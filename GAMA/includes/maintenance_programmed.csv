@@ -1,0 +1,8 @@
+practice_name;practice_frequency_weeks;season_dep;target_season;department;cost_euros
+trash_removal;1;false;;cleaning;
+leaf_removal;1;false;;cleaning;
+visual_inspection;26;false;;stormwater;
+component_cleaning;52;false;;stormwater;
+sediment_removal;260;false;;stormwater;
+mowing;26;false;;green_spaces;
+vegetation_management;26;false;;green_spaces;

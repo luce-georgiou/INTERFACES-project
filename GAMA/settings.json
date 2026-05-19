@@ -1,0 +1,10 @@
+{
+"type": "json_settings",
+"name": "NBSSAM_model_VR",
+"splashscreen": "./models/snapshots/snapshot.png",
+"model_file_path": "./models/NBSS_AM_v2.1-VR.gaml",
+"experiment_name": "vr_xp",
+"minimal_players": "1",
+"maximal_players": "1",
+"selected_monitoring": "gama_screen"
+}
