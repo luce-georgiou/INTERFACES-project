@@ -6,7 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
 using System.Linq;
 
-//using DigitalRuby.RainMaker;
+using DigitalRuby.RainMaker;
 
 
 
@@ -122,7 +122,7 @@ public class SimulationManagerInteraction : SimulationManager
                 else if (fqt == 2) ChangeColor(obj, Color.yellow);
                 else if (fqt == 3) Debug.Log("test send dyn data");
             }
-            if (name.StartsWith("outlet"))
+            else if (name.StartsWith("outlet"))
             {
                 int fqt = attributes[i].fqt_outlet;
                 Debug.Log("outlet fqt : " + fqt);
@@ -132,6 +132,28 @@ public class SimulationManagerInteraction : SimulationManager
                 else if (fqt == 2) ChangeColor(obj, Color.yellow);
                 else if (fqt == 3) Debug.Log("test send dyn data");
                 
+            }
+            else if (name.StartsWith("rain"))
+            {
+                float intensity = attributes[i].rain_intensity;
+                GameObject rainObj = GameObject.FindWithTag("rain");
+
+                //if (rainObj == null)
+                //{
+                //    BaseRainScript rain = FindObjectOfType<BaseRainScript>();
+                //    if (rain != null)
+                //    {
+                //        rain.RainIntensity = intensity / 3f;
+                //    }
+                //    else
+                //    {
+                //        Debug.LogError("BaseRainScript introuvable");
+                //    }
+                //    continue;
+                //}
+
+                BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
+                rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
             }
         }
 

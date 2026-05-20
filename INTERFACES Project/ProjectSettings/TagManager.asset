@@ -30,6 +30,7 @@ TagManager:
   - gravel
   - natural_environment
   - swale
+  - rain
   layers:
   - Default
   - TransparentFX

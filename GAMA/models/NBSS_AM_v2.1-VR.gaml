@@ -8,7 +8,7 @@ species unity_linker parent: abstract_unity_linker {
 	int min_num_players  <- 1;
 	//unity_property up_sewer_system;
 	unity_property up_filter_media;
-		//unity_property up_rain;
+	unity_property up_rain;
 	//unity_property up_programmed_maintenance;
 		//unity_property up_unmanaged_flow;
 		//unity_property up_managed_flow;
@@ -88,9 +88,9 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_filter_media;
 
 
-//		unity_aspect rain_aspect <- geometry_aspect(1.0,#gray,precision);
-//		up_rain <- geometry_properties("rain","rain",rain_aspect,#no_interaction,false);
-//		unity_properties << up_rain;
+		unity_aspect rain_aspect <- prefab_aspect("Prefabs/RainMaker/Prefab/RainPrefab",1.0,0.0,1.0,0.0,precision);
+		up_rain <- geometry_properties("rain","rain",rain_aspect,#no_interaction,false);
+		unity_properties << up_rain;
 
 
 //		unity_aspect programmed_maintenance_aspect <- geometry_aspect(1.0,#gray,precision);
@@ -252,16 +252,16 @@ species unity_linker parent: abstract_unity_linker {
 		list<int> fqt_inlet <- inlet collect (each.function_attributes["my_fqt"]);
 		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
 		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
-		write "types envoyés : " + fqt_inlet; // debug
+		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
+		write "rain intensity : " + rain_intensity; // debug
 		//put this list value in a map (several attributes can be send at the same time).
-		map<string,list<int>> atts <-  [
-			"fqt_inlet":: fqt_inlet //mettre "type" pour que ce soit reconnu dans les Attributs
-			//"biodiv":: biodiv_inlet
-			];
+		map<string,list<int>> atts_inlet <-  ["fqt_inlet":: fqt_inlet]; //mettre "type" pour que ce soit reconnu dans les Attributs
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
+		map<string,list<int>> atts_rain <- ["rain_intensity":: rain_intensity];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
-		do add_geometries_to_send(inlet,up_inlet,atts);
+		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
+		do add_geometries_to_send(rain,up_rain,atts_rain);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
 //		do add_geometries_to_keep(outlet);	

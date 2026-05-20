@@ -848,12 +848,12 @@ species failure_event{
 		ask agents of_generic_species component where (each.my_name=failure.impacted_agent){
 			function_attributes[failure.impacted_attribute] <- max(0,function_attributes[failure.impacted_attribute]-1);
 			// debug
-			write function_attributes[failure.impacted_attribute];
-			write failure.impacted_agent;
-			if self is inlet {
-				write inlet(self).type;
-				write function_attributes["my_fqt"];
-			}
+//			write function_attributes[failure.impacted_attribute];
+//			write failure.impacted_agent;
+//			if self is inlet {
+//				write inlet(self).type;
+//				write function_attributes["my_fqt"];
+//			}
 			// fin debug
 			failure.last_failure <- current_date;
 			add myself to:self.my_failures;
