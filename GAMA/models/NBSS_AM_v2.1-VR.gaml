@@ -66,16 +66,16 @@ species unity_linker parent: abstract_unity_linker {
 //		do add_background_geometries(rtf_maintenance,up_rtf_maintenance);
 		//do add_background_geometries(urban_environment,up_urban_environment);
 		do add_background_geometries(ponding_area,up_ponding_area);
-	//	do add_background_geometries(filter_media, up_filter_media);
+		do add_background_geometries(filter_media, up_filter_media);
 //		do add_background_geometries(managed_flow,up_managed_flow);
 //		do add_background_geometries(unmanaged_flow,up_unmanaged_flow);
 //		do add_background_geometries(output_flow,up_output_flow);
 		
 		//
 		//do add_background_geometries(microorganisms, up_microorganisms);
-	//	do add_background_geometries(gravel, up_gravel);
+		do add_background_geometries(gravel, up_gravel);
 		//do add_background_geometries(NBSS, up_NBSS);
-	//	do add_background_geometries(swale, up_swale);
+		do add_background_geometries(swale, up_swale);
 	}
 	action define_properties {
 //		unity_aspect sewer_system_aspect <- geometry_aspect(1.0,#gray,precision);
@@ -228,19 +228,19 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	reflex send_geometries {
 		do add_geometries_to_send(trees,up_trees);
-//		do add_geometries_to_send(vegetation_cover, up_vegetation_cover);
-		do add_geometries_to_send(outlet,up_outlet);
-//		do add_geometries_to_send(inlet, up_inlet);
-		//do add_geometries_to_send(NBSS,up_NBSS);
-		//do add_geometries_to_send(filter_media,up_filter_media);
-		
-		//
+////		do add_geometries_to_send(vegetation_cover, up_vegetation_cover);
+//		//do add_geometries_to_send(outlet,up_outlet);
+		//do add_geometries_to_send(inlet, up_inlet);
+//		//do add_geometries_to_send(NBSS,up_NBSS);
+//		//do add_geometries_to_send(filter_media,up_filter_media);
+//		
+//		//
 		do add_geometries_to_send(shrubs_plants, up_shrubs_plants);
 		do add_geometries_to_send(grass, up_grass);
 		do add_geometries_to_send(trash, up_trash);
 		do add_geometries_to_send(weeds, up_weeds);
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
-		//do add_geometries_to_send(ponding_area,up_ponding_area);
+//		//do add_geometries_to_send(ponding_area,up_ponding_area);
 	}
 	
 	// modify state of species according to health/biodiv
@@ -249,15 +249,28 @@ species unity_linker parent: abstract_unity_linker {
 		// add attributes to send to Unity. We send one attribute "type" for the dynamic_punctual_agent agents, 
 		// that will have for name "type" in uniy and which is an integer  (between 0 and 2 for each dynamic_punctual_agent).
 		// get the value of type for each agent.
-		list<int> type_agents <- inlet collect (each.function_attributes["my_fqt"]);
-		//write "types envoyés : " + type_agents; // debug
+		list<int> fqt_inlet <- inlet collect (each.function_attributes["my_fqt"]);
+		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
+		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
+		write "types envoyés : " + fqt_inlet; // debug
 		//put this list value in a map (several attributes can be send at the same time).
-		map<string,list<int>> atts <-  ["type":: type_agents];
+		map<string,list<int>> atts <-  [
+			"fqt_inlet":: fqt_inlet //mettre "type" pour que ce soit reconnu dans les Attributs
+			//"biodiv":: biodiv_inlet
+			];
+		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
-		do add_geometries_to_send(inlet,up_inlet,atts);	
+		do add_geometries_to_send(inlet,up_inlet,atts);
+		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
-		//do add_geometries_to_keep(outlet);	
+//		do add_geometries_to_keep(outlet);	
+//		do add_geometries_to_keep(trees);
+//		do add_geometries_to_keep(shrubs_plants);
+//		do add_geometries_to_keep(grass);
+//		do add_geometries_to_keep(trash);
+//		do add_geometries_to_keep(weeds);
+//		do add_geometries_to_keep(vegetal_waste);
 	}
 	
 	

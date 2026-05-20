@@ -6,6 +6,8 @@ using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
 using System.Linq;
 
+//using DigitalRuby.RainMaker;
+
 
 
 public class SimulationManagerInteraction : SimulationManager
@@ -84,7 +86,7 @@ public class SimulationManagerInteraction : SimulationManager
 
     }
 
-    private List<string> tagsToIgnore = new List<string> { "ponding_area"};
+    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     protected override void ManageAttributes(List<Attributes> attributes)
     {
@@ -97,25 +99,39 @@ public class SimulationManagerInteraction : SimulationManager
                 continue;
 
             Debug.Log(name);
-            int type = attributes[i].type;
-            Debug.Log("Health of inlet : " + type);
+            int type = attributes[i].fqt_inlet;
+            //int fqt_outlet = attributes[i].fqt_outlet;
+
+            //if (name.StartsWith("rain"))
+            //{
+            //    GameObject rainObj = GameObject.Find("Rain");
+            //    BaseRainScript rain = rainObj.GetComponent<BaseRainScript>();
+            //    rain.RainIntensity = type / 3f; // mappe 0-3 vers 0.0-1.0
+            //}
+
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
-            if (type == 0)
+
+            if (name.StartsWith("inlet"))
             {
-                ChangeColor(obj, Color.red);
+                int fqt = attributes[i].fqt_inlet;
+                Debug.Log("inlet fqt : " + fqt);
+                
+                if (fqt == 0)      ChangeColor(obj, Color.red);
+                else if (fqt == 1) ChangeColor(obj, Color.orange);
+                else if (fqt == 2) ChangeColor(obj, Color.yellow);
+                else if (fqt == 3) Debug.Log("test send dyn data");
             }
-            else if (type == 1)
+            if (name.StartsWith("outlet"))
             {
-                ChangeColor(obj, Color.orange);
-            }
-            else if (type == 2)
-            {
-                ChangeColor(obj, Color.yellow);
-            }
-            else if (type == 3)
-            {
-                Debug.Log("test send dyn data");
+                int fqt = attributes[i].fqt_outlet;
+                Debug.Log("outlet fqt : " + fqt);
+
+                if (fqt == 0)      ChangeColor(obj, Color.red);
+                else if (fqt == 1) ChangeColor(obj, Color.orange);
+                else if (fqt == 2) ChangeColor(obj, Color.yellow);
+                else if (fqt == 3) Debug.Log("test send dyn data");
+                
             }
         }
 
