@@ -135,6 +135,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("rain"))
             {
+                // Change rain intensity according to rain data
                 float intensity = attributes[i].rain_intensity;
                 GameObject rainObj = GameObject.FindWithTag("rain");
 
@@ -154,9 +155,59 @@ public class SimulationManagerInteraction : SimulationManager
 
                 BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
                 rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
+
+                // Change ponding area aspect according to rain intensity
+                string pondingArea = "ponding_area0";
+                if (geometryMap.ContainsKey(pondingArea)) {
+                    GameObject pondObj = (GameObject)geometryMap[pondingArea][0];
+                    if (intensity == 0) continue;
+                    else if (intensity == 1) ChangeColor(pondObj, Color.yellow);
+                    else if (intensity == 2) ChangeColor(pondObj, Color.orange);
+                    else if (intensity == 3) ChangeColor(pondObj, Color.red);
+                }
+                //foreach (var key in geometryMap.Keys.Where(k => k.StartsWith("grass")))
+                //{
+                //    GameObject herbeObj = (GameObject)geometryMap[key][0];
+                //    if (intensity == 0) ChangeColor(herbeObj, Color.yellow);
+                //    else if (intensity == 1) ChangeColor(herbeObj, new Color(0.5f, 0.8f, 0.2f));
+                //    else if (intensity == 2) ChangeColor(herbeObj, Color.green);
+                //    else if (intensity == 3) ChangeColor(herbeObj, new Color(0f, 0.5f, 0f));
+                //}
+                //GameObject groundObj = GameObject.Find("Ground"); si objet dans hierarchy
+            }
+            // gestion de l'aspect de l'environnement selon les saisons
+            else if (name.StartsWith("trees"))
+            {
+                string saison = attributes[i].tree_seasons;
+                GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
+                GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
+                GameObject treeObj = GameObject.FindWithTag("trees");
+                if (saison == "winter") // mettre neige à la place pluie, Ground blanc
+                {
+                    Vector3 position = treeObj.transform.position;
+                    Quaternion rotation = treeObj.transform.rotation;
+
+                    Destroy(treeObj);
+                    Instantiate(sapinPrefab, position, rotation);
+
+
+                    //obj.GetComponent<MeshFilter>().mesh = sapinPrefab.GetComponent<MeshFilter>().sharedMesh;
+                    //obj.GetComponent<MeshRenderer>().material = sapinPrefab.GetComponent<MeshRenderer>().sharedMaterial;
+                }
+                else if (saison == "spring")
+                {
+                    // ajouter fleurs, sol vert, arbre classique
+                }
+                else if (saison == "fall")
+                {
+                    // arbre sans feuille, sol orange, bcp de vegetal_waste (changer aspect vegetal_waste selon saison?)
+                }
+                else if (saison == "summer")
+                {
+                    // à décider, sécheresse
+                }
             }
         }
-
     }
     
 

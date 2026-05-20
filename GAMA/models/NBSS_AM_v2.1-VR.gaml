@@ -65,7 +65,7 @@ species unity_linker parent: abstract_unity_linker {
 //		do add_background_geometries(failure_event,up_failure_event);
 //		do add_background_geometries(rtf_maintenance,up_rtf_maintenance);
 		//do add_background_geometries(urban_environment,up_urban_environment);
-		do add_background_geometries(ponding_area,up_ponding_area);
+		//do add_background_geometries(ponding_area,up_ponding_area);
 		do add_background_geometries(filter_media, up_filter_media);
 //		do add_background_geometries(managed_flow,up_managed_flow);
 //		do add_background_geometries(unmanaged_flow,up_unmanaged_flow);
@@ -170,12 +170,12 @@ species unity_linker parent: abstract_unity_linker {
 		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#ray_interactable,false);
 		unity_properties << up_NBSS;
 		
-		unity_aspect swale_aspect <- geometry_aspect(1.0,#lawngreen,precision);
+		unity_aspect swale_aspect <- geometry_aspect(0.5,#green,precision);
 		up_swale <- geometry_properties("swale","swale",swale_aspect,#ray_interactable,false);
 		unity_properties << up_swale;
 
 
-		unity_aspect default_aspect <- geometry_aspect(1.0,#gray,precision);
+		unity_aspect default_aspect <- geometry_aspect(1.0,#green,precision);
 		up_default <- geometry_properties("default","",default_aspect,#no_interaction,false);
 		unity_properties << up_default;
 
@@ -220,14 +220,14 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_urban_environment;
 
 
-		unity_aspect ponding_area_aspect <- geometry_aspect(0.5, #blue, precision);
+		unity_aspect ponding_area_aspect <- geometry_aspect(0.2, #blue, precision);
 		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
 		unity_properties << up_ponding_area;
 
 
 	}
 	reflex send_geometries {
-		do add_geometries_to_send(trees,up_trees);
+		//do add_geometries_to_send(trees,up_trees);
 ////		do add_geometries_to_send(vegetation_cover, up_vegetation_cover);
 //		//do add_geometries_to_send(outlet,up_outlet);
 		//do add_geometries_to_send(inlet, up_inlet);
@@ -240,7 +240,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(trash, up_trash);
 		do add_geometries_to_send(weeds, up_weeds);
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
-//		//do add_geometries_to_send(ponding_area,up_ponding_area);
+		do add_geometries_to_send(ponding_area,up_ponding_area);
 	}
 	
 	// modify state of species according to health/biodiv
@@ -253,15 +253,18 @@ species unity_linker parent: abstract_unity_linker {
 		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
 		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
-		write "rain intensity : " + rain_intensity; // debug
+		list<string> tree_seasons <- trees collect current_season; 
+		//write "rain intensity : " + rain_intensity; // debug
 		//put this list value in a map (several attributes can be send at the same time).
 		map<string,list<int>> atts_inlet <-  ["fqt_inlet":: fqt_inlet]; //mettre "type" pour que ce soit reconnu dans les Attributs
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
 		map<string,list<int>> atts_rain <- ["rain_intensity":: rain_intensity];
+		map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
 		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		do add_geometries_to_send(rain,up_rain,atts_rain);
+		do add_geometries_to_send(trees,up_trees,atts_trees);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
 //		do add_geometries_to_keep(outlet);	
@@ -336,6 +339,28 @@ species unity_linker parent: abstract_unity_linker {
 //		//selon état (3, 2, 1, 0), composant devient rouge, jaune, orange -> changer aspect des species
 //		is_failure_event <- false;
 //	}
+
+	// faire pousser des mauvaises herbes quand la végétation n'est pas saine
+	reflex invasive_weeds {
+		ask vegetation_cover {
+			write invasive;
+			if invasive = true {
+				create weeds {location <- any_location_in(one_of(NBSS).shape) every(100 #cycle);}
+			}
+		}
+	}
+	// accumulation de déchets
+	reflex trash_acc {
+		ask ext_time_failure {
+			if my_name = "trash_acc" and (cycle mod (my_frequency * 7)) = 0 { // toutes les 12 semaines on ajoute un déchet
+				create trash {location <- any_location_in(one_of(NBSS).shape);}
+			}
+		}
+	}
+	
+	// gestion des saisons
+	
+	
 	reflex dying_biodiv {
 		//selon état, réduire le nombre d'espèce dans l'environnement (et réduire fonctionnalité soil par ex) -> enlever agents des listes (uorg par ex)
 	}

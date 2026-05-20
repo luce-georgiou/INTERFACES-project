@@ -38,7 +38,7 @@ global {
 	// gestion espace libre
 	
 	//geometry free_space <- copy(shape);
-	geometry init_free_space <- rectangle(100,100);
+	geometry init_free_space <- rectangle(75, 75);
 	geometry free_space <- init_free_space;
 	
 	//geometry free_space;
@@ -111,22 +111,6 @@ global {
 	int days_vegetation_degraded <- 0; 
 	
 	init {
-		
-//		point pt1 <- {25, 25};
-//		point pt2 <- {100, 25};
-//		point pt3 <- {100, 100};
-//		point pt4 <- {25, 100};
-//		
-//		free_space <- union([
-//		    pt1 buffer 15,
-//		    pt2 buffer 15,
-//		    pt3 buffer 15,
-//		    pt4 buffer 15,
-//		    line([pt1, pt2]) + 8,
-//		    line([pt2, pt3]) + 8,
-//		    line([pt3, pt4]) + 8,
-//		    line([pt4, pt1]) + 8
-//		]);
 		
 		// Initialization of Rain agent : 
 		create rain {
