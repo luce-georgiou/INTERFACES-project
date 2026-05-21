@@ -118,7 +118,7 @@ species unity_linker parent: abstract_unity_linker {
 //		unity_properties << up_vegetal_component;
 
 
-		unity_aspect trees_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1",1.0,0.0,1.0,0.0,precision);
+		unity_aspect trees_aspect <- prefab_aspect("Prefabs/Snowy_Low_Poly_Trees/Pine_NoSnow1",1.0,0.0,1.0,0.0,precision);
 		up_trees <- geometry_properties("trees","trees",trees_aspect,#ray_interactable,false);
 		unity_properties << up_trees;
 		

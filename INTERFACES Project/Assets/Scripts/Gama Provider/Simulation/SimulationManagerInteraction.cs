@@ -192,76 +192,88 @@ public class SimulationManagerInteraction : SimulationManager
             // gestion de l'aspect de l'environnement selon les saisons
             else if (name.StartsWith("trees"))
             {
+                //string saison = attributes[i].tree_seasons;
+                //GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
+                //GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
+                ////GameObject treeObj = GameObject.FindWithTag("trees");
+
+
+                //if (saison == "winter") // mettre neige à la place pluie, Ground blanc
+                //{
+
+                //    // Changer arbre en arbre enneigé 
+                //    GameObject treeObj = GameObject.FindWithTag("trees");
+                //    Vector3 position = treeObj.transform.position;
+                //    Quaternion rotation = treeObj.transform.rotation;
+
+                //    Destroy(treeObj);
+                //    GameObject sapin = Instantiate(sapinPrefab, position, rotation);
+                //    sapin.tag = "trees";
+
+
+                //    //obj.GetComponent<MeshFilter>().mesh = sapinPrefab.GetComponent<MeshFilter>().sharedMesh;
+                //    //obj.GetComponent<MeshRenderer>().material = sapinPrefab.GetComponent<MeshRenderer>().sharedMaterial;
+                //}
+                //else if (saison == "spring")
+                //{
+                //    GameObject sapinObj = GameObject.FindWithTag("trees");
+                //    if (sapinObj != null)
+                //    {
+                //        Vector3 position = sapinObj.transform.position;
+                //        Quaternion rotation = sapinObj.transform.rotation;
+                //        Destroy(sapinObj);
+                //        GameObject tree = Instantiate(treePrefab, position, rotation);
+                //        tree.tag = "trees";
+                //    }
+                //    // ajouter fleurs, sol vert, arbre classique
+                //}
+                //else if (saison == "fall")
+                //{
+                //    GameObject sapinObj = GameObject.FindWithTag("trees");
+                //    if (sapinObj != null)
+                //    {
+                //        Vector3 position = sapinObj.transform.position;
+                //        Quaternion rotation = sapinObj.transform.rotation;
+                //        Destroy(sapinObj);
+                //        GameObject tree = Instantiate(treePrefab, position, rotation);
+                //        tree.tag = "trees";
+                //    }
+                //    // arbre sans feuille, sol orange, bcp de vegetal_waste (changer aspect vegetal_waste selon saison?)
+                //}
+                //else if (saison == "summer")
+                //{
+                //    GameObject sapinObj = GameObject.FindWithTag("trees");
+                //    if (sapinObj != null)
+                //    {
+                //        Vector3 position = sapinObj.transform.position;
+                //        Quaternion rotation = sapinObj.transform.rotation;
+                //        Destroy(sapinObj);
+                //        GameObject tree = Instantiate(treePrefab, position, rotation);
+                //        tree.tag = "trees";
+                //    }
+                //    // à décider, sécheresse
+                //}
                 string saison = attributes[i].tree_seasons;
-                GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
-                GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
-                //GameObject treeObj = GameObject.FindWithTag("trees");
+                GameObject treeObj = GameObject.FindWithTag("trees");
+                //List<object> o = geometryMap[name];
+                //GameObject obj = (GameObject)o[0];
 
-
-            //    if (saison == "winter") // mettre neige à la place pluie, Ground blanc
-            //    {
-            //        //mainModule.gravityModifier = 0.1f;
-            //        //mainModule.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 1.5f);
-            //        //mainModule.startSize = new ParticleSystem.MinMaxCurve(0.1f, 0.3f);
-            //        //ParticleSystem snow = Resources.Load<ParticleSystem>("Prefabs/Nature Biomes Pack - Low Poly/Prefabs/Particles/Snow Particles");
-            //        //rainScript.RainIntensity = 0.1f;
-            //        //rainScript.RainFallParticleSystem = snow;
-
-            //        //ParticleSystem snowInstance = GameObject.Instantiate(snow, rainScript.transform.position, Quaternion.identity);
-            //        //rainScript.RainFallParticleSystem = snowInstance;
-
-            //        // Changer arbre en arbre enneigé 
-            //        GameObject treeObj = GameObject.FindWithTag("trees");
-            //        Vector3 position = treeObj.transform.position;
-            //        Quaternion rotation = treeObj.transform.rotation;
-
-            //        Destroy(treeObj);
-            //        GameObject sapin = Instantiate(sapinPrefab, position, rotation);
-            //        sapin.tag = "trees";
-
-
-            //        //obj.GetComponent<MeshFilter>().mesh = sapinPrefab.GetComponent<MeshFilter>().sharedMesh;
-            //        //obj.GetComponent<MeshRenderer>().material = sapinPrefab.GetComponent<MeshRenderer>().sharedMaterial;
-            //    }
-            //    else if (saison == "spring")
-            //    {
-            //        GameObject sapinObj = GameObject.FindWithTag("trees");
-            //        if (sapinObj != null)
-            //        {
-            //            Vector3 position = sapinObj.transform.position;
-            //            Quaternion rotation = sapinObj.transform.rotation;
-            //            Destroy(sapinObj);
-            //            GameObject tree = Instantiate(treePrefab, position, rotation);
-            //            tree.tag = "trees";
-            //        }
-            //        // ajouter fleurs, sol vert, arbre classique
-            //    }
-            //    else if (saison == "fall")
-            //    {
-            //        GameObject sapinObj = GameObject.FindWithTag("trees");
-            //        if (sapinObj != null)
-            //        {
-            //            Vector3 position = sapinObj.transform.position;
-            //            Quaternion rotation = sapinObj.transform.rotation;
-            //            Destroy(sapinObj);
-            //            GameObject tree = Instantiate(treePrefab, position, rotation);
-            //            tree.tag = "trees";
-            //        }
-            //        // arbre sans feuille, sol orange, bcp de vegetal_waste (changer aspect vegetal_waste selon saison?)
-            //    }
-            //    else if (saison == "summer")
-            //    {
-            //        GameObject sapinObj = GameObject.FindWithTag("trees");
-            //        if (sapinObj != null)
-            //        {
-            //            Vector3 position = sapinObj.transform.position;
-            //            Quaternion rotation = sapinObj.transform.rotation;
-            //            Destroy(sapinObj);
-            //            GameObject tree = Instantiate(treePrefab, position, rotation);
-            //            tree.tag = "trees";
-            //        }
-            //        // à décider, sécheresse
-            //    }
+                if (saison == "winter")
+                {
+                    GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
+                    if (sapinPrefab != null)
+                    {
+                        GameObject snow = Instantiate(sapinPrefab, obj.transform.position, obj.transform.rotation);
+                        snow.name = "SnowLayer";
+                        snow.transform.SetParent(obj.transform);
+                    }
+                }
+                else
+                {
+                    Transform snowLayer = obj.transform.Find("SnowLayer");
+                    if (snowLayer != null)
+                        Destroy(snowLayer.gameObject);
+                }
             }
         }
     }
