@@ -254,16 +254,23 @@ species unity_linker parent: abstract_unity_linker {
 		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
+		//list<string> rain_seasons <- rain collect current_season; 
+		list<int> rain_seasons <- rain collect current_season_int;
 		//write "rain intensity : " + rain_intensity; // debug
 		//put this list value in a map (several attributes can be send at the same time).
 		map<string,list<int>> atts_inlet <-  ["fqt_inlet":: fqt_inlet]; //mettre "type" pour que ce soit reconnu dans les Attributs
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
-		map<string,list<int>> atts_rain <- ["rain_intensity":: rain_intensity];
+		map<string,list<int>> atts_rain <- [
+			"rain_intensity":: rain_intensity,
+			"rain_seasons":: rain_seasons
+		];
+		//map<string, list<string>> atts_rain_seasons <- ["rain_seasons"::rain_seasons];
 		map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
 		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		do add_geometries_to_send(rain,up_rain,atts_rain);
+		//do add_geometries_to_send(rain,up_rain,atts_rain_seasons);
 		do add_geometries_to_send(trees,up_trees,atts_trees);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list

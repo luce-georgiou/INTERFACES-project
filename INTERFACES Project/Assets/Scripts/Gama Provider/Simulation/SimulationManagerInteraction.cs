@@ -21,10 +21,10 @@ public class SimulationManagerInteraction : SimulationManager
         //{
         //    ChangeColor(obj, Color.blue);
         //}
-        Debug.Log("HoverEnterInteraction : " + obj);
+        //Debug.Log("HoverEnterInteraction : " + obj);
         if (obj.tag.Equals("inlet") || obj.tag.Equals("weeds"))
         {
-            Debug.Log("HoverEnterInteraction : " + obj);
+            //Debug.Log("HoverEnterInteraction : " + obj);
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
         }
 
@@ -41,7 +41,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    bool isSelected = SelectedObjects.Contains(obj);
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
-        Debug.Log("HoverExitInteraction : " + obj);
+        //Debug.Log("HoverExitInteraction : " + obj);
         if (obj.tag.Equals("inlet") || obj.tag.Equals("weeds"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
@@ -55,7 +55,7 @@ public class SimulationManagerInteraction : SimulationManager
         if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
-            Debug.Log("grabbedObject : " + grabbedObject);
+            //Debug.Log("grabbedObject : " + grabbedObject);
 
             if (grabbedObject.tag.Equals("inlet") || grabbedObject.tag.Equals("weeds"))
             {
@@ -98,16 +98,8 @@ public class SimulationManagerInteraction : SimulationManager
             if (tagsToIgnore.Any(tag => name.StartsWith(tag)))
                 continue;
 
-            Debug.Log(name);
+            //Debug.Log(name);
             int type = attributes[i].fqt_inlet;
-            //int fqt_outlet = attributes[i].fqt_outlet;
-
-            //if (name.StartsWith("rain"))
-            //{
-            //    GameObject rainObj = GameObject.Find("Rain");
-            //    BaseRainScript rain = rainObj.GetComponent<BaseRainScript>();
-            //    rain.RainIntensity = type / 3f; // mappe 0-3 vers 0.0-1.0
-            //}
 
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
@@ -115,49 +107,71 @@ public class SimulationManagerInteraction : SimulationManager
             if (name.StartsWith("inlet"))
             {
                 int fqt = attributes[i].fqt_inlet;
-                Debug.Log("inlet fqt : " + fqt);
-                
-                if (fqt == 0)      ChangeColor(obj, Color.red);
+                //Debug.Log("inlet fqt : " + fqt);
+
+                if (fqt == 0) ChangeColor(obj, Color.red);
                 else if (fqt == 1) ChangeColor(obj, Color.orange);
                 else if (fqt == 2) ChangeColor(obj, Color.yellow);
-                else if (fqt == 3) Debug.Log("test send dyn data");
+                //else if (fqt == 3) ; //Debug.Log("test send dyn data");
             }
             else if (name.StartsWith("outlet"))
             {
                 int fqt = attributes[i].fqt_outlet;
-                Debug.Log("outlet fqt : " + fqt);
+                //Debug.Log("outlet fqt : " + fqt);
 
                 if (fqt == 0)      ChangeColor(obj, Color.red);
                 else if (fqt == 1) ChangeColor(obj, Color.orange);
                 else if (fqt == 2) ChangeColor(obj, Color.yellow);
-                else if (fqt == 3) Debug.Log("test send dyn data");
+                //else if (fqt == 3) Debug.Log("test send dyn data");
                 
             }
             else if (name.StartsWith("rain"))
             {
-                // Change rain intensity according to rain data
                 float intensity = attributes[i].rain_intensity;
-                GameObject rainObj = GameObject.FindWithTag("rain");
+                int saison = attributes[i].rain_seasons;
+                BaseRainScript rainScript = GameObject.FindWithTag("rain").GetComponent<BaseRainScript>();
+                ParticleSystem ps = rainScript.RainFallParticleSystem;
+                
+                var ma = ps.main;
 
-                //if (rainObj == null)
-                //{
-                //    BaseRainScript rain = FindObjectOfType<BaseRainScript>();
-                //    if (rain != null)
-                //    {
-                //        rain.RainIntensity = intensity / 3f;
-                //    }
-                //    else
-                //    {
-                //        Debug.LogError("BaseRainScript introuvable");
-                //    }
-                //    continue;
-                //}
+                rainScript.RainIntensity = intensity / 3f;
+                if (saison == 1) // hiver
+                {
+                    ma.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
+                    ma.gravityModifier = 0.2f; // presque pas de gravité
+                    //ma.maxParticles = 6000;
+                    rainScript.EnableWind = false;
+                    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
+                    renderer.renderMode = ParticleSystemRenderMode.Billboard;
 
-                BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
-                rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
+                    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
+                    vol.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
+                    vol.y = new ParticleSystem.MinMaxCurve(-0.5f, -0.1f);  // descente
+                    vol.z = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
+                }
+                else
+                {
+                    ma.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.15f);
+                    ma.gravityModifier = 1f;
+                    rainScript.EnableWind = true;
+                    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
+                    renderer.renderMode = ParticleSystemRenderMode.Stretch;
+                    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
+                    vol.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+                    vol.y = new ParticleSystem.MinMaxCurve(-55f, -50f);
+                    vol.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+                }
 
-                // Change ponding area aspect according to rain intensity
-                string pondingArea = "ponding_area0";
+
+                    //// Change rain intensity according to rain data -> marche
+                    //float intensity = attributes[i].rain_intensity;
+                    //int saison = attributes[i].rain_seasons;
+                    //GameObject rainObj = GameObject.FindWithTag("rain");
+                    //BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
+                    //rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
+
+                    // Change ponding area aspect according to rain intensity
+                    string pondingArea = "ponding_area0";
                 if (geometryMap.ContainsKey(pondingArea)) {
                     GameObject pondObj = (GameObject)geometryMap[pondingArea][0];
                     if (intensity == 0) continue;
@@ -181,31 +195,73 @@ public class SimulationManagerInteraction : SimulationManager
                 string saison = attributes[i].tree_seasons;
                 GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
                 GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
-                GameObject treeObj = GameObject.FindWithTag("trees");
-                if (saison == "winter") // mettre neige à la place pluie, Ground blanc
-                {
-                    Vector3 position = treeObj.transform.position;
-                    Quaternion rotation = treeObj.transform.rotation;
-
-                    Destroy(treeObj);
-                    Instantiate(sapinPrefab, position, rotation);
+                //GameObject treeObj = GameObject.FindWithTag("trees");
 
 
-                    //obj.GetComponent<MeshFilter>().mesh = sapinPrefab.GetComponent<MeshFilter>().sharedMesh;
-                    //obj.GetComponent<MeshRenderer>().material = sapinPrefab.GetComponent<MeshRenderer>().sharedMaterial;
-                }
-                else if (saison == "spring")
-                {
-                    // ajouter fleurs, sol vert, arbre classique
-                }
-                else if (saison == "fall")
-                {
-                    // arbre sans feuille, sol orange, bcp de vegetal_waste (changer aspect vegetal_waste selon saison?)
-                }
-                else if (saison == "summer")
-                {
-                    // à décider, sécheresse
-                }
+            //    if (saison == "winter") // mettre neige à la place pluie, Ground blanc
+            //    {
+            //        //mainModule.gravityModifier = 0.1f;
+            //        //mainModule.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 1.5f);
+            //        //mainModule.startSize = new ParticleSystem.MinMaxCurve(0.1f, 0.3f);
+            //        //ParticleSystem snow = Resources.Load<ParticleSystem>("Prefabs/Nature Biomes Pack - Low Poly/Prefabs/Particles/Snow Particles");
+            //        //rainScript.RainIntensity = 0.1f;
+            //        //rainScript.RainFallParticleSystem = snow;
+
+            //        //ParticleSystem snowInstance = GameObject.Instantiate(snow, rainScript.transform.position, Quaternion.identity);
+            //        //rainScript.RainFallParticleSystem = snowInstance;
+
+            //        // Changer arbre en arbre enneigé 
+            //        GameObject treeObj = GameObject.FindWithTag("trees");
+            //        Vector3 position = treeObj.transform.position;
+            //        Quaternion rotation = treeObj.transform.rotation;
+
+            //        Destroy(treeObj);
+            //        GameObject sapin = Instantiate(sapinPrefab, position, rotation);
+            //        sapin.tag = "trees";
+
+
+            //        //obj.GetComponent<MeshFilter>().mesh = sapinPrefab.GetComponent<MeshFilter>().sharedMesh;
+            //        //obj.GetComponent<MeshRenderer>().material = sapinPrefab.GetComponent<MeshRenderer>().sharedMaterial;
+            //    }
+            //    else if (saison == "spring")
+            //    {
+            //        GameObject sapinObj = GameObject.FindWithTag("trees");
+            //        if (sapinObj != null)
+            //        {
+            //            Vector3 position = sapinObj.transform.position;
+            //            Quaternion rotation = sapinObj.transform.rotation;
+            //            Destroy(sapinObj);
+            //            GameObject tree = Instantiate(treePrefab, position, rotation);
+            //            tree.tag = "trees";
+            //        }
+            //        // ajouter fleurs, sol vert, arbre classique
+            //    }
+            //    else if (saison == "fall")
+            //    {
+            //        GameObject sapinObj = GameObject.FindWithTag("trees");
+            //        if (sapinObj != null)
+            //        {
+            //            Vector3 position = sapinObj.transform.position;
+            //            Quaternion rotation = sapinObj.transform.rotation;
+            //            Destroy(sapinObj);
+            //            GameObject tree = Instantiate(treePrefab, position, rotation);
+            //            tree.tag = "trees";
+            //        }
+            //        // arbre sans feuille, sol orange, bcp de vegetal_waste (changer aspect vegetal_waste selon saison?)
+            //    }
+            //    else if (saison == "summer")
+            //    {
+            //        GameObject sapinObj = GameObject.FindWithTag("trees");
+            //        if (sapinObj != null)
+            //        {
+            //            Vector3 position = sapinObj.transform.position;
+            //            Quaternion rotation = sapinObj.transform.rotation;
+            //            Destroy(sapinObj);
+            //            GameObject tree = Instantiate(treePrefab, position, rotation);
+            //            tree.tag = "trees";
+            //        }
+            //        // à décider, sécheresse
+            //    }
             }
         }
     }

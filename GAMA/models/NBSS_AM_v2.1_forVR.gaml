@@ -68,6 +68,7 @@ global {
 	
 	// Defining seasons
 	string current_season;
+	int current_season_int;
 	int y <- year(current_date);
 	date season_end;
 	date season_start;
@@ -75,21 +76,25 @@ global {
 		
 		if (month(current_date)=12 or month(current_date)<=2){
 			current_season <- "winter";
+			current_season_int <- 1;
 			season_start <- date(string(y)+ "-12-01");
 			season_end <-date(string(y+1) + "-02-28");
 		}
 		if (month(current_date)>=3 and month(current_date)<=5){
 			current_season<- "spring";
+			current_season_int <- 2;
 			season_start <- date(string(y)+ "-03-01");
 			season_end <-date(string(y) + "-05-31");
 		}
 		if (month(current_date)>=6 and month(current_date)<=8){
 			current_season <- "summer";
+			current_season_int <- 3;
 			season_start <- date(string(y)+ "-06-01");
 			season_end <-date(string(y) + "-08-31");
 		}
 		if (month(current_date)>=9 and month(current_date)<=11){
 			current_season <- "fall";
+			current_season_int <- 4;
 			season_start <- date(string(y)+ "-09-01");
 			season_end <-date(string(y) + "-11-30");
 		}

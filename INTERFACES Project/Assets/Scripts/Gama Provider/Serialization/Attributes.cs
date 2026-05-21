@@ -10,4 +10,5 @@ public class Attributes
     public int fqt_outlet;
     public float rain_intensity;
     public string tree_seasons;
+    public int rain_seasons;
 }
