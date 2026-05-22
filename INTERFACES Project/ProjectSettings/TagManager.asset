@@ -20,7 +20,6 @@ TagManager:
   - inlet
   - trash
   - weeds
-  - grass
   - shrubs_plants
   - ponding_area
   - urban_environment
@@ -30,6 +29,10 @@ TagManager:
   - gravel
   - natural_environment
   - swale
+  - rain
+  - grass
+  - flower
+  - lawn
   layers:
   - Default
   - TransparentFX

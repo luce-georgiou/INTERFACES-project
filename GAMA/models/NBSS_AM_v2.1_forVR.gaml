@@ -38,7 +38,7 @@ global {
 	// gestion espace libre
 	
 	//geometry free_space <- copy(shape);
-	geometry init_free_space <- rectangle(100,100);
+	geometry init_free_space <- rectangle(75, 75);
 	geometry free_space <- init_free_space;
 	
 	//geometry free_space;
@@ -68,6 +68,7 @@ global {
 	
 	// Defining seasons
 	string current_season;
+	int current_season_int;
 	int y <- year(current_date);
 	date season_end;
 	date season_start;
@@ -75,21 +76,25 @@ global {
 		
 		if (month(current_date)=12 or month(current_date)<=2){
 			current_season <- "winter";
+			current_season_int <- 1;
 			season_start <- date(string(y)+ "-12-01");
 			season_end <-date(string(y+1) + "-02-28");
 		}
 		if (month(current_date)>=3 and month(current_date)<=5){
 			current_season<- "spring";
+			current_season_int <- 2;
 			season_start <- date(string(y)+ "-03-01");
 			season_end <-date(string(y) + "-05-31");
 		}
 		if (month(current_date)>=6 and month(current_date)<=8){
 			current_season <- "summer";
+			current_season_int <- 3;
 			season_start <- date(string(y)+ "-06-01");
 			season_end <-date(string(y) + "-08-31");
 		}
 		if (month(current_date)>=9 and month(current_date)<=11){
 			current_season <- "fall";
+			current_season_int <- 4;
 			season_start <- date(string(y)+ "-09-01");
 			season_end <-date(string(y) + "-11-30");
 		}
@@ -112,22 +117,6 @@ global {
 	
 	init {
 		
-//		point pt1 <- {25, 25};
-//		point pt2 <- {100, 25};
-//		point pt3 <- {100, 100};
-//		point pt4 <- {25, 100};
-//		
-//		free_space <- union([
-//		    pt1 buffer 15,
-//		    pt2 buffer 15,
-//		    pt3 buffer 15,
-//		    pt4 buffer 15,
-//		    line([pt1, pt2]) + 8,
-//		    line([pt2, pt3]) + 8,
-//		    line([pt3, pt4]) + 8,
-//		    line([pt4, pt1]) + 8
-//		]);
-		
 		// Initialization of Rain agent : 
 		create rain {
 			create managed_flow{
@@ -135,6 +124,7 @@ global {
 				myself.runoff <- self;
 			}
 		}
+		
 		// Initialization of NBSS and all its components :
 		create NBSS {
 			shape <- rectangle(30, 20);
@@ -150,6 +140,17 @@ global {
 				list<point> list_of_positions <- [{myself.location.x, myself.location.y + 7, myself.location.z}, {myself.location.x, myself.location.y - 7, myself.location.z}];
 				location <- list_of_positions[index];
 				free_space <- free_space - (shape + 0.5);
+				//ask swale {
+			        loop k from: 0 to: length(list_of_positions) - 1 {
+				        loop i from: 1 to: 4 {
+				            float flower_x <- list_of_positions[k].x - 15 + (i * 6);
+				            float flower_y <- list_of_positions[k].y;
+				            create flower {
+				                location <- {flower_x, flower_y};
+				            }
+				        }
+			        }
+			    //}
 			}
 			
 			create inlet {
@@ -204,15 +205,35 @@ global {
 			create vegetation_cover {
 				my_name<-"vegetation_cover";
 				my_NBSS<- myself;
-				create grass number: rnd(0, 20) {
-					//location <- any_location_in(zone_NBSS);
+				create grass number: rnd(0, 100) {
+					//if free_space != nil and !empty(free_space) {
+						shape <- circle(0.5);
+						location <- any_location_in(free_space);
+						//free_space <- free_space - (shape + 0.1); 
 				}
-				create shrubs_plants number: rnd(0,3) {
-					//location <- any_location_in(zone_NBSS);
+//				create grass_2 number: rnd(0, 10) {
+//					//if free_space != nil and !empty(free_space) {
+//						shape <- circle(0.5);
+//						location <- any_location_in(free_space);
+//						free_space <- free_space - (shape + 0.2); 
+//				}
+//				create grass_3 number: rnd(0, 10) {
+//					//if free_space != nil and !empty(free_space) {
+//						shape <- circle(0.5);
+//						location <- any_location_in(free_space);
+//						free_space <- free_space - (shape + 0.2); 
+//				}
+				create shrubs_plants number: rnd(0,7) {
+					//if free_space != nil and !empty(free_space) {
+						shape <- circle(1.5);
+						location <- any_location_in(free_space);
+						//free_space <- free_space - (shape + 0.2); 
 				}
 			}
-			create trees {
-				
+			create trees number: rnd(0,5) {
+				shape <- circle(2);
+				location <- any_location_in(free_space);
+				//free_space <- free_space - (shape + 0.3);
 				
 				my_name <- "trees";
 				my_NBSS<- myself;
@@ -318,7 +339,41 @@ global {
 		}
 		create weeds number: rnd(0,10) {
 			//location <- any_location_in(global_zone);
-		}		
+		}	
+//		create lawn {
+//			geometry hole <- rectangle(30,20) at_location first(NBSS).location; // la loc précise du trou
+//    		geometry base <- rectangle(75, 75) at_location init_free_space.location;
+//    		shape <- base - hole;
+//		    write "NBSS location : " + first(NBSS).location;
+//		    write "init_free_space location : " + init_free_space.location;
+//		    write "base : " + base;
+//		    write "hole : " + hole;
+//		    write "overlap : " + (base overlaps hole);  // doit être TRUE
+//    		location <- init_free_space.location;
+//		}	
+		create lawn { // haut
+		    shape <- rectangle(75, (75.0/2) - (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
+		             at_location {init_free_space.location.x, 
+		                          first(NBSS).location.y + 20.0/2 + ((init_free_space.location.y + 75.0/2) - (first(NBSS).location.y + 20.0/2)) / 2};
+		}
+		
+		create lawn { // bas
+		    shape <- rectangle(75, (75.0/2) + (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
+		             at_location {init_free_space.location.x, 
+		                          first(NBSS).location.y - 20.0/2 - ((first(NBSS).location.y - 20.0/2) - (init_free_space.location.y - 75.0/2)) / 2};
+		}
+		
+		create lawn { // gauche
+		    shape <- rectangle((75.0/2) + (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
+		             at_location {first(NBSS).location.x - 30.0/2 - ((first(NBSS).location.x - 30.0/2) - (init_free_space.location.x - 75.0/2)) / 2,
+		                          first(NBSS).location.y};
+		}
+		
+		create lawn { // droite
+		    shape <- rectangle((75.0/2) - (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
+		             at_location {first(NBSS).location.x + 30.0/2 + ((init_free_space.location.x + 75.0/2) - (first(NBSS).location.x + 30.0/2)) / 2,
+		                          first(NBSS).location.y};
+		}
 
 		// The maintenance_practices.csv file contains maintenance practices parameters
 		// Here I am creating as many maintenance practice agent as there are lines in the CSV file. 
@@ -376,6 +431,10 @@ species gravel parent: NBSS {
 		draw rectangle(80,55) border:#black color:#black;
 		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -31, -2} anchor: #top_center;
 	}
+}
+
+species lawn parent: vegetal_component { //grille en été ou quand pas arrosé, qd santé dégradée, ajouter float pour humidité ? et changer vitesse selon saison
+	float height <- 0.15;
 }
 
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
@@ -714,6 +773,20 @@ species grass parent: vegetal_component {
 	}
 }
 
+//species grass_1 parent: grass {}
+//species grass_2 parent: grass {}
+//species grass_3 parent: grass {}
+
+species flower parent: vegetal_component {
+	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
+	aspect default {
+		draw square(1) border: #black color: #pink;
+	}
+}
+
+//species flower_1 parent: flower {}
+//species flower_2 parent: flower {}
+
 /***************************************************** SHRUBS and PLANTS *******************************************/
 
 species shrubs_plants parent: vegetal_component {
@@ -823,7 +896,7 @@ species output_flow {
 
 /***************************************************** MANAGED OUTPUT FLOW *******************************************/
 species managed_flow parent: output_flow {
-
+	//rgb my_color;
 
 }
 
@@ -848,12 +921,12 @@ species failure_event{
 		ask agents of_generic_species component where (each.my_name=failure.impacted_agent){
 			function_attributes[failure.impacted_attribute] <- max(0,function_attributes[failure.impacted_attribute]-1);
 			// debug
-			write function_attributes[failure.impacted_attribute];
-			write failure.impacted_agent;
-			if self is inlet {
-				write inlet(self).type;
-				write function_attributes["my_fqt"];
-			}
+//			write function_attributes[failure.impacted_attribute];
+//			write failure.impacted_agent;
+//			if self is inlet {
+//				write inlet(self).type;
+//				write function_attributes["my_fqt"];
+//			}
 			// fin debug
 			failure.last_failure <- current_date;
 			add myself to:self.my_failures;
