@@ -86,7 +86,7 @@ public class SimulationManagerInteraction : SimulationManager
 
     }
 
-    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
+    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel", "grass", "flower"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     protected override void ManageAttributes(List<Attributes> attributes)
     {
@@ -99,7 +99,7 @@ public class SimulationManagerInteraction : SimulationManager
                 continue;
 
             //Debug.Log(name);
-            int type = attributes[i].fqt_inlet;
+            //int type = attributes[i].fqt_inlet;
 
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
@@ -254,9 +254,13 @@ public class SimulationManagerInteraction : SimulationManager
                 //    // à décider, sécheresse
                 //}
                 string saison = attributes[i].tree_seasons;
-                GameObject treeObj = GameObject.FindWithTag("trees");
+                //GameObject treeObj = GameObject.FindWithTag("trees");
                 //List<object> o = geometryMap[name];
                 //GameObject obj = (GameObject)o[0];
+
+                // marche avec ça
+                //List<object> treeData = geometryMap[name];
+                //GameObject treeObj = (GameObject)treeData[0];
 
                 if (saison == "winter")
                 {
@@ -273,6 +277,20 @@ public class SimulationManagerInteraction : SimulationManager
                     Transform snowLayer = obj.transform.Find("SnowLayer");
                     if (snowLayer != null)
                         Destroy(snowLayer.gameObject);
+                }
+            }
+            else if (name.StartsWith("lawn"))
+            {
+                float height = attributes[i].lawn_height;
+                float season = attributes[i].lawn_seasons;
+                obj.transform.localScale = new Vector3(obj.transform.localScale.x, height, obj.transform.localScale.z);
+                if (season == 1)
+                {
+                    ChangeColor(obj, Color.white); // snow in winter
+                }
+                else
+                {
+                    ChangeColor(obj, new Color(0f, 0.502f, 0f));
                 }
             }
         }

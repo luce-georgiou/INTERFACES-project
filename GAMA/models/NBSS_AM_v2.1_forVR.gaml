@@ -124,6 +124,7 @@ global {
 				myself.runoff <- self;
 			}
 		}
+		
 		// Initialization of NBSS and all its components :
 		create NBSS {
 			shape <- rectangle(30, 20);
@@ -139,6 +140,17 @@ global {
 				list<point> list_of_positions <- [{myself.location.x, myself.location.y + 7, myself.location.z}, {myself.location.x, myself.location.y - 7, myself.location.z}];
 				location <- list_of_positions[index];
 				free_space <- free_space - (shape + 0.5);
+				//ask swale {
+			        loop k from: 0 to: length(list_of_positions) - 1 {
+				        loop i from: 1 to: 4 {
+				            float flower_x <- list_of_positions[k].x - 15 + (i * 6);
+				            float flower_y <- list_of_positions[k].y;
+				            create flower {
+				                location <- {flower_x, flower_y};
+				            }
+				        }
+			        }
+			    //}
 			}
 			
 			create inlet {
@@ -193,15 +205,35 @@ global {
 			create vegetation_cover {
 				my_name<-"vegetation_cover";
 				my_NBSS<- myself;
-				create grass number: rnd(0, 20) {
-					//location <- any_location_in(zone_NBSS);
+				create grass number: rnd(0, 100) {
+					//if free_space != nil and !empty(free_space) {
+						shape <- circle(0.5);
+						location <- any_location_in(free_space);
+						//free_space <- free_space - (shape + 0.1); 
 				}
-				create shrubs_plants number: rnd(0,3) {
-					//location <- any_location_in(zone_NBSS);
+//				create grass_2 number: rnd(0, 10) {
+//					//if free_space != nil and !empty(free_space) {
+//						shape <- circle(0.5);
+//						location <- any_location_in(free_space);
+//						free_space <- free_space - (shape + 0.2); 
+//				}
+//				create grass_3 number: rnd(0, 10) {
+//					//if free_space != nil and !empty(free_space) {
+//						shape <- circle(0.5);
+//						location <- any_location_in(free_space);
+//						free_space <- free_space - (shape + 0.2); 
+//				}
+				create shrubs_plants number: rnd(0,7) {
+					//if free_space != nil and !empty(free_space) {
+						shape <- circle(1.5);
+						location <- any_location_in(free_space);
+						//free_space <- free_space - (shape + 0.2); 
 				}
 			}
-			create trees {
-				
+			create trees number: rnd(0,5) {
+				shape <- circle(2);
+				location <- any_location_in(free_space);
+				//free_space <- free_space - (shape + 0.3);
 				
 				my_name <- "trees";
 				my_NBSS<- myself;
@@ -307,7 +339,41 @@ global {
 		}
 		create weeds number: rnd(0,10) {
 			//location <- any_location_in(global_zone);
-		}		
+		}	
+//		create lawn {
+//			geometry hole <- rectangle(30,20) at_location first(NBSS).location; // la loc précise du trou
+//    		geometry base <- rectangle(75, 75) at_location init_free_space.location;
+//    		shape <- base - hole;
+//		    write "NBSS location : " + first(NBSS).location;
+//		    write "init_free_space location : " + init_free_space.location;
+//		    write "base : " + base;
+//		    write "hole : " + hole;
+//		    write "overlap : " + (base overlaps hole);  // doit être TRUE
+//    		location <- init_free_space.location;
+//		}	
+		create lawn { // haut
+		    shape <- rectangle(75, (75.0/2) - (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
+		             at_location {init_free_space.location.x, 
+		                          first(NBSS).location.y + 20.0/2 + ((init_free_space.location.y + 75.0/2) - (first(NBSS).location.y + 20.0/2)) / 2};
+		}
+		
+		create lawn { // bas
+		    shape <- rectangle(75, (75.0/2) + (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
+		             at_location {init_free_space.location.x, 
+		                          first(NBSS).location.y - 20.0/2 - ((first(NBSS).location.y - 20.0/2) - (init_free_space.location.y - 75.0/2)) / 2};
+		}
+		
+		create lawn { // gauche
+		    shape <- rectangle((75.0/2) + (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
+		             at_location {first(NBSS).location.x - 30.0/2 - ((first(NBSS).location.x - 30.0/2) - (init_free_space.location.x - 75.0/2)) / 2,
+		                          first(NBSS).location.y};
+		}
+		
+		create lawn { // droite
+		    shape <- rectangle((75.0/2) - (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
+		             at_location {first(NBSS).location.x + 30.0/2 + ((init_free_space.location.x + 75.0/2) - (first(NBSS).location.x + 30.0/2)) / 2,
+		                          first(NBSS).location.y};
+		}
 
 		// The maintenance_practices.csv file contains maintenance practices parameters
 		// Here I am creating as many maintenance practice agent as there are lines in the CSV file. 
@@ -365,6 +431,10 @@ species gravel parent: NBSS {
 		draw rectangle(80,55) border:#black color:#black;
 		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -31, -2} anchor: #top_center;
 	}
+}
+
+species lawn parent: vegetal_component { //grille en été ou quand pas arrosé, qd santé dégradée, ajouter float pour humidité ? et changer vitesse selon saison
+	float height <- 0.15;
 }
 
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
@@ -703,6 +773,20 @@ species grass parent: vegetal_component {
 	}
 }
 
+//species grass_1 parent: grass {}
+//species grass_2 parent: grass {}
+//species grass_3 parent: grass {}
+
+species flower parent: vegetal_component {
+	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
+	aspect default {
+		draw square(1) border: #black color: #pink;
+	}
+}
+
+//species flower_1 parent: flower {}
+//species flower_2 parent: flower {}
+
 /***************************************************** SHRUBS and PLANTS *******************************************/
 
 species shrubs_plants parent: vegetal_component {
@@ -812,7 +896,7 @@ species output_flow {
 
 /***************************************************** MANAGED OUTPUT FLOW *******************************************/
 species managed_flow parent: output_flow {
-
+	//rgb my_color;
 
 }
 

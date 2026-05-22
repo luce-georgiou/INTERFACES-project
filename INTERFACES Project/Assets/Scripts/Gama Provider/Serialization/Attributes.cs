@@ -11,4 +11,6 @@ public class Attributes
     public float rain_intensity;
     public string tree_seasons;
     public int rain_seasons;
+    public float lawn_height;
+    public int lawn_seasons;
 }
