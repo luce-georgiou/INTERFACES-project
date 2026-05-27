@@ -22,7 +22,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, Color.blue);
         //}
         //Debug.Log("HoverEnterInteraction : " + obj);
-        if (obj.tag.Equals("inlet") || obj.tag.Equals("weeds"))
+        if (obj.tag.Equals("lawn_mower") || obj.tag.Equals("weeds"))
         {
             //Debug.Log("HoverEnterInteraction : " + obj);
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
@@ -42,7 +42,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
         //Debug.Log("HoverExitInteraction : " + obj);
-        if (obj.tag.Equals("inlet") || obj.tag.Equals("weeds"))
+        if (obj.tag.Equals("lawn_mower") || obj.tag.Equals("weeds"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
         }
@@ -57,7 +57,7 @@ public class SimulationManagerInteraction : SimulationManager
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             //Debug.Log("grabbedObject : " + grabbedObject);
 
-            if (grabbedObject.tag.Equals("inlet") || grabbedObject.tag.Equals("weeds"))
+            if (grabbedObject.tag.Equals("weeds"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
@@ -80,7 +80,14 @@ public class SimulationManagerInteraction : SimulationManager
             //    ChangeColor(obj, newSelection ? Color.red : Color.gray);
             //    remainingTime = timeWithoutInteraction;
             //}
+            if (grabbedObject.tag.Equals("lawn_mower"))
+            {
+                Dictionary<string, string> args = new Dictionary<string, string> {
+                         {"id", grabbedObject.name }
+                    };
+                ConnectionManager.Instance.SendExecutableAsk("mow_lawn", args);
 
+            }
 
         }
 

@@ -44,6 +44,7 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_microorganisms;
 	unity_property up_swale;
 	unity_property up_lawn;
+	unity_property up_lawn_mower;
 	//list<point> init_locations <- define_init_locations();
 
 //	list<point> define_init_locations {
@@ -88,6 +89,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_background_geometries(gravel, up_gravel);
 		//do add_background_geometries(NBSS, up_NBSS);
 		do add_background_geometries(swale, up_swale);
+		//do add_background_geometries(lawn_mower, up_lawn_mower);
 	}
 	action define_properties {
 		unity_aspect default_aspect <- geometry_aspect(1.0,#green,precision);
@@ -177,6 +179,10 @@ species unity_linker parent: abstract_unity_linker {
 		up_weeds <- geometry_properties("weeds","weeds",weeds_aspect,#ray_interactable,false);
 		unity_properties << up_weeds;
 		
+		/* Interaction tools */
+		unity_aspect lawn_mower_aspect <- prefab_aspect("Prefabs/Power Garden Tools/Prefabs/LawnMower",1.0,0.0,1.0,0.0,precision);
+		up_lawn_mower <- geometry_properties("lawn_mower","lawn_mower",lawn_mower_aspect,#ray_interactable,false);
+		unity_properties << up_lawn_mower;
 		
 //		unity_aspect sewer_system_aspect <- geometry_aspect(1.0,#gray,precision);
 //		up_sewer_system <- geometry_properties("sewer_system","sewer_system",sewer_system_aspect,#no_interaction,false);
@@ -272,6 +278,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
 		do add_geometries_to_send(ponding_area,up_ponding_area);
 		do add_geometries_to_send(lawn, up_lawn);
+		do add_geometries_to_send(lawn_mower, up_lawn_mower);
 	}
 	
 	// modify state of species according to health/biodiv
@@ -359,7 +366,7 @@ species unity_linker parent: abstract_unity_linker {
 		if (ag != nil) {
 			ask ag {
 				create ag;
-				add ag to: myself.geometries_to_send; //pas sûre
+				//add ag to: myself.geometries_to_send; //pas sûre
 			}
 		}
 	}
@@ -375,6 +382,24 @@ species unity_linker parent: abstract_unity_linker {
 				location <- rnd({1.0, 0.0, 0.0}); //à déterminer mais dans ponding area
 			}
 			// supprimer une partie des feuilles/de l'herbe au niveau du sol/des arbres
+		}
+	}
+	
+	action vegetal_waste_spawner(int veg_waste_amnt) {
+//		point spawn_area;
+//		ask ponding_area {
+//			spawn_area <- location;
+//		}
+		create weeds number: veg_waste_amnt {location <- any_location_in(one_of(ponding_area).shape);}
+	}
+	
+	action mow_lawn(string id) {
+		lawn_mower tool <- lawn_mower first_with(each.name = id); 
+		if tool != nil {
+			ask lawn {
+				height <- height - 0.5;
+			}
+			do vegetal_waste_spawner(10);
 		}
 	}
 	
@@ -461,7 +486,7 @@ species unity_player parent: abstract_unity_player{
     }
 }
 
-experiment vr_xp parent:"Interface (EN)" autorun: false type: unity {
+experiment vr_xp parent:"Interface (EN)" autorun: true type: unity {
 	float minimum_cycle_duration <- 0.1;
 	string unity_linker_species <- string(unity_linker);
 	list<string> displays_to_hide <- ["Rain", "Inlet", "Ponding area", "Vegetation cover", "Filter media", "Performance", map];
@@ -488,7 +513,19 @@ experiment vr_xp parent:"Interface (EN)" autorun: false type: unity {
 	}
 
 	output {
+		 
 		 display map_VR parent: map {
+//			 graphics "timer" {
+//			 	switch (state) {
+//			        match "fast_phase" {
+//			            float left <- (fast_start + 1.5 #minute) - gama.machine_time;
+//			            draw "Next phase in " + max(0, int(left / 1000)) + " seconds"
+//			                at: {0.0, 0.0} color: #white font: font("Arial", 16, #plain);
+//			        }
+//			    }
+//			 }
+			 
+			 
 			 species unity_player;
 			 event #mouse_down{
 				 float t <- gama.machine_time;

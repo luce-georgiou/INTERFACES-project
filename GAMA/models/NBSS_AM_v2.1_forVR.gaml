@@ -34,22 +34,42 @@
 model NBSSAM
 
 //******************** GLOBAL *****************************************
-global {
-	// gestion espace libre
+global control: fsm {
 	
-	//geometry free_space <- copy(shape);
+	/* Modifs par rapport modèle Emma */
 	geometry init_free_space <- rectangle(75, 75);
 	geometry free_space <- init_free_space;
 	
-	//geometry free_space;
+    float slow_duration <- 3 #minute;
+    float slow_start;
+    int last_slow_month <- -1;
+    
+    state fast_phase initial: true {
+        //write "fast_phase";
+        //step <- fast_step;
+        minimum_cycle_duration <- 0.5;
+//        enter {
+//        	fast_start <- gama.machine_time;
+//        } 
+        transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
+        	and current_date.month mod 2 = 0
+        	and current_date.month != last_slow_month;
+    }
+    
+    state slow_phase {
+        //write "slow_phase";
+        //step <- slow_step;
+        minimum_cycle_duration <- 10.0;
+        enter {
+            last_slow_month <- current_date.month;
+            slow_start <- gama.machine_time;
+        }
+        transition to: fast_phase 
+            when: (gama.machine_time - slow_start) >= slow_duration;
+    }
+    /* Fin modifs */
 	
 	
-	
-	int price <- 0;
-	int time_since_last_water <- 5; //à définir
-	bool is_failure_event <- false;
-	//geometry zone_NBSS <- rectangle(30, 20) at_location global_zone.location; // zone NBSS
-	//geometry global_zone <- rectangle(50,40);
 	float step <-1 #day;
 	float step1 <- 1.0;
 	
@@ -99,6 +119,18 @@ global {
 			season_end <-date(string(y) + "-11-30");
 		}
 	}
+	//TODO: slow simulation -> alternating between maintenance phases (slow) and sped up to see results on nature (zoom out ?)
+//	reflex play_phase when: (current_date < starting_date + 1) { // chaque mois ? ralentir sur 1 journée
+//		if (current_date.day = 1 and (current_date.month mod 3 = 0)) {
+//			step <- 100.0;
+//			ask simulation {
+//				do pause;
+//				// lancer chrono (2min?) 
+//				// relancer simu
+//			}
+//		}
+//		step <- 1.0;
+//	}
 	
 
 	// Loading csv files that has the logic table which calculates the output flow depending on input and condition values
@@ -114,6 +146,7 @@ global {
 	int days_accepted_flood <- 0;
 	int days_flooding <- 0;
 	int days_vegetation_degraded <- 0; 
+	
 	
 	init {
 		
@@ -351,6 +384,11 @@ global {
 //		    write "overlap : " + (base overlaps hole);  // doit être TRUE
 //    		location <- init_free_space.location;
 //		}	
+		create lawn_mower {
+			//geometry rect <- rectangle(85, 85);
+			//location <- any_location_in(rect - free_space);
+			location <- {25.0, 10.0, 0};
+		}
 		create lawn { // haut
 		    shape <- rectangle(75, (75.0/2) - (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
 		             at_location {init_free_space.location.x, 
@@ -374,6 +412,7 @@ global {
 		             at_location {first(NBSS).location.x + 30.0/2 + ((init_free_space.location.x + 75.0/2) - (first(NBSS).location.x + 30.0/2)) / 2,
 		                          first(NBSS).location.y};
 		}
+		
 
 		// The maintenance_practices.csv file contains maintenance practices parameters
 		// Here I am creating as many maintenance practice agent as there are lines in the CSV file. 
@@ -437,9 +476,14 @@ species lawn parent: vegetal_component { //grille en été ou quand pas arrosé,
 	float height <- 0.15;
 }
 
+species lawn_mower {
+	
+}
+
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
 
 species vegetal_waste {
+	
 	aspect default {
 		draw square(3) border:#black color:#red;
 	}
@@ -930,7 +974,7 @@ species failure_event{
 			// fin debug
 			failure.last_failure <- current_date;
 			add myself to:self.my_failures;
-			is_failure_event <- true;
+			//is_failure_event <- true;
 		}
 	}
 	
@@ -1129,7 +1173,7 @@ species programmed_maintenance  {
 
 		}
 	}
-
+	//TODO: transformer en action ? -> quand joueur interagit avc espace/composants -> déclenche ça
 	reflex trigger_prog_maintenance when: (maintenance_type="programmed")and every(maintenance_frequency #week) and (current_date>starting_date){ 
 		days_maintained <- days_maintained +1;
 //		ask agents of_generic_species vegetal_component {

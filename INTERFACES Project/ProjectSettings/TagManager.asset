@@ -33,6 +33,7 @@ TagManager:
   - grass
   - flower
   - lawn
+  - lawn_mower
   layers:
   - Default
   - TransparentFX
