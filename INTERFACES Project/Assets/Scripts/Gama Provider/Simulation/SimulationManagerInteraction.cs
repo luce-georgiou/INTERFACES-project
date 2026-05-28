@@ -8,10 +8,22 @@ using System.Linq;
 
 using DigitalRuby.RainMaker;
 
+using TMPro;
+using System.Collections;
+
+
 
 
 public class SimulationManagerInteraction : SimulationManager
 {
+    // Message manager
+    private string lastFailureMessage = "";
+    IEnumerator ShowForDuration(string msg, float duration)
+    {
+        SendingMessages.Show(msg);
+        yield return new WaitForSeconds(duration);
+        SendingMessages.Show("");
+    }
 
     //Defines what happens when a ray passes over an object 
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
@@ -97,7 +109,8 @@ public class SimulationManagerInteraction : SimulationManager
 
     protected override void ManageAttributes(List<Attributes> attributes)
     {
-        
+
+
         for (int i = 0; i < infoWorld.names.Count; i++)
         {
             string name = infoWorld.names[i];
@@ -111,6 +124,8 @@ public class SimulationManagerInteraction : SimulationManager
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
 
+            
+
             if (name.StartsWith("inlet"))
             {
                 int fqt = attributes[i].fqt_inlet;
@@ -120,6 +135,14 @@ public class SimulationManagerInteraction : SimulationManager
                 else if (fqt == 1) ChangeColor(obj, Color.orange);
                 else if (fqt == 2) ChangeColor(obj, Color.yellow);
                 //else if (fqt == 3) ; //Debug.Log("test send dyn data");
+
+                string failure_name = attributes[i].failures_inlet;
+                string newMessage = failure_name + " on " + name;        
+                if ((newMessage != lastFailureMessage) && (failure_name != null))
+                {
+                    lastFailureMessage = newMessage;
+                    StartCoroutine(ShowForDuration(newMessage, 2f));
+                }
             }
             else if (name.StartsWith("outlet"))
             {
@@ -132,13 +155,24 @@ public class SimulationManagerInteraction : SimulationManager
                 //else if (fqt == 3) Debug.Log("test send dyn data");
                 
             }
+            //else if (name.StartsWith("failure_event"))
+            //{
+            //    GameObject failObj = GameObject.FindWithTag("failure_event");
+            //    failObj.GetComponent<Renderer>().enabled = false;
+
+            //    string failure_name = attributes[i].failure_name;
+            //    string impacted_component = attributes[i].impacted_component;
+            //    Debug.Log(failure_name + " on " + impacted_component);
+
+            //    SendingMessages.Show(failure_name + " on " + impacted_component); 
+            //}
             else if (name.StartsWith("rain"))
             {
                 float intensity = attributes[i].rain_intensity;
                 int saison = attributes[i].rain_seasons;
                 BaseRainScript rainScript = GameObject.FindWithTag("rain").GetComponent<BaseRainScript>();
                 ParticleSystem ps = rainScript.RainFallParticleSystem;
-                
+
                 var ma = ps.main;
 
                 rainScript.RainIntensity = intensity / 3f;
@@ -170,15 +204,15 @@ public class SimulationManagerInteraction : SimulationManager
                 }
 
 
-                    //// Change rain intensity according to rain data -> marche
-                    //float intensity = attributes[i].rain_intensity;
-                    //int saison = attributes[i].rain_seasons;
-                    //GameObject rainObj = GameObject.FindWithTag("rain");
-                    //BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
-                    //rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
+                //// Change rain intensity according to rain data -> marche
+                //float intensity = attributes[i].rain_intensity;
+                //int saison = attributes[i].rain_seasons;
+                //GameObject rainObj = GameObject.FindWithTag("rain");
+                //BaseRainScript rainScript = rainObj.GetComponent<BaseRainScript>();
+                //rainScript.RainIntensity = intensity / 3f; // mappe 0-3 vers 0.0-1.0
 
-                    // Change ponding area aspect according to rain intensity
-                    string pondingArea = "ponding_area0";
+                // Change ponding area aspect according to rain intensity
+                string pondingArea = "ponding_area0";
                 if (geometryMap.ContainsKey(pondingArea)) {
                     GameObject pondObj = (GameObject)geometryMap[pondingArea][0];
                     if (intensity == 0) continue;
@@ -302,7 +336,40 @@ public class SimulationManagerInteraction : SimulationManager
             }
         }
     }
-    
+
+    //SendingMessages message = null;
+
+    ////allow to serialize the message as GAMAMessage object
+    //protected override void ManageOtherMessages(string content)
+    //{
+    //    Debug.Log("receive message");
+    //    message = SendingMessages.CreateFromJSON(content);
+    //}
+
+    ////action activated at the end of the update phase (every frame)
+    //protected override void OtherUpdate()
+    //{
+    //    // if a message was received, display in the console the content of the message
+    //    if (message != null)
+    //    {
+    //        Debug.Log("Test");
+    //        Debug.Log("received from GAMA: " + message.name_failure_event + " on " + message.component);
+    //        message = null;
+    //    }
+    //}
+
+    //public TextMeshProUGUI messageText;
+
+    //void Start()
+    //{
+    //    messageText.text = "Votre message";
+    //}
+
+    //public void ShowMessage(string msg)
+    //{
+    //    messageText.text = msg;
+    //}
+
 
     //Defines what happens when the main button (of the right controller) is trigger 
     protected override void TriggerMainButton()
@@ -310,21 +377,9 @@ public class SimulationManagerInteraction : SimulationManager
        
     }
 
-    //Defines what happens when a non-standard message is received from GAMA. 
-    protected override void ManageOtherMessages(string content)
-    {
-
-    }
 
     //Processes additional information contained in WorldJSONInfo - sent by GAMA at each simulation step.  
     protected override void ManageOtherInformation()
-    {
-
-    }
-
-
-    //Adds extra actions to be performed for each new frame.
-    protected override void OtherUpdate()
     {
 
     }

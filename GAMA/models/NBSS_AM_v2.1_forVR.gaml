@@ -40,6 +40,9 @@ global control: fsm {
 	geometry init_free_space <- rectangle(75, 75);
 	geometry free_space <- init_free_space;
 	
+	list<string> list_failures_for_VR <- [];
+	bool failure_happening_bool <- false;
+	
     float slow_duration <- 3 #minute;
     float slow_start;
     int last_slow_month <- -1;
@@ -47,7 +50,7 @@ global control: fsm {
     state fast_phase initial: true {
         //write "fast_phase";
         //step <- fast_step;
-        minimum_cycle_duration <- 0.5;
+        minimum_cycle_duration <- 0.2;
 //        enter {
 //        	fast_start <- gama.machine_time;
 //        } 
@@ -59,7 +62,7 @@ global control: fsm {
     state slow_phase {
         //write "slow_phase";
         //step <- slow_step;
-        minimum_cycle_duration <- 10.0;
+        minimum_cycle_duration <- 3.0;
         enter {
             last_slow_month <- current_date.month;
             slow_start <- gama.machine_time;
@@ -346,7 +349,9 @@ global control: fsm {
 			my_name <- "Receiving natural environment";
 		}
 	
-		create failure_event {}
+		create failure_event {
+			//shape <- circle(0.01); // for prism area in Unity
+		}
 		// The following 2 csv files contain failure event parameters.
 		// Here I am creating as many failure events agent as there are lines in the CSV file.
 		create ext_time_failure from:csv_file( "../includes/failures/ext_time_failures.csv",';',true) with:
@@ -609,7 +614,7 @@ species engineered_component parent: component {
 
 /********************************************** INLET ***************************************/
 species inlet parent: engineered_component {
-	int type <- function_attributes["my_fqt"];
+	//int type <- function_attributes["my_fqt"];
 	
 	aspect default {
 		draw circle(4) border:#black color:my_color;
@@ -985,7 +990,8 @@ species failure_event{
 	reflex failure_happening when:(last_failure = current_date) and (last_failure > starting_date) and (failure_happened = false) {	
 		write my_name + " on " + impacted_agent + " on " + string(current_date,"dd MM yyyy");
 		failure_happened <- true;
-
+		list_failures_for_VR <- list_failures_for_VR + (my_name + " on " + impacted_agent + " on " + string(current_date,"dd MM yyyy"));
+		failure_happening_bool <- true;
 	}
 	
 

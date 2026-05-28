@@ -13,4 +13,7 @@ public class Attributes
     public int rain_seasons;
     public float lawn_height;
     public int lawn_seasons;
+    //public string impacted_component;
+    //public string failure_name;
+    public string failures_inlet;
 }

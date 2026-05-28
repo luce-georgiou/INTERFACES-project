@@ -95,6 +95,10 @@ species unity_linker parent: abstract_unity_linker {
 		unity_aspect default_aspect <- geometry_aspect(1.0,#green,precision);
 		up_default <- geometry_properties("default","",default_aspect,#no_interaction,false);
 		unity_properties << up_default;
+		
+//		unity_aspect failure_event_aspect <- geometry_aspect(1.0,#green,precision);
+//		up_failure_event <- geometry_properties("failure_event","failure_event",failure_event_aspect,#no_interaction,false);
+//		unity_properties << up_failure_event;
 
 		/* Water flow */
 		unity_aspect rain_aspect <- prefab_aspect("Prefabs/RainMaker/Prefab/RainPrefab",1.0,0.0,1.0,0.0,precision);
@@ -244,10 +248,6 @@ species unity_linker parent: abstract_unity_linker {
 //		unity_aspect ext_metric_failure_aspect <- geometry_aspect(1.0,#gray,precision);
 //		up_ext_metric_failure <- geometry_properties("ext_metric_failure","ext_metric_failure",ext_metric_failure_aspect,#no_interaction,false);
 //		unity_properties << up_ext_metric_failure;
-
-//		unity_aspect failure_event_aspect <- geometry_aspect(1.0,#gray,precision);
-//		up_failure_event <- geometry_properties("failure_event","failure_event",failure_event_aspect,#no_interaction,false);
-//		unity_properties << up_failure_event;
 //
 //		unity_aspect output_flow_aspect <- geometry_aspect(1.0,#gray,precision);
 //		up_output_flow <- geometry_properties("output_flow","output_flow",output_flow_aspect,#no_interaction,false);
@@ -281,24 +281,29 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
 	}
 	
+	// sending messages
+//	reflex send_messages_to_Unity when: (one_of(failure_event).last_failure = current_date) and (one_of(failure_event).last_failure > starting_date) and (one_of(failure_event).failure_happened = false) {
+//		write "sending message";
+//		//do send_message players: unity_player as list mes: ["name_failure_event":: last(failure_event).my_name,"component":: last(failure_event).impacted_agent ];
+//	}
+	
 	// modify state of species according to health/biodiv
 	reflex send_agents when: not empty(unity_player) {
-		
-		// add attributes to send to Unity. We send one attribute "type" for the dynamic_punctual_agent agents, 
-		// that will have for name "type" in uniy and which is an integer  (between 0 and 2 for each dynamic_punctual_agent).
-		// get the value of type for each agent.
 		list<int> fqt_inlet <- inlet collect (each.function_attributes["my_fqt"]);
 		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
 		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
-		//list<string> rain_seasons <- rain collect current_season; 
 		list<int> rain_seasons <- rain collect current_season_int;
 		list<float> lawn_height <- lawn collect each.height;
 		list<float> lawn_seasons <- lawn collect float(current_season_int);
-		//write "rain intensity : " + rain_intensity; // debug
-		//put this list value in a map (several attributes can be send at the same time).
-		map<string,list<int>> atts_inlet <-  ["fqt_inlet":: fqt_inlet]; //mettre "type" pour que ce soit reconnu dans les Attributs
+//		list<string> failures_name <- failure_event collect each.my_name;
+//		list<string> failures_aff_component <- failure_event collect each.impacted_agent;
+//		write failures_name;
+//		write failures_aff_component;
+		map<string,list<unknown>> atts_inlet <-  [
+			"fqt_inlet":: fqt_inlet
+		]; 
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
 		map<string,list<int>> atts_rain <- [
 			"rain_intensity":: rain_intensity,
@@ -310,6 +315,15 @@ species unity_linker parent: abstract_unity_linker {
 		];
 		//map<string, list<string>> atts_rain_seasons <- ["rain_seasons"::rain_seasons];
 		map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
+//		map<string,list<string>> atts_failures <- [
+//			"failure_name":: failures_name,
+//			"impacted_component":: failures_aff_component
+//		];
+		if one_of(inlet).my_failures != [] {
+			list<string> failures_inlet <- inlet collect last(each.my_failures).my_name;
+			atts_inlet <- atts_inlet + ("failures_inlet":: failures_inlet);
+			
+		}
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
 		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
@@ -317,6 +331,7 @@ species unity_linker parent: abstract_unity_linker {
 		//do add_geometries_to_send(rain,up_rain,atts_rain_seasons);
 		do add_geometries_to_send(trees,up_trees,atts_trees);
 		do add_geometries_to_send(lawn, up_lawn, atts_lawn);
+		//do add_geometries_to_send(failure_event, up_failure_event, atts_failures);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
 //		do add_geometries_to_keep(outlet);	
