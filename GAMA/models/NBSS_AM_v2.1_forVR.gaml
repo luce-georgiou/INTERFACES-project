@@ -37,8 +37,36 @@ model NBSSAM
 global control: fsm {
 	
 	/* Modifs par rapport modèle Emma */
-	geometry init_free_space <- rectangle(75, 75);
-	geometry free_space <- init_free_space;
+	geometry free_space; //<- init_free_space;
+	geometry init_free_space;
+	
+	// Geoms des 8 NBS
+	list<geometry> list_of_geoms <- [
+			rectangle(24.5, 4.8),  //5
+			rectangle(26.1, 4.8), //6
+			rectangle(61.5, 5.86), //7
+			rectangle(63.2, 5.96), //8
+			rectangle(5.3, 24.5), //4
+			rectangle(5.3, 16.7), //3
+			rectangle(5.3, 14.7),  //2
+			rectangle(5.3, 25.1) //1	
+	];
+	// Geoms des 8 ponding areas
+	list<geometry> list_of_geoms_pond <- [
+		rectangle(24.5, 2),  //5
+		rectangle(26.1, 2), //6
+		rectangle(61.5, 2.2), //7
+		rectangle(63.2, 2.2), //8
+		rectangle(2.1, 24.5), //4
+		rectangle(2.1, 16.7), //3
+		rectangle(2.1, 14.7),  //2
+		rectangle(2.1, 25.1) //1	
+	];
+	
+	// Loc des 8 NBS
+	list<point> list_of_locs <- [{17.25, -7.0}, {69.55, -7.0}, {140, -7.0}, {207, -7.0},
+		{91.5, -45.65}, {91.5, -73.25}, {91.5, -95.95}, {91.5, -122.85}
+	];
 	
 	list<string> list_failures_for_VR <- [];
 	bool failure_happening_bool <- false;
@@ -91,7 +119,6 @@ global control: fsm {
 	
 	// Defining seasons
 	string current_season;
-	int current_season_int;
 	int y <- year(current_date);
 	date season_end;
 	date season_start;
@@ -99,25 +126,21 @@ global control: fsm {
 		
 		if (month(current_date)=12 or month(current_date)<=2){
 			current_season <- "winter";
-			current_season_int <- 1;
 			season_start <- date(string(y)+ "-12-01");
 			season_end <-date(string(y+1) + "-02-28");
 		}
 		if (month(current_date)>=3 and month(current_date)<=5){
 			current_season<- "spring";
-			current_season_int <- 2;
 			season_start <- date(string(y)+ "-03-01");
 			season_end <-date(string(y) + "-05-31");
 		}
 		if (month(current_date)>=6 and month(current_date)<=8){
 			current_season <- "summer";
-			current_season_int <- 3;
 			season_start <- date(string(y)+ "-06-01");
 			season_end <-date(string(y) + "-08-31");
 		}
 		if (month(current_date)>=9 and month(current_date)<=11){
 			current_season <- "fall";
-			current_season_int <- 4;
 			season_start <- date(string(y)+ "-09-01");
 			season_end <-date(string(y) + "-11-30");
 		}
@@ -161,45 +184,56 @@ global control: fsm {
 			}
 		}
 		
+		/* Creating the urban/vegetal environment */
+		create lawn {
+			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
+		    init_free_space <- lawn_geom;
+		    loop i from: 0 to: 7 {
+		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
+		        lawn_geom <- lawn_geom - nbs;
+		    }
+		    shape <- lawn_geom;
+		    free_space <- lawn_geom;
+		}
+		create lawn_mower {
+			//geometry rect <- rectangle(85, 85);
+			//location <- any_location_in(rect - free_space);
+			location <- any_location_in(free_space);
+		}
+		
+		create trees number: rnd(0,5) {
+			shape <- circle(2);
+			location <- any_location_in(free_space);
+			my_name <- "trees";
+		}
+		create shrubs_plants number: rnd(0, 15) {
+			shape <- circle(1);
+			location <- any_location_in(free_space);
+			my_name <- "shrubs";
+		}
+		
+		create trash number: rnd(0,10) {
+			location <- any_location_in(free_space);
+		}
+		create weeds number: rnd(0,10) {
+			location <- any_location_in(free_space);
+		}	
+		
+		
 		// Initialization of NBSS and all its components :
-		create NBSS {
-			shape <- rectangle(30, 20);
-			location <- any_location_in(free_space buffer -15.0);
-			//location <- {location.x, location.y, location.z - 1.0};
-			free_space <- free_space - (shape + 0.5);
-			
-			my_name <- "Swale1";
-			//location <- {25.0, 25.0, 0.0};
-			//write global_zone.location;
-			create swale number: 2 { // faire apparaître la tranchée
-				shape <- rectangle(30, 6);
-				list<point> list_of_positions <- [{myself.location.x, myself.location.y + 7, myself.location.z}, {myself.location.x, myself.location.y - 7, myself.location.z}];
-				location <- list_of_positions[index];
-				free_space <- free_space - (shape + 0.5);
-				//ask swale {
-			        loop k from: 0 to: length(list_of_positions) - 1 {
-				        loop i from: 1 to: 4 {
-				            float flower_x <- list_of_positions[k].x - 15 + (i * 6);
-				            float flower_y <- list_of_positions[k].y;
-				            create flower {
-				                location <- {flower_x, flower_y};
-				            }
-				        }
-			        }
-			    //}
-			}
+		create NBSS number: 8 {
+			shape <- list_of_geoms[index];
+			location <- list_of_locs[index];
+			my_name <- "swale" + index;
 			
 			create inlet {
-				shape <- circle(1);
-				location <- {myself.location.x - 13.0, myself.location.y, 0};
-				free_space <- free_space - (shape + 0.5);
-				//location <- any_location_in(zone_NBSS.contour) + {0.0, 0.0, 1.0};
-				//location <- any_location_in(line(zone_NBSS.points));
-//				loop while: (self distance_to one_of(inlet)) < 0.5 {
-//				    location <- any_location_in(line(zone_NBSS.points));
-//				}
-				
-				//write zone_NBSS.contour;
+				shape <- circle(0.5);
+				if (list_of_geoms[index].width > list_of_geoms[index].height) {
+					location <- {list_of_locs[index].x - list_of_geoms[index].width/2, list_of_locs[index].y};
+				}
+				else {
+					location <- {list_of_locs[index].x, list_of_locs[index].y + list_of_geoms[index].height/2};
+				}
 				my_name<-"inlet";
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -213,14 +247,11 @@ global control: fsm {
 				create unmanaged_flow {
 					my_component <- myself;
 					myself.my_output_unmanaged_flow <- self;
-	
 				}
 			}
 			create ponding_area  {
-				shape <- rectangle(30, 8);
-				location <- {myself.location.x, myself.location.y, 0}; //z+1.75
-				free_space <- free_space - (shape + 0.5);
-				
+				shape <- list_of_geoms_pond[index];
+				location <- list_of_locs[index];
 				my_name<-"ponding_area";
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -236,51 +267,18 @@ global control: fsm {
 					my_component <- myself;
 					myself.my_output_unmanaged_flow <- self;
 				}		
-		
 			}
 			create vegetation_cover {
 				my_name<-"vegetation_cover";
 				my_NBSS<- myself;
-				create grass number: rnd(0, 100) {
-					//if free_space != nil and !empty(free_space) {
+				create grass number: rnd(0, 30) {
 						shape <- circle(0.5);
-						location <- any_location_in(free_space);
-						//free_space <- free_space - (shape + 0.1); 
+						location <- any_location_in(one_of(NBSS));
 				}
-//				create grass_2 number: rnd(0, 10) {
-//					//if free_space != nil and !empty(free_space) {
-//						shape <- circle(0.5);
-//						location <- any_location_in(free_space);
-//						free_space <- free_space - (shape + 0.2); 
-//				}
-//				create grass_3 number: rnd(0, 10) {
-//					//if free_space != nil and !empty(free_space) {
-//						shape <- circle(0.5);
-//						location <- any_location_in(free_space);
-//						free_space <- free_space - (shape + 0.2); 
-//				}
-				create shrubs_plants number: rnd(0,7) {
-					//if free_space != nil and !empty(free_space) {
-						shape <- circle(1.5);
-						location <- any_location_in(free_space);
-						//free_space <- free_space - (shape + 0.2); 
-				}
-			}
-			create trees number: rnd(0,5) {
-				shape <- circle(2);
-				location <- any_location_in(free_space);
-				//free_space <- free_space - (shape + 0.3);
-				
-				my_name <- "trees";
-				my_NBSS<- myself;
-				//location <- any_location_in(zone_NBSS) + {0.0, 0.0, 1.0};
 			}
 			create filter_media {
-				//location <- zone_NBSS.location + {0.0, 0.0, -1.0};
-				shape <- rectangle(30,20);
-				location <- {myself.location.x, myself.location.y, myself.location.z-1.0};
-				free_space <- free_space - (shape + 0.5);
-				
+//				shape <- rectangle(30,20);
+//				location <- {myself.location.x, myself.location.y, myself.location.z-1.0};
 				my_name<-"filter_media";
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -297,17 +295,14 @@ global control: fsm {
 					myself.my_output_unmanaged_flow <- self;
 				}
 			}
-		
-			
 			create outlet{
-				//location <- any_location_in(zone_NBSS.contour);
-//				loop while: (self distance_to one_of(inlet)) < 0.5 {
-//				    location <- any_location_in(zone_NBSS.contour);
-//				}
-				shape <- circle(1);
-				location <- {myself.location.x + 13.0, myself.location.y, 0};
-				free_space <- free_space - (shape + 0.5);
-				
+				shape <- square(0.5);
+				if (list_of_geoms[index].width > list_of_geoms[index].height) {
+					location <- {list_of_locs[index].x + list_of_geoms[index].width/2, list_of_locs[index].y};
+				}
+				else {
+					location <- {list_of_locs[index].x, list_of_locs[index].y - list_of_geoms[index].height/2};
+				}
 				my_name <- "outlet";
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -324,11 +319,11 @@ global control: fsm {
 					myself.my_output_unmanaged_flow <- self;
 				}
 			}
-			create gravel {
-				shape <- rectangle(30,20);
-				location <- {myself.location.x, myself.location.y, myself.location.z-2.0};
-				free_space <- free_space - (shape + 0.5);
-			}
+//			create gravel {
+//				shape <- rectangle(30,20);
+//				location <- {myself.location.x, myself.location.y, myself.location.z-2.0};
+//				//free_space <- free_space - (shape + 0.5);
+//			}
 			my_components <- my_engineered_components union my_vegetal_components;	
 			
 		}
@@ -338,9 +333,35 @@ global control: fsm {
 				my_component<- myself;
 				myself.overflow <- self;
 			}
-			
+			create road number: 2 {
+			shape <- [rectangle(260, 7), rectangle(7, 150)][index];
+			location <- [{one_of(lawn).location.x, one_of(lawn).location.y + 65}, {one_of(lawn).location.x - 15, one_of(lawn).location.y}][index]; 
+			}
+			create building number: 7 {
+				shape <- [rectangle(11, 25), //1
+					rectangle(11, 35), //2
+					rectangle(18, 12), //3
+					rectangle(20, 22), //4
+					rectangle(28, 11), //5
+					rectangle(28, 11), //6
+					rectangle(28, 11) //7
+				][index];
+				location <- [
+					{last(road).location.x - 20, list_of_locs[7].y}, {last(road).location.x - 20, (list_of_locs[6].y + list_of_locs[5].y)/2}, 
+					{last(road).location.x - 22, list_of_locs[4].y},
+					{last(road).location.x + 16, list_of_locs[7].y}, {last(road).location.x + 20, list_of_locs[6].y}, 
+					{last(road).location.x + 20, list_of_locs[5].y}, {last(road).location.x + 20, list_of_locs[4].y}
+				][index];
+			}
+			create park number: 2 {
+				shape <- [rectangle(45, 23), // Pole petite enfance
+					rectangle(130, 23) // Parc Elie Wiesel
+				][index];
+				location <- [{list_of_locs[1].x - 7, list_of_locs[1].y - 18}, // Pole petite enfance
+					{(list_of_locs[2].x + list_of_locs[3].x)/2 - 4, list_of_locs[1].y - 18} // Parc Elie Wiesel
+				][index];
+			}
 		}
-		
 		create sewer_system{
 			my_name <- "Sewer system";
 		}
@@ -372,53 +393,6 @@ global control: fsm {
 					my_threshold::int(get("threshold"))
 
 			];
-		create trash number: rnd(0,10) {
-			//location <- any_location_in(global_zone);
-		}
-		create weeds number: rnd(0,10) {
-			//location <- any_location_in(global_zone);
-		}	
-//		create lawn {
-//			geometry hole <- rectangle(30,20) at_location first(NBSS).location; // la loc précise du trou
-//    		geometry base <- rectangle(75, 75) at_location init_free_space.location;
-//    		shape <- base - hole;
-//		    write "NBSS location : " + first(NBSS).location;
-//		    write "init_free_space location : " + init_free_space.location;
-//		    write "base : " + base;
-//		    write "hole : " + hole;
-//		    write "overlap : " + (base overlaps hole);  // doit être TRUE
-//    		location <- init_free_space.location;
-//		}	
-		create lawn_mower {
-			//geometry rect <- rectangle(85, 85);
-			//location <- any_location_in(rect - free_space);
-			location <- {25.0, 10.0, 0};
-		}
-		create lawn { // haut
-		    shape <- rectangle(75, (75.0/2) - (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
-		             at_location {init_free_space.location.x, 
-		                          first(NBSS).location.y + 20.0/2 + ((init_free_space.location.y + 75.0/2) - (first(NBSS).location.y + 20.0/2)) / 2};
-		}
-		
-		create lawn { // bas
-		    shape <- rectangle(75, (75.0/2) + (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
-		             at_location {init_free_space.location.x, 
-		                          first(NBSS).location.y - 20.0/2 - ((first(NBSS).location.y - 20.0/2) - (init_free_space.location.y - 75.0/2)) / 2};
-		}
-		
-		create lawn { // gauche
-		    shape <- rectangle((75.0/2) + (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
-		             at_location {first(NBSS).location.x - 30.0/2 - ((first(NBSS).location.x - 30.0/2) - (init_free_space.location.x - 75.0/2)) / 2,
-		                          first(NBSS).location.y};
-		}
-		
-		create lawn { // droite
-		    shape <- rectangle((75.0/2) - (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
-		             at_location {first(NBSS).location.x + 30.0/2 + ((init_free_space.location.x + 75.0/2) - (first(NBSS).location.x + 30.0/2)) / 2,
-		                          first(NBSS).location.y};
-		}
-		
-
 		// The maintenance_practices.csv file contains maintenance practices parameters
 		// Here I am creating as many maintenance practice agent as there are lines in the CSV file. 
 		if maintenance_type = "programmed" {
@@ -434,8 +408,6 @@ global control: fsm {
 		if maintenance_type = "run-to-failure" {
 			create rtf_maintenance;
 		}
-		
-		
 	}
 		
 	
@@ -478,11 +450,27 @@ species gravel parent: NBSS {
 }
 
 species lawn parent: vegetal_component { //grille en été ou quand pas arrosé, qd santé dégradée, ajouter float pour humidité ? et changer vitesse selon saison
-	float height <- 0.15;
+	float height <- 0.1;
 }
 
-species lawn_mower {
-	
+species lawn_mower {}
+
+species road parent: urban_environment {
+	aspect default {
+		draw shape color: #grey;
+	}
+}
+
+species building parent: urban_environment {
+	aspect default {
+		draw shape color: #grey;
+	}
+}
+
+species park parent: urban_environment {
+	aspect default {
+		draw shape color: #green;
+	}
 }
 
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
@@ -545,9 +533,10 @@ species NBSS {
 
 	
 	aspect default {
-		draw rectangle(30, 20) color: #white;
+		draw shape color: #pink;
+		//draw rectangle(30, 20) color: #white;
 		//draw rectangle(80,55) border:#black color:#white;
-		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -31, 1} anchor: #top_center;
+		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location; //+ {0, -31, 1} anchor: #top_center;
 	}
 	
 
@@ -617,7 +606,7 @@ species inlet parent: engineered_component {
 	//int type <- function_attributes["my_fqt"];
 	
 	aspect default {
-		draw circle(4) border:#black color:my_color;
+		draw shape border:#black color:my_color;
 		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -7, 1} anchor: #top_center;
 		//draw line([ponding_area(0).location -0.01,self.location + 3]) color: #dodgerblue begin_arrow: 2 end_arrow: -7 width: 2.0;
 	}
@@ -720,7 +709,7 @@ species filter_media parent: engineered_component {
 /***************************************************** OUTLET *************************************/
 species outlet parent: engineered_component {
 	aspect default {
-		draw circle(4) border:#black color:my_color;
+		draw shape border:#black color:my_color;
 		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -7, 1} anchor: #center;
 	}
 }
@@ -1322,6 +1311,13 @@ experiment "Interface (EN)"	type: gui {
 			graphics "free_area" {
 				draw free_space color: #lightgreen;
 			}
+			species NBSS;
+			species inlet;
+			species outlet;
+			species road;
+			species building;
+			species park;
+			
 		}
 		display "Rain" type: 2d {
 			chart "Rain events" type: series y_label: "level" y2_label:"mm" y_range: {0,3.5} y2_range:{-120,0} y_tick_unit:1   y2_tick_unit:5 x_serie_labels:string(current_date,"dd MM yyyy"){

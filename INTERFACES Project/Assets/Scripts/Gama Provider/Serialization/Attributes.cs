@@ -10,10 +10,11 @@ public class Attributes
     public int fqt_outlet;
     public float rain_intensity;
     public string tree_seasons;
-    public int rain_seasons;
+    public string rain_seasons;
     public float lawn_height;
-    public int lawn_seasons;
+    public string lawn_seasons;
     //public string impacted_component;
     //public string failure_name;
     public string failures_inlet;
+    public string failures_outlet;
 }

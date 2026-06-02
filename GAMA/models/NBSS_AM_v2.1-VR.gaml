@@ -7,7 +7,7 @@ species unity_linker parent: abstract_unity_linker {
 	int max_num_players  <- 1;
 	int min_num_players  <- 1;
 	//unity_property up_sewer_system;
-	unity_property up_filter_media;
+	//unity_property up_filter_media;
 	unity_property up_rain;
 	//unity_property up_programmed_maintenance;
 		//unity_property up_unmanaged_flow;
@@ -40,11 +40,14 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_vegetal_waste;
 	unity_property up_trash;
 	unity_property up_weeds;
-	unity_property up_gravel;
+	//unity_property up_gravel;
 	unity_property up_microorganisms;
 	unity_property up_swale;
 	unity_property up_lawn;
 	unity_property up_lawn_mower;
+	unity_property up_road;
+	unity_property up_building;
+	unity_property up_park;
 	//list<point> init_locations <- define_init_locations();
 
 //	list<point> define_init_locations {
@@ -58,6 +61,9 @@ species unity_linker parent: abstract_unity_linker {
 		do define_properties;
 		player_unity_properties <- [up_default];
 		
+		do add_background_geometries(road, up_road);
+		do add_background_geometries(building, up_building);
+		do add_background_geometries(park, up_park);
 		//do add_background_geometries(lawn, up_lawn);
 		do add_background_geometries(grass,up_grass);
 //		do add_background_geometries(grass_2,up_grass2);
@@ -79,15 +85,15 @@ species unity_linker parent: abstract_unity_linker {
 //		do add_background_geometries(rtf_maintenance,up_rtf_maintenance);
 		//do add_background_geometries(urban_environment,up_urban_environment);
 		//do add_background_geometries(ponding_area,up_ponding_area);
-		do add_background_geometries(filter_media, up_filter_media);
+		//do add_background_geometries(filter_media, up_filter_media);
 //		do add_background_geometries(managed_flow,up_managed_flow);
 //		do add_background_geometries(unmanaged_flow,up_unmanaged_flow);
 //		do add_background_geometries(output_flow,up_output_flow);
 		
 		//
 		//do add_background_geometries(microorganisms, up_microorganisms);
-		do add_background_geometries(gravel, up_gravel);
-		//do add_background_geometries(NBSS, up_NBSS);
+		//do add_background_geometries(gravel, up_gravel);
+		do add_background_geometries(NBSS, up_NBSS);
 		do add_background_geometries(swale, up_swale);
 		//do add_background_geometries(lawn_mower, up_lawn_mower);
 	}
@@ -107,13 +113,17 @@ species unity_linker parent: abstract_unity_linker {
 		
 		
 		/* NBSS components */
-		unity_aspect filter_media_aspect <- geometry_aspect(1.0,#saddlebrown,precision);
-		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
-		unity_properties << up_filter_media;
+		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#gray,precision);
+		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
+		unity_properties << up_NBSS;
 		
-		unity_aspect gravel_aspect <- geometry_aspect(1.0, #slategrey, precision); //à voir si je définis la sous-couche en prefab ou non
-		up_gravel <- geometry_properties("gravel","gravel",gravel_aspect,#no_interaction,false);
-		unity_properties << up_gravel;
+//		unity_aspect filter_media_aspect <- geometry_aspect(1.0,#saddlebrown,precision);
+//		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
+//		unity_properties << up_filter_media;
+		
+//		unity_aspect gravel_aspect <- geometry_aspect(1.0, #slategrey, precision); //à voir si je définis la sous-couche en prefab ou non
+//		up_gravel <- geometry_properties("gravel","gravel",gravel_aspect,#no_interaction,false);
+//		unity_properties << up_gravel;
 		
 		unity_aspect ponding_area_aspect <- geometry_aspect(0.2, #blue, precision);
 		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
@@ -145,7 +155,7 @@ species unity_linker parent: abstract_unity_linker {
 		up_grass <- geometry_properties("grass","grass",grass_aspect,#no_interaction,false);
 		unity_properties << up_grass;
 		
-		unity_aspect lawn_aspect <- geometry_aspect(0.15,#green,precision);
+		unity_aspect lawn_aspect <- geometry_aspect(0.1,#green,precision);
 		up_lawn <- geometry_properties("lawn","lawn",lawn_aspect,#no_interaction,false);
 		unity_properties << up_lawn;
 		
@@ -187,6 +197,19 @@ species unity_linker parent: abstract_unity_linker {
 		unity_aspect lawn_mower_aspect <- prefab_aspect("Prefabs/Power Garden Tools/Prefabs/LawnMower",1.0,0.0,1.0,0.0,precision);
 		up_lawn_mower <- geometry_properties("lawn_mower","lawn_mower",lawn_mower_aspect,#ray_interactable,false);
 		unity_properties << up_lawn_mower;
+		
+		/* Urban environment */
+		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
+		up_road <- geometry_properties("road","",road_aspect,#no_interaction,false);
+		unity_properties << up_road;
+		
+		unity_aspect building_aspect <- geometry_aspect(10,#gray,precision);
+		up_building <- geometry_properties("building","",building_aspect,#no_interaction,false);
+		unity_properties << up_building;
+		
+		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
+		up_park <- geometry_properties("park","",park_aspect,#no_interaction,false);
+		unity_properties << up_park;
 		
 //		unity_aspect sewer_system_aspect <- geometry_aspect(1.0,#gray,precision);
 //		up_sewer_system <- geometry_properties("sewer_system","sewer_system",sewer_system_aspect,#no_interaction,false);
@@ -232,10 +255,6 @@ species unity_linker parent: abstract_unity_linker {
 //		unity_aspect natural_environment_aspect <- geometry_aspect(1.0,#green,precision);
 //		up_natural_environment <- geometry_properties("natural_environment","natural_environment",natural_environment_aspect,#no_interaction,false);
 //		unity_properties << up_natural_environment;
-
-//		unity_aspect NBSS_aspect <- geometry_aspect(2.0,#gray,precision);
-//		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#ray_interactable,false);
-//		unity_properties << up_NBSS;
 		
 //		unity_aspect component_aspect <- prefab_aspect("Prefabs/Visual Prefabs/City/Vehicles/Car",1.0,0.0,1.0,0.0,precision);
 //		up_component <- geometry_properties("component","component",component_aspect,#no_interaction,false);
@@ -294,9 +313,9 @@ species unity_linker parent: abstract_unity_linker {
 		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
-		list<int> rain_seasons <- rain collect current_season_int;
+		list<string> rain_seasons <- rain collect current_season;
 		list<float> lawn_height <- lawn collect each.height;
-		list<float> lawn_seasons <- lawn collect float(current_season_int);
+		list<string> lawn_seasons <- lawn collect current_season;
 //		list<string> failures_name <- failure_event collect each.my_name;
 //		list<string> failures_aff_component <- failure_event collect each.impacted_agent;
 //		write failures_name;
@@ -305,11 +324,11 @@ species unity_linker parent: abstract_unity_linker {
 			"fqt_inlet":: fqt_inlet
 		]; 
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
-		map<string,list<int>> atts_rain <- [
+		map<string,list<unknown>> atts_rain <- [
 			"rain_intensity":: rain_intensity,
 			"rain_seasons":: rain_seasons
 		];
-		map<string,list<float>> atts_lawn <- [
+		map<string,list<unknown>> atts_lawn <- [
 			"lawn_height":: lawn_height,
 			"lawn_seasons":: lawn_seasons
 		];
@@ -322,6 +341,11 @@ species unity_linker parent: abstract_unity_linker {
 		if one_of(inlet).my_failures != [] {
 			list<string> failures_inlet <- inlet collect last(each.my_failures).my_name;
 			atts_inlet <- atts_inlet + ("failures_inlet":: failures_inlet);
+			
+		}
+		if one_of(outlet).my_failures != [] {
+			list<string> failures_outlet <- outlet collect last(each.my_failures).my_name;
+			atts_outlet <- atts_outlet + ("failures_outlet":: failures_outlet);
 			
 		}
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
@@ -442,22 +466,22 @@ species unity_linker parent: abstract_unity_linker {
 		}
 	}
 	// lawn growing
-	reflex lawn_growth {
-		if (current_season = "spring") { // herbe pousse plus vite au printemps = plus de tonte nécessaire
-			if (cycle mod (1*7) = 0) {
-				ask lawn {
-					height <- height + 0.01;
-				}
-			}
-		}
-		else {
-			if (cycle mod (2*7) = 0) {
-				ask lawn {
-					height <- height + 0.01;
-				}
-			}
-		}
-	}
+//	reflex lawn_growth {
+//		if (current_season = "spring") { // herbe pousse plus vite au printemps = plus de tonte nécessaire
+//			if (cycle mod (1*7) = 0) {
+//				ask lawn {
+//					height <- height + 0.01;
+//				}
+//			}
+//		}
+//		else {
+//			if (cycle mod (2*7) = 0) {
+//				ask lawn {
+//					height <- height + 0.001;
+//				}
+//			}
+//		}
+//	}
 	
 	// gestion des saisons
 	
@@ -493,12 +517,12 @@ species unity_player parent: abstract_unity_player{
 		}
 	}
 	
-	reflex stay_in_bounds { // marche pas
-        if !(init_free_space overlaps self) {
-            write "out of bounds";
-            location <- closest_points_with(init_free_space.location, self)[0]; // ou 1
-        }
-    }
+//	reflex stay_in_bounds { // marche pas
+//        if !(init_free_space overlaps self) {
+//            write "out of bounds";
+//            location <- closest_points_with(init_free_space.location, self)[0]; // ou 1
+//        }
+//    }
 }
 
 experiment vr_xp parent:"Interface (EN)" autorun: true type: unity {

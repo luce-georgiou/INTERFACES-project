@@ -104,8 +104,8 @@ public class SimulationManagerInteraction : SimulationManager
         }
 
     }
-
-    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel", "grass", "flower"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
+    // Mettre dans cette liste tous les objets statiques
+    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     protected override void ManageAttributes(List<Attributes> attributes)
     {
@@ -124,37 +124,56 @@ public class SimulationManagerInteraction : SimulationManager
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
 
-            
 
-            if (name.StartsWith("inlet"))
+            string[] prefixes = { "inlet", "outlet" };
+            foreach (string prefix in prefixes)
             {
-                int fqt = attributes[i].fqt_inlet;
-                //Debug.Log("inlet fqt : " + fqt);
-
-                if (fqt == 0) ChangeColor(obj, Color.red);
-                else if (fqt == 1) ChangeColor(obj, Color.orange);
-                else if (fqt == 2) ChangeColor(obj, Color.yellow);
-                //else if (fqt == 3) ; //Debug.Log("test send dyn data");
-
-                string failure_name = attributes[i].failures_inlet;
-                string newMessage = failure_name + " on " + name;        
-                if ((newMessage != lastFailureMessage) && (failure_name != null))
+                if (name.StartsWith(prefix))
                 {
-                    lastFailureMessage = newMessage;
-                    StartCoroutine(ShowForDuration(newMessage, 2f));
+                    int fqt = prefix == "inlet" ? attributes[i].fqt_inlet : attributes[i].fqt_outlet;
+                    if (fqt == 0) ChangeColor(obj, Color.red);
+                    else if (fqt == 1) ChangeColor(obj, Color.orange);
+                    else if (fqt == 2) ChangeColor(obj, Color.yellow);
+
+                    string failure_name = prefix == "inlet" ? attributes[i].failures_inlet : attributes[i].failures_outlet;
+                    string newMessage = failure_name + " on " + name;
+                    if ((newMessage != lastFailureMessage) && (failure_name != null))
+                    {
+                        lastFailureMessage = newMessage;
+                        StartCoroutine(ShowForDuration(newMessage, 2f));
+                    }
+                    break;
                 }
             }
-            else if (name.StartsWith("outlet"))
-            {
-                int fqt = attributes[i].fqt_outlet;
-                //Debug.Log("outlet fqt : " + fqt);
+            //if (name.StartsWith("inlet"))
+            //{
+            //    int fqt = attributes[i].fqt_inlet;
+            //    //Debug.Log("inlet fqt : " + fqt);
 
-                if (fqt == 0)      ChangeColor(obj, Color.red);
-                else if (fqt == 1) ChangeColor(obj, Color.orange);
-                else if (fqt == 2) ChangeColor(obj, Color.yellow);
-                //else if (fqt == 3) Debug.Log("test send dyn data");
+            //    if (fqt == 0) ChangeColor(obj, Color.red);
+            //    else if (fqt == 1) ChangeColor(obj, Color.orange);
+            //    else if (fqt == 2) ChangeColor(obj, Color.yellow);
+            //    //else if (fqt == 3) ; //Debug.Log("test send dyn data");
+
+            //    string failure_name = attributes[i].failures_inlet;
+            //    string newMessage = failure_name + " on " + name;        
+            //    if ((newMessage != lastFailureMessage) && (failure_name != null))
+            //    {
+            //        lastFailureMessage = newMessage;
+            //        StartCoroutine(ShowForDuration(newMessage, 2f));
+            //    }
+            //}
+            //else if (name.StartsWith("outlet"))
+            //{
+            //    int fqt = attributes[i].fqt_outlet;
+            //    //Debug.Log("outlet fqt : " + fqt);
+
+            //    if (fqt == 0)      ChangeColor(obj, Color.red);
+            //    else if (fqt == 1) ChangeColor(obj, Color.orange);
+            //    else if (fqt == 2) ChangeColor(obj, Color.yellow);
+            //    //else if (fqt == 3) Debug.Log("test send dyn data");
                 
-            }
+            //}
             //else if (name.StartsWith("failure_event"))
             //{
             //    GameObject failObj = GameObject.FindWithTag("failure_event");
@@ -166,17 +185,17 @@ public class SimulationManagerInteraction : SimulationManager
 
             //    SendingMessages.Show(failure_name + " on " + impacted_component); 
             //}
-            else if (name.StartsWith("rain"))
+            if (name.StartsWith("rain"))
             {
                 float intensity = attributes[i].rain_intensity;
-                int saison = attributes[i].rain_seasons;
+                string season = attributes[i].rain_seasons;
                 BaseRainScript rainScript = GameObject.FindWithTag("rain").GetComponent<BaseRainScript>();
                 ParticleSystem ps = rainScript.RainFallParticleSystem;
 
                 var ma = ps.main;
 
                 rainScript.RainIntensity = intensity / 3f;
-                if (saison == 1) // hiver
+                if (season == "winter") // hiver
                 {
                     ma.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
                     ma.gravityModifier = 0.2f; // presque pas de gravité
@@ -323,9 +342,9 @@ public class SimulationManagerInteraction : SimulationManager
             else if (name.StartsWith("lawn"))
             {
                 float height = attributes[i].lawn_height;
-                float season = attributes[i].lawn_seasons;
+                string season = attributes[i].lawn_seasons;
                 obj.transform.localScale = new Vector3(obj.transform.localScale.x, height, obj.transform.localScale.z);
-                if (season == 1)
+                if (season == "winter")
                 {
                     ChangeColor(obj, Color.white); // snow in winter
                 }
