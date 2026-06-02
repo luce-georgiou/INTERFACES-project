@@ -105,15 +105,15 @@ species unity_linker parent: abstract_unity_linker {
 		up_lawn <- geometry_properties("lawn","lawn",lawn_aspect,#no_interaction,false);
 		unity_properties << up_lawn;
 		
-		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
+		unity_aspect road_aspect <- geometry_aspect(0.15,#gray,precision);
 		up_road <- geometry_properties("road","",road_aspect,#no_interaction,false);
 		unity_properties << up_road;
 		
-		unity_aspect building_aspect <- geometry_aspect(10,#gray,precision);
+		unity_aspect building_aspect <- geometry_aspect(0.2,#gray,precision);
 		up_building <- geometry_properties("building","",building_aspect,#no_interaction,false);
 		unity_properties << up_building;
 		
-		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
+		unity_aspect park_aspect <- geometry_aspect(0.15,#darkgreen,precision);
 		up_park <- geometry_properties("park","",park_aspect,#no_interaction,false);
 		unity_properties << up_park;
 	}
