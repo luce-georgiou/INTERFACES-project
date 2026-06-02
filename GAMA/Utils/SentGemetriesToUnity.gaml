@@ -10,115 +10,55 @@ import "../models/NBSS_AM_v2.1_forVR.gaml"
 
 
 global {
-	unity_property up_filter_media;
-	unity_property up_rain;
-	//unity_property up_programmed_maintenance;
-		//unity_property up_unmanaged_flow;
-		//unity_property up_managed_flow;
-	unity_property up_vegetation_cover;
-	//unity_property up_vegetal_component;
-	unity_property up_trees;
-	unity_property up_inlet;
-	unity_property up_engineered_component;
-	unity_property up_natural_environment;
 	unity_property up_NBSS;
 	unity_property up_default;
-	//unity_property up_component;
-	//unity_property up_ext_time_failure;
-	//unity_property up_ext_metric_failure;
-	//unity_property up_failure_event;
-	//unity_property up_output_flow;
-	//unity_property up_rtf_maintenance;
-	unity_property up_outlet;
-	unity_property up_urban_environment;
-	unity_property up_ponding_area;
-	
-	//mes agents ajoutés
-	unity_property up_shrubs_plants;
-	unity_property up_grass;
-//	unity_property up_grass2;
-//	unity_property up_grass3;
-	unity_property up_flower;
-//	unity_property up_flower2;
-	unity_property up_vegetal_waste;
-	unity_property up_trash;
-	unity_property up_weeds;
-	unity_property up_gravel;
-	unity_property up_microorganisms;
-	unity_property up_swale;
+	unity_property up_road;
+	unity_property up_building;
+	unity_property up_park;
 	unity_property up_lawn;
-	unity_property up_lawn_mower;
 	
 	
 	init {
  		// Initialization of NBSS and all its components :
-		list<geometry> list_of_geoms <- [rectangle(25.1, 2.65), rectangle(14.7, 2.65), rectangle(16.7, 2.65), rectangle(24.5, 2.65), 
-				rectangle(24.5, 2.4), rectangle(26.1, 2.4), rectangle(61.5, 2.93), rectangle(63.2, 2.93)
-			];
-			create NBSS number: 8 {
-			
+		create NBSS number: 8 {
 			shape <- list_of_geoms[index];
-			
-			create inlet {
-				shape <- circle(1);
-				location <- {myself.location.x - 13.0, myself.location.y, 0};
-			}
-			create ponding_area  {
-				shape <- rectangle(30, 8);
-				location <- {myself.location.x, myself.location.y, 0}; //z+1.75
-			}
-			create grass number: rnd(0, 100) {
-				//if free_space != nil and !empty(free_space) {
-					shape <- circle(0.5);
-					location <- any_location_in(free_space);
-					//free_space <- free_space - (shape + 0.1); 
-			}
-			create shrubs_plants number: rnd(0,7) {
-					shape <- circle(1.5);
-					location <- any_location_in(free_space);
-			}
-			create trees number: rnd(0,5) {
-				shape <- circle(2);
-				location <- any_location_in(free_space);
-			}
-			create filter_media {
-				shape <- rectangle(30,20);
-				location <- {myself.location.x, myself.location.y, myself.location.z-1.0};
-			}
-			create outlet{
-				shape <- circle(1);
-				location <- {myself.location.x + 13.0, myself.location.y, 0};
-			}
-			create gravel {
-				shape <- rectangle(30,20);
-				location <- {myself.location.x, myself.location.y, myself.location.z-2.0};
-				
-			}	
+			location <- list_of_locs[index];
 		}
-		
-		
-		create lawn { // haut
-		    shape <- rectangle(75, (75.0/2) - (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
-		             at_location {init_free_space.location.x, 
-		                          first(NBSS).location.y + 20.0/2 + ((init_free_space.location.y + 75.0/2) - (first(NBSS).location.y + 20.0/2)) / 2};
+		create lawn {
+			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
+		    loop i from: 0 to: 7 {
+		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
+		        lawn_geom <- lawn_geom - nbs;
+		    }
+		    shape <- lawn_geom;
 		}
-		
-		create lawn { // bas
-		    shape <- rectangle(75, (75.0/2) + (first(NBSS).location.y - init_free_space.location.y) - 20.0/2) 
-		             at_location {init_free_space.location.x, 
-		                          first(NBSS).location.y - 20.0/2 - ((first(NBSS).location.y - 20.0/2) - (init_free_space.location.y - 75.0/2)) / 2};
+		create road number: 2 {
+			shape <- [rectangle(260, 7), rectangle(7, 150)][index];
+			location <- [{one_of(lawn).location.x, one_of(lawn).location.y + 65}, {one_of(lawn).location.x - 15, one_of(lawn).location.y}][index]; 
 		}
-		
-		create lawn { // gauche
-		    shape <- rectangle((75.0/2) + (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
-		             at_location {first(NBSS).location.x - 30.0/2 - ((first(NBSS).location.x - 30.0/2) - (init_free_space.location.x - 75.0/2)) / 2,
-		                          first(NBSS).location.y};
+		create building number: 7 {
+			shape <- [rectangle(11, 25), //1
+				rectangle(11, 35), //2
+				rectangle(18, 12), //3
+				rectangle(20, 22), //4
+				rectangle(28, 11), //5
+				rectangle(28, 11), //6
+				rectangle(28, 11) //7
+			][index];
+			location <- [
+				{last(road).location.x - 20, list_of_locs[7].y}, {last(road).location.x - 20, (list_of_locs[6].y + list_of_locs[5].y)/2}, 
+				{last(road).location.x - 22, list_of_locs[4].y},
+				{last(road).location.x + 16, list_of_locs[7].y}, {last(road).location.x + 20, list_of_locs[6].y}, 
+				{last(road).location.x + 20, list_of_locs[5].y}, {last(road).location.x + 20, list_of_locs[4].y}
+			][index];
 		}
-		
-		create lawn { // droite
-		    shape <- rectangle((75.0/2) - (first(NBSS).location.x - init_free_space.location.x) - 30.0/2, 20) 
-		             at_location {first(NBSS).location.x + 30.0/2 + ((init_free_space.location.x + 75.0/2) - (first(NBSS).location.x + 30.0/2)) / 2,
-		                          first(NBSS).location.y};
+		create park number: 2 {
+			shape <- [rectangle(45, 23), // Pole petite enfance
+				rectangle(130, 23) // Parc Elie Wiesel
+			][index];
+			location <- [{list_of_locs[1].x - 7, list_of_locs[1].y - 18}, // Pole petite enfance
+				{(list_of_locs[2].x + list_of_locs[3].x)/2 - 4, list_of_locs[1].y - 18} // Parc Elie Wiesel
+			][index];
 		}
 	}
  	
@@ -143,20 +83,11 @@ species unity_linker parent: abstract_unity_linker {
 	init {
 		//define the unity properties
 		do define_properties;
-		do add_background_geometries(grass,up_grass);
-		do add_background_geometries(flower,up_flower);
-		do add_background_geometries(filter_media, up_filter_media);
-		do add_background_geometries(gravel, up_gravel);
-		do add_background_geometries(swale, up_swale);
-		
-		do add_background_geometries(shrubs_plants, up_shrubs_plants);
-		//do add_geometries_to_send(grass, up_grass);
-		do add_background_geometries(trash, up_trash);
-		do add_background_geometries(weeds, up_weeds);
-		do add_background_geometries(vegetal_waste,up_vegetal_waste);
-		do add_background_geometries(ponding_area,up_ponding_area);
+		do add_background_geometries(NBSS, up_NBSS);
+		do add_background_geometries(road, up_road);
+		do add_background_geometries(building, up_building);
+		do add_background_geometries(park, up_park);
 		do add_background_geometries(lawn, up_lawn);
-		do add_background_geometries(lawn_mower, up_lawn_mower);
 	}
 	
 	
@@ -166,77 +97,25 @@ species unity_linker parent: abstract_unity_linker {
 		up_default <- geometry_properties("default","",default_aspect,#no_interaction,false);
 		unity_properties << up_default;
 
-		/* Water flow */
-		unity_aspect rain_aspect <- prefab_aspect("Prefabs/RainMaker/Prefab/RainPrefab",1.0,0.0,1.0,0.0,precision);
-		up_rain <- geometry_properties("rain","rain",rain_aspect,#no_interaction,false);
-		unity_properties << up_rain;
+		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#gray,precision);
+		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
+		unity_properties << up_NBSS;
 		
-		
-		/* NBSS components */
-		unity_aspect filter_media_aspect <- geometry_aspect(1.0,#saddlebrown,precision);
-		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
-		unity_properties << up_filter_media;
-		
-		unity_aspect gravel_aspect <- geometry_aspect(1.0, #slategrey, precision); //à voir si je définis la sous-couche en prefab ou non
-		up_gravel <- geometry_properties("gravel","gravel",gravel_aspect,#no_interaction,false);
-		unity_properties << up_gravel;
-		
-		unity_aspect ponding_area_aspect <- geometry_aspect(0.2, #blue, precision);
-		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
-		unity_properties << up_ponding_area;
-		
-		unity_aspect inlet_aspect <- geometry_aspect(0.75,#gray,precision);
-		up_inlet <- geometry_properties("inlet","inlet",inlet_aspect,#ray_interactable,false);
-		unity_properties << up_inlet;
-		
-		unity_aspect outlet_aspect <- geometry_aspect(0.75,#gray,precision);
-		up_outlet <- geometry_properties("outlet","outlet",outlet_aspect,#ray_interactable,false);
-		unity_properties << up_outlet;
-		
-		unity_aspect swale_aspect <- geometry_aspect(0.5,#green,precision);
-		up_swale <- geometry_properties("swale","swale",swale_aspect,#ray_interactable,false);
-		unity_properties << up_swale;
-		
-
-		/* Vegetation */
-		unity_aspect trees_aspect <- prefab_aspect("Prefabs/Snowy_Low_Poly_Trees/Pine_NoSnow1",1.0,0.0,1.0,0.0,precision);
-		up_trees <- geometry_properties("trees","trees",trees_aspect,#ray_interactable,false);
-		unity_properties << up_trees;
-		
-		unity_aspect shrubs_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Bush_1_1",1.0,0.0,1.0,0.0,precision);
-		up_shrubs_plants <- geometry_properties("shrubs_plants","shrubs_plants",shrubs_aspect,#ray_interactable,false);
-		unity_properties << up_shrubs_plants;
-		
-		unity_aspect grass_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_1",1.0,0.0,1.0,0.0,precision);
-		up_grass <- geometry_properties("grass","grass",grass_aspect,#no_interaction,false);
-		unity_properties << up_grass;
-		
-		unity_aspect lawn_aspect <- geometry_aspect(0.15,#green,precision);
+		unity_aspect lawn_aspect <- geometry_aspect(0.1,#green,precision);
 		up_lawn <- geometry_properties("lawn","lawn",lawn_aspect,#no_interaction,false);
 		unity_properties << up_lawn;
-	
-		unity_aspect flower_aspect <- prefab_aspect("Prefabs/DEMOLowPolyFlowers/Prefabs/SM_Hyacinth_PastellBlue_Big",1.0,0.0,1.0,0.0,precision);
-		up_flower <- geometry_properties("flower","flower",flower_aspect,#no_interaction,false);
-		unity_properties << up_flower;
-
-	/* Trash/Invasive vegetation */
-		unity_aspect vegetal_waste_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Plant_1_1",1.0,0.0,1.0,0.0,precision);
-		up_vegetal_waste <- geometry_properties("vegetal_waste","vegetal_waste",vegetal_waste_aspect,#ray_interactable,false);
-		unity_properties << up_vegetal_waste;
 		
-		unity_aspect trash_aspect <- prefab_aspect("Prefabs/Mess Maker Free/Low Poly/Cans/Soda Can Green Crushed",1.0,0.0,1.0,0.0,precision);
-		up_trash <- geometry_properties("trash","trash",trash_aspect,#ray_interactable,false);
-		unity_properties << up_trash;
+		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
+		up_road <- geometry_properties("road","",road_aspect,#no_interaction,false);
+		unity_properties << up_road;
 		
-		unity_aspect weeds_aspect <- prefab_aspect("Prefabs/Parks And Nature Pack/Prefab/GrassE",1.0,0.0,1.0,0.0,precision);
-		up_weeds <- geometry_properties("weeds","weeds",weeds_aspect,#ray_interactable,false);
-		unity_properties << up_weeds;
+		unity_aspect building_aspect <- geometry_aspect(10,#gray,precision);
+		up_building <- geometry_properties("building","",building_aspect,#no_interaction,false);
+		unity_properties << up_building;
 		
-		/* Interaction tools */
-		unity_aspect lawn_mower_aspect <- prefab_aspect("Prefabs/Power Garden Tools/Prefabs/LawnMower",1.0,0.0,1.0,0.0,precision);
-		up_lawn_mower <- geometry_properties("lawn_mower","lawn_mower",lawn_mower_aspect,#ray_interactable,false);
-		unity_properties << up_lawn_mower;
-		
+		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
+		up_park <- geometry_properties("park","",park_aspect,#no_interaction,false);
+		unity_properties << up_park;
 	}
 }
 

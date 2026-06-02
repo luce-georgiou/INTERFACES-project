@@ -27,14 +27,12 @@ TagManager:
   - vegetation_cover
   - filter_media
   - gravel
-  - natural_environment
   - swale
   - rain
   - grass
   - flower
   - lawn
   - lawn_mower
-  - failure_event
   layers:
   - Default
   - TransparentFX

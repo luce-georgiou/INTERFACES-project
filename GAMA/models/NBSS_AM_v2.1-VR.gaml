@@ -55,7 +55,7 @@ species unity_linker parent: abstract_unity_linker {
 //	}
 
 	bool do_send_world <- true;
-	list<point> init_locations <- [any_location_in(init_free_space) + {0,0,1}];
+	list<point> init_locations <- [any_location_in(init_free_space)];
 
 	init {
 		do define_properties;
@@ -137,9 +137,9 @@ species unity_linker parent: abstract_unity_linker {
 		up_outlet <- geometry_properties("outlet","outlet",outlet_aspect,#ray_interactable,false);
 		unity_properties << up_outlet;
 		
-		unity_aspect swale_aspect <- geometry_aspect(0.5,#green,precision);
-		up_swale <- geometry_properties("swale","swale",swale_aspect,#ray_interactable,false);
-		unity_properties << up_swale;
+//		unity_aspect swale_aspect <- geometry_aspect(0.5,#green,precision);
+//		up_swale <- geometry_properties("swale","swale",swale_aspect,#ray_interactable,false);
+//		unity_properties << up_swale;
 		
 
 		/* Vegetation */

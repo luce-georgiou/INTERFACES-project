@@ -38,7 +38,7 @@ global control: fsm {
 	
 	/* Modifs par rapport modèle Emma */
 	geometry free_space; //<- init_free_space;
-	geometry init_free_space;
+	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
 	
 	// Geoms des 8 NBS
 	list<geometry> list_of_geoms <- [
@@ -201,14 +201,14 @@ global control: fsm {
 			location <- any_location_in(free_space);
 		}
 		
-		create trees number: rnd(0,5) {
+		create trees number: rnd(0,15) {
 			shape <- circle(2);
-			location <- any_location_in(free_space);
+			location <- any_location_in(last(park));
 			my_name <- "trees";
 		}
 		create shrubs_plants number: rnd(0, 15) {
 			shape <- circle(1);
-			location <- any_location_in(free_space);
+			location <- any_location_in(last(park));
 			my_name <- "shrubs";
 		}
 		
@@ -225,6 +225,23 @@ global control: fsm {
 			shape <- list_of_geoms[index];
 			location <- list_of_locs[index];
 			my_name <- "swale" + index;
+			
+			NBSS parent_nbss <- self;
+			
+			int i <- index;
+			
+			create flower number: 10 {
+				shape <- triangle(0.1);
+				if (i < 4) { //NBSS horizontale
+					location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
+						list_of_locs[i].y + ((index mod 10) < 5 ? 2.5 : -2.5)
+					};
+				} else { //NBSS verticale
+					location <- {list_of_locs[i].x + ((index mod 10) < 5 ? 2.5 : -2.5),
+						list_of_locs[i].y - list_of_geoms[i].height/2 + (index mod 5) * list_of_geoms[i].height/4
+					};
+				}
+			}
 			
 			create inlet {
 				shape <- circle(0.5);
@@ -1317,6 +1334,7 @@ experiment "Interface (EN)"	type: gui {
 			species road;
 			species building;
 			species park;
+			species flower;
 			
 		}
 		display "Rain" type: 2d {
