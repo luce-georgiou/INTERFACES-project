@@ -185,6 +185,7 @@ global control: fsm {
 		}
 		
 		/* Creating the urban/vegetal environment */
+
 		create lawn {
 			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
 		    init_free_space <- lawn_geom;
@@ -200,17 +201,7 @@ global control: fsm {
 			//location <- any_location_in(rect - free_space);
 			location <- any_location_in(free_space);
 		}
-		
-		create trees number: rnd(0,15) {
-			shape <- circle(2);
-			location <- any_location_in(last(park));
-			my_name <- "trees";
-		}
-		create shrubs_plants number: rnd(0, 15) {
-			shape <- circle(1);
-			location <- any_location_in(last(park));
-			my_name <- "shrubs";
-		}
+
 		
 		create trash number: rnd(0,10) {
 			location <- any_location_in(free_space);
@@ -377,6 +368,18 @@ global control: fsm {
 				location <- [{list_of_locs[1].x - 7, list_of_locs[1].y - 18}, // Pole petite enfance
 					{(list_of_locs[2].x + list_of_locs[3].x)/2 - 4, list_of_locs[1].y - 18} // Parc Elie Wiesel
 				][index];
+				if (index = 1) {
+					create trees number: rnd(0,15) {
+						shape <- circle(0.5);
+						location <- any_location_in(myself.shape);
+						my_name <- "trees";
+					}
+					create shrubs_plants number: rnd(0, 15) {
+						shape <- circle(1);
+						location <- any_location_in(myself.shape);
+						my_name <- "shrubs";
+					}
+				}
 			}
 		}
 		create sewer_system{
@@ -847,9 +850,10 @@ species flower parent: vegetal_component {
 species shrubs_plants parent: vegetal_component {
 	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
 	aspect default {
+		draw shape color: #grey;
 		//draw rectangle(10,10) at: my_surface.location + {0,-5,1};
 		//draw shrubs_plants_image size: {20.0, 12.0, 0.0} at: my_surface.location + {8, -8, 1};
-		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -8, 1} anchor: #top_center;
+		//draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -8, 1} anchor: #top_center;
 	}
 	
 }
@@ -859,7 +863,8 @@ species shrubs_plants parent: vegetal_component {
 species trees parent: vegetal_component {
 	map <string,int> function_attributes <- ["my_health"::3];
 	aspect default {
-		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -12, 1} anchor: #top_center;
+		draw shape color: #black;
+		//draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -12, 1} anchor: #top_center;
 	}
 }
 
@@ -1335,6 +1340,7 @@ experiment "Interface (EN)"	type: gui {
 			species building;
 			species park;
 			species flower;
+			species trees;
 			
 		}
 		display "Rain" type: 2d {
