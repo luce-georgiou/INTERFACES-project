@@ -160,7 +160,7 @@ public class SimulationManagerInteraction : SimulationManager
                     if (fqt == 0)
                     {
                         ChangeColor(obj, Color.red);
-                        // Afficher "!" flottant au-dessus du composant à l'état critique
+                        // Afficher "!" flottant au-dessus du composant ï¿½ l'ï¿½tat critique
                         showExclamation = true;
                     }
                     else if (fqt == 1)
@@ -235,7 +235,7 @@ public class SimulationManagerInteraction : SimulationManager
                 if (season == "winter") // hiver
                 {
                     ma.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
-                    ma.gravityModifier = 0.2f; // presque pas de gravité
+                    ma.gravityModifier = 0.2f; // presque pas de gravitï¿½
                     //ma.maxParticles = 6000;
                     rainScript.EnableWind = false;
                     var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
@@ -325,10 +325,10 @@ public class SimulationManagerInteraction : SimulationManager
                 ////GameObject treeObj = GameObject.FindWithTag("trees");
 
 
-                //if (saison == "winter") // mettre neige à la place pluie, Ground blanc
+                //if (saison == "winter") // mettre neige ï¿½ la place pluie, Ground blanc
                 //{
 
-                //    // Changer arbre en arbre enneigé 
+                //    // Changer arbre en arbre enneigï¿½ 
                 //    GameObject treeObj = GameObject.FindWithTag("trees");
                 //    Vector3 position = treeObj.transform.position;
                 //    Quaternion rotation = treeObj.transform.rotation;
@@ -378,14 +378,14 @@ public class SimulationManagerInteraction : SimulationManager
                 //        GameObject tree = Instantiate(treePrefab, position, rotation);
                 //        tree.tag = "trees";
                 //    }
-                //    // à décider, sécheresse
+                //    // ï¿½ dï¿½cider, sï¿½cheresse
                 //}
                 string saison = attributes[i].tree_seasons;
                 //GameObject treeObj = GameObject.FindWithTag("trees");
                 //List<object> o = geometryMap[name];
                 //GameObject obj = (GameObject)o[0];
 
-                // marche avec ça
+                // marche avec ï¿½a
                 //List<object> treeData = geometryMap[name];
                 //GameObject treeObj = (GameObject)treeData[0];
 
@@ -462,11 +462,11 @@ public class SimulationManagerInteraction : SimulationManager
         ProBuilderMesh stairs = ShapeGenerator.GenerateStair(PivotLocation.Center,
             new Vector3(width, height, depth),
             stepCount, false);
-        Material mat = new Material(Shader.Find("Standard"));
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
         mat.color = Color.green; // ta couleur
         stairs.GetComponent<MeshRenderer>().material = mat;
         stairs.transform.position = location;
-        stairs.gameObject.name = "swale" + swaleCount;
+        stairs.gameObject.name = "swale__" + swaleCount;
         swaleCount++;
         stairs.gameObject.tag = "swale";
         stairs.ToMesh();
@@ -478,7 +478,7 @@ public class SimulationManagerInteraction : SimulationManager
     {
         // Swale 4
         BuildSwale(24.5f, 1.5f, 2f, 5, new Vector3(90f, 0.0f, 45.64999f)).transform.rotation = Quaternion.Euler(0, -90, 0);
-        BuildSwale(24.5f, 1.5f, 2f, 5, new Vector3(93f, 0.0f, 45.64999f)).transform.rotation = Quaternion.Euler(0, 90, 0); // tourne de 90°;
+        BuildSwale(24.5f, 1.5f, 2f, 5, new Vector3(93f, 0.0f, 45.64999f)).transform.rotation = Quaternion.Euler(0, 90, 0); // tourne de 90ï¿½;
     }
 
 

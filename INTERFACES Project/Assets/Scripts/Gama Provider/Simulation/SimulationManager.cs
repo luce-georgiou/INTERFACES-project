@@ -942,7 +942,9 @@ public class SimulationManager : MonoBehaviour
 
         ManageOtherInformation();
         toRemove.Clear();
-        toRemove.UnionWith(geometryMap.Keys);
+        Debug.Log(geometryMap);
+        if (geometryMap != null) 
+            toRemove.UnionWith(geometryMap.Keys);
 
         // foreach (List<object> obj in geometryMap.Values) {
         //((GameObject) obj[0]).SetActive(false);
