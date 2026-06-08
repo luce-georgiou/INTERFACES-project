@@ -113,7 +113,7 @@ species unity_linker parent: abstract_unity_linker {
 		
 		
 		/* NBSS components */
-		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#gray,precision);
+		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#green,precision);
 		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
 		unity_properties << up_NBSS;
 		
@@ -171,7 +171,7 @@ species unity_linker parent: abstract_unity_linker {
 //		up_grass3 <- geometry_properties("grass3","grass3",grass3_aspect,#no_interaction,false);
 //		unity_properties << up_grass3;
 //		
-		unity_aspect flower_aspect <- prefab_aspect("Prefabs/DEMOLowPolyFlowers/Prefabs/SM_Hyacinth_PastellBlue_Big",1.0,0.0,1.0,0.0,precision);
+		unity_aspect flower_aspect <- prefab_aspect("Prefabs/DEMOLowPolyFlowers/Prefabs/SM_Dandelion_Small",1.0,0.0,1.0,0.0,precision);
 		up_flower <- geometry_properties("flower","flower",flower_aspect,#no_interaction,false);
 		unity_properties << up_flower;
 //		
@@ -494,6 +494,11 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	reflex sediment_acc {
 		//quand valeur dans tableau potpall_acc augmente, ajouter une couche de sédiments (et transformer vegetal waste en sediments)
+	}
+	reflex send_message when: send_init_message {
+		//write "Send message: ";
+		do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+		//do send_message players: unity_player as list mes: ["cycle"::cycle];
 	}
 }
 

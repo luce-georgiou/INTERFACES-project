@@ -37,6 +37,8 @@ model NBSSAM
 global control: fsm {
 	
 	/* Modifs par rapport modèle Emma */
+	bool send_init_message <- false;
+	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
 	
@@ -75,7 +77,54 @@ global control: fsm {
     float slow_start;
     int last_slow_month <- -1;
     
-    state fast_phase initial: true {
+    state situation1_init initial: true {
+	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
+	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
+	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
+	// mauvaise végétation dans quasi toute (sauf une disons, où on dit qu'elle a des fleurs dc les gens en prennent soin)
+	// pb avec la récupération des EP via les canalisations des immeubles (deux bouchées donc tout va dans la même (genre la 4) qui est surchargée
+	//swale 1 à 4 remplies
+	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
+	
+    	//minimum_cycle_duration <- 0.2;
+    	enter {
+	    	write "entering situation1_init";
+//	    	create trash number: 15 {
+//	    		location <- any_location_in(NBSS first_with (each.my_name = "swale6"));
+//	    		write "created trash";
+//	    	}
+	    	loop s over: NBSS where (each.name = "swale6") {
+	    		create trash number: 15 {
+			        location <- any_location_in(s);
+			    }
+	    	}
+	    	create flower number: 10 {
+		    	int i <- 0;
+		    	location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
+								list_of_locs[i].y + (index < 5 ? 2.5 : -2.5)
+				};
+				write location;
+			}
+			loop s over: NBSS where (each.my_name != "swale0") {
+			    create weeds number: 15 {
+			        location <- any_location_in(s);
+			    }
+			}
+			write "created weeds";
+			send_init_message <- true; // on entre state phase active -> false
+		//send message explicatif
+		//définir dans unity_linker les interactions nécessaires
+    	}
+    	//send_init_message <- false;
+    	transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
+        	and current_date.month mod 2 = 0
+        	and current_date.month != last_slow_month;
+    	exit {
+    		
+    	}
+    }
+    
+    state fast_phase { //initial: true {
         //write "fast_phase";
         //step <- fast_step;
         minimum_cycle_duration <- 0.2;
@@ -92,12 +141,18 @@ global control: fsm {
         //step <- slow_step;
         minimum_cycle_duration <- 3.0;
         enter {
+            //send_init_message <- false;
             last_slow_month <- current_date.month;
             slow_start <- gama.machine_time;
         }
         transition to: fast_phase 
             when: (gama.machine_time - slow_start) >= slow_duration;
+        exit {
+        	send_init_message <- false;
+        }
     }
+    
+
     /* Fin modifs */
 	
 	
@@ -217,22 +272,22 @@ global control: fsm {
 			location <- list_of_locs[index];
 			my_name <- "swale" + index;
 			
-			NBSS parent_nbss <- self;
-			
-			int i <- index;
-			
-			create flower number: 10 {
-				shape <- triangle(0.1);
-				if (i < 4) { //NBSS horizontale
-					location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
-						list_of_locs[i].y + ((index mod 10) < 5 ? 2.5 : -2.5)
-					};
-				} else { //NBSS verticale
-					location <- {list_of_locs[i].x + ((index mod 10) < 5 ? 2.5 : -2.5),
-						list_of_locs[i].y - list_of_geoms[i].height/2 + (index mod 5) * list_of_geoms[i].height/4
-					};
-				}
-			}
+//			NBSS parent_nbss <- self;
+//			
+//			int i <- index;
+//			
+//			create flower number: 10 {
+//				shape <- triangle(0.1);
+//				if (i < 4) { //NBSS horizontale
+//					location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
+//						list_of_locs[i].y + ((index mod 10) < 5 ? 2.5 : -2.5)
+//					};
+//				} else { //NBSS verticale
+//					location <- {list_of_locs[i].x + ((index mod 10) < 5 ? 2.5 : -2.5),
+//						list_of_locs[i].y - list_of_geoms[i].height/2 + (index mod 5) * list_of_geoms[i].height/4
+//					};
+//				}
+//			}
 			
 			create inlet {
 				shape <- circle(0.5);
@@ -279,10 +334,10 @@ global control: fsm {
 			create vegetation_cover {
 				my_name<-"vegetation_cover";
 				my_NBSS<- myself;
-				create grass number: rnd(0, 30) {
-						shape <- circle(0.5);
-						location <- any_location_in(one_of(NBSS));
-				}
+//				create grass number: rnd(0, 30) {
+//						shape <- circle(0.5);
+//						location <- any_location_in(one_of(NBSS));
+//				}
 			}
 			create filter_media {
 //				shape <- rectangle(30,20);
@@ -644,6 +699,8 @@ species inlet parent: engineered_component {
 species ponding_area parent: engineered_component {
 	bool temporary<-true;
 	bool ponding <- false;
+	
+	float water_level <- 0.0;
 	
 	//unusual ponding occurs when filter media has an output_unmanaged_flow
 	reflex unusual_ponding when: (current_date < starting_date) and (my_downstream_comp.my_output_unmanaged_flow.my_flow>=1) and (ponding=false){
@@ -1321,7 +1378,7 @@ experiment "run" type: gui {
 //TODO: display the environment with the different species so that xp is the one used in VR gama file
 
 // Interface 
-experiment "Interface (EN)"	type: gui {
+experiment "Interface (EN)"	type: gui autorun: true {
 	//parameter "maintenance type" var:maintenance_type among:["no maintenance", "run-to-failure", "programmed"];
 	parameter "maintenance type" var:maintenance_type among:["no maintenance"];
 	output {

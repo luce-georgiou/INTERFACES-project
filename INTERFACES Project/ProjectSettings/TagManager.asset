@@ -33,6 +33,7 @@ TagManager:
   - flower
   - lawn
   - lawn_mower
+  - exclamation
   layers:
   - Default
   - TransparentFX
