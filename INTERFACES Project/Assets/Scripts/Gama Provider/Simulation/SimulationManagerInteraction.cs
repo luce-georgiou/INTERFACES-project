@@ -209,7 +209,7 @@ public class SimulationManagerInteraction : SimulationManager
             //    else if (fqt == 1) ChangeColor(obj, Color.orange);
             //    else if (fqt == 2) ChangeColor(obj, Color.yellow);
             //    //else if (fqt == 3) Debug.Log("test send dyn data");
-                
+
             //}
             //else if (name.StartsWith("failure_event"))
             //{
@@ -222,6 +222,9 @@ public class SimulationManagerInteraction : SimulationManager
 
             //    SendingMessages.Show(failure_name + " on " + impacted_component); 
             //}
+
+            
+
             if (name.StartsWith("rain"))
             {
                 float intensity = attributes[i].rain_intensity;
@@ -319,6 +322,27 @@ public class SimulationManagerInteraction : SimulationManager
             // gestion de l'aspect de l'environnement selon les saisons
             else if (name.StartsWith("trees"))
             {
+                //just for getting vertices locations
+                foreach (var key in geometryMap.Keys)
+                {
+                    if (!key.StartsWith("NBSS")) continue;
+
+                    GameObject nbsObj = (GameObject)geometryMap[key][0];
+                    Mesh mesh = nbsObj.GetComponent<MeshFilter>().mesh;
+                    MeshFilter mf = nbsObj.GetComponent<MeshFilter>();
+                    Debug.Log("MeshFilter: " + mf);
+                    Vector3[] vertices = mesh.vertices;
+
+                    foreach (Vector3 v in vertices)
+                    {
+                        Debug.Log(nbsObj);
+                        // coordonnées locales
+                        Debug.Log("coordonées locales : " + v);
+
+                        // coordonnées monde
+                        Debug.Log(nbsObj.transform.TransformPoint(v));
+                    }
+                }
                 //string saison = attributes[i].tree_seasons;
                 //GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
                 //GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
@@ -482,10 +506,10 @@ public class SimulationManagerInteraction : SimulationManager
     }
 
 
-    void Start()
-    {
-        BuildEnvironment();
-    }
+    //void Start()
+    //{
+    //    BuildEnvironment();
+    //}
 
     //Defines what happens when the main button (of the right controller) is trigger 
     protected override void TriggerMainButton()

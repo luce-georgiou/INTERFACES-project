@@ -68,7 +68,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_background_geometries(grass,up_grass);
 //		do add_background_geometries(grass_2,up_grass2);
 //		do add_background_geometries(grass_3,up_grass3);
-		do add_background_geometries(flower,up_flower);
+		//do add_background_geometries(flower,up_flower);
 //		do add_background_geometries(flower_2,up_flower2);
 //		do add_background_geometries(sewer_system,up_sewer_system);
 		
@@ -94,7 +94,7 @@ species unity_linker parent: abstract_unity_linker {
 		//do add_background_geometries(microorganisms, up_microorganisms);
 		//do add_background_geometries(gravel, up_gravel);
 		do add_background_geometries(NBSS, up_NBSS);
-		do add_background_geometries(swale, up_swale);
+		//do add_background_geometries(swale, up_swale);
 		//do add_background_geometries(lawn_mower, up_lawn_mower);
 	}
 	action define_properties {
@@ -185,7 +185,8 @@ species unity_linker parent: abstract_unity_linker {
 		up_vegetal_waste <- geometry_properties("vegetal_waste","vegetal_waste",vegetal_waste_aspect,#ray_interactable,false);
 		unity_properties << up_vegetal_waste;
 		
-		unity_aspect trash_aspect <- prefab_aspect("Prefabs/Mess Maker Free/Low Poly/Cans/Soda Can Green Crushed",1.0,0.0,1.0,0.0,precision);
+		unity_aspect trash_aspect <- geometry_aspect(0.5,#red,precision);
+		//unity_aspect trash_aspect <- prefab_aspect("Prefabs/Mess Maker Free/Low Poly/Cans/Soda Can Green Crushed",1.0,0.0,1.0,0.0,precision); //pb avec ce prefab
 		up_trash <- geometry_properties("trash","trash",trash_aspect,#ray_interactable,false);
 		unity_properties << up_trash;
 		
@@ -294,6 +295,7 @@ species unity_linker parent: abstract_unity_linker {
 		//do add_geometries_to_send(grass, up_grass);
 		do add_geometries_to_send(trash, up_trash);
 		do add_geometries_to_send(weeds, up_weeds);
+		do add_geometries_to_send(flower, up_flower); //test
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
 		do add_geometries_to_send(ponding_area,up_ponding_area);
 		do add_geometries_to_send(lawn, up_lawn);

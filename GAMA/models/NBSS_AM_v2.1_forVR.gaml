@@ -66,8 +66,15 @@ global control: fsm {
 	];
 	
 	// Loc des 8 NBS
-	list<point> list_of_locs <- [{17.25, -7.0}, {69.55, -7.0}, {140, -7.0}, {207, -7.0},
-		{91.5, -45.65}, {91.5, -73.25}, {91.5, -95.95}, {91.5, -122.85}
+	list<point> list_of_locs <- [
+		{17.25, -7.0}, //0 
+		{69.55, -7.0}, //1
+		{140, -7.0}, //2
+		{207, -7.0}, //3
+		{91.5, -45.65}, //4
+		{91.5, -73.25}, //5
+		{91.5, -95.95}, //6
+		{91.5, -122.85} //7
 	];
 	
 	list<string> list_failures_for_VR <- [];
@@ -87,41 +94,43 @@ global control: fsm {
 	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
 	
     	//minimum_cycle_duration <- 0.2;
+    	int init_wait <- 0;
     	enter {
 	    	write "entering situation1_init";
-//	    	create trash number: 15 {
-//	    		location <- any_location_in(NBSS first_with (each.my_name = "swale6"));
-//	    		write "created trash";
-//	    	}
-	    	loop s over: NBSS where (each.name = "swale6") {
-	    		create trash number: 15 {
+	    	
+			loop s over: NBSS where (each.my_name = "swale1") {
+	    		create trash number: 10 {
+			        shape <- circle(0.1);
 			        location <- any_location_in(s);
 			    }
 	    	}
 	    	create flower number: 10 {
-		    	int i <- 0;
-		    	location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
-								list_of_locs[i].y + (index < 5 ? 2.5 : -2.5)
+		    	//int i <- 0;
+		    	shape <- triangle(0.6);
+		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
+								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
 				};
-				write location;
 			}
 			loop s over: NBSS where (each.my_name != "swale0") {
 			    create weeds number: 15 {
 			        location <- any_location_in(s);
 			    }
 			}
-			write "created weeds";
-			send_init_message <- true; // on entre state phase active -> false
+		}
+			//send_init_message <- true; // on entre state phase active -> false
 		//send message explicatif
 		//définir dans unity_linker les interactions nécessaires
-    	}
+		init_wait <- init_wait + 1;
+		if (init_wait = 1) { send_init_message <- true; }
+    	
+    	
     	//send_init_message <- false;
     	transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
         	and current_date.month mod 2 = 0
         	and current_date.month != last_slow_month;
-    	exit {
-    		
-    	}
+        	
+    	
+    	exit {}
     }
     
     state fast_phase { //initial: true {
@@ -258,13 +267,12 @@ global control: fsm {
 		}
 
 		
-		create trash number: rnd(0,10) {
-			location <- any_location_in(free_space);
-		}
+//		create trash number: rnd(0,10) {
+//			location <- any_location_in(free_space);
+//		}
 		create weeds number: rnd(0,10) {
 			location <- any_location_in(free_space);
 		}	
-		
 		
 		// Initialization of NBSS and all its components :
 		create NBSS number: 8 {
@@ -895,7 +903,7 @@ species grass parent: vegetal_component {
 species flower parent: vegetal_component {
 	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
 	aspect default {
-		draw square(1) border: #black color: #pink;
+		draw shape border: #black color: #pink;
 	}
 }
 
@@ -1398,6 +1406,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			species park;
 			species flower;
 			species trees;
+			species trash;
 			
 		}
 		display "Rain" type: 2d {
