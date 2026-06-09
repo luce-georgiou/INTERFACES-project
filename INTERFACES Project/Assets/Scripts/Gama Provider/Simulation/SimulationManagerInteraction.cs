@@ -110,6 +110,28 @@ public class SimulationManagerInteraction : SimulationManager
 
     }
 
+    Vector3[] GetNBSSVertices(string nbssName)
+    {
+        GameObject[] nbssObjects = GameObject.FindGameObjectsWithTag("park");
+        foreach (GameObject obj in nbssObjects)
+        {
+            if (obj.name == nbssName)
+            {
+                Mesh mesh = obj.GetComponent<MeshFilter>().sharedMesh;
+                if (mesh == null) return null;
+
+                Vector3[] worldVertices = new Vector3[mesh.vertices.Length];
+                for (int i = 0; i < mesh.vertices.Length; i++)
+                {
+                    worldVertices[i] = obj.transform.TransformPoint(mesh.vertices[i]);
+                }
+                return worldVertices;
+            }
+        }
+        return null;
+    }
+
+
 
     // Mettre dans cette liste tous les objets statiques
     private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
@@ -118,6 +140,20 @@ public class SimulationManagerInteraction : SimulationManager
 
     protected override void ManageAttributes(List<Attributes> attributes)
     {
+
+        for (int i = 0; i < 8; i++)
+        {
+            string nbs_name = "park" + i;
+            Vector3[] vertices = GetNBSSVertices(nbs_name);
+            if (vertices != null)
+            {
+                foreach (Vector3 v in vertices)
+                {
+                    Debug.Log(nbs_name);
+                    Debug.Log(v);
+                }
+            }
+        }
 
         GameObject exclamationCanvas = GameObject.FindWithTag("exclamation");
         CanvasGroup cg = exclamationCanvas != null ? exclamationCanvas.GetComponent<CanvasGroup>() : null;
@@ -322,27 +358,7 @@ public class SimulationManagerInteraction : SimulationManager
             // gestion de l'aspect de l'environnement selon les saisons
             else if (name.StartsWith("trees"))
             {
-                //just for getting vertices locations
-                foreach (var key in geometryMap.Keys)
-                {
-                    if (!key.StartsWith("NBSS")) continue;
-
-                    GameObject nbsObj = (GameObject)geometryMap[key][0];
-                    Mesh mesh = nbsObj.GetComponent<MeshFilter>().mesh;
-                    MeshFilter mf = nbsObj.GetComponent<MeshFilter>();
-                    Debug.Log("MeshFilter: " + mf);
-                    Vector3[] vertices = mesh.vertices;
-
-                    foreach (Vector3 v in vertices)
-                    {
-                        Debug.Log(nbsObj);
-                        // coordonnées locales
-                        Debug.Log("coordonées locales : " + v);
-
-                        // coordonnées monde
-                        Debug.Log(nbsObj.transform.TransformPoint(v));
-                    }
-                }
+               
                 //string saison = attributes[i].tree_seasons;
                 //GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
                 //GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
@@ -416,6 +432,9 @@ public class SimulationManagerInteraction : SimulationManager
                 if (saison == "winter")
                 {
                     GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
+
+                    //GameObject lawn = GameObject.FindWithTag("lawn");
+
                     if (sapinPrefab != null)
                     {
                         GameObject snow = Instantiate(sapinPrefab, obj.transform.position, obj.transform.rotation);
@@ -430,20 +449,20 @@ public class SimulationManagerInteraction : SimulationManager
                         Destroy(snowLayer.gameObject);
                 }
             }
-            else if (name.StartsWith("lawn"))
-            {
-                float height = attributes[i].lawn_height;
-                string season = attributes[i].lawn_seasons;
-                obj.transform.localScale = new Vector3(obj.transform.localScale.x, height, obj.transform.localScale.z);
-                if (season == "winter")
-                {
-                    ChangeColor(obj, Color.white); // snow in winter
-                }
-                else
-                {
-                    ChangeColor(obj, new Color(0f, 0.502f, 0f));
-                }
-            }
+            //else if (name.StartsWith("lawn"))
+            //{
+            //    float height = attributes[i].lawn_height;
+            //    string season = attributes[i].lawn_seasons;
+            //    obj.transform.localScale = new Vector3(obj.transform.localScale.x, height, obj.transform.localScale.z);
+            //    if (season == "winter")
+            //    {
+            //        ChangeColor(obj, Color.white); // snow in winter
+            //    }
+            //    else
+            //    {
+            //        ChangeColor(obj, new Color(0f, 0.502f, 0f));
+            //    }
+            //}
         }
     }
 

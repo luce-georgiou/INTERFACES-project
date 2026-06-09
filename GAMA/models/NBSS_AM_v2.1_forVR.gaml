@@ -515,7 +515,7 @@ global control: fsm {
 /* Added species for VR sim */
 species trash {
 	aspect default {
-		draw circle(1) border:#black color:#red;
+		draw shape border:#black color:#red;
 	}
 }
 

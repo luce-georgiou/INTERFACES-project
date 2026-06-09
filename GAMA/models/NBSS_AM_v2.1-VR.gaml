@@ -209,7 +209,7 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_building;
 		
 		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
-		up_park <- geometry_properties("park","",park_aspect,#no_interaction,false);
+		up_park <- geometry_properties("park","park",park_aspect,#no_interaction,false);
 		unity_properties << up_park;
 		
 //		unity_aspect sewer_system_aspect <- geometry_aspect(1.0,#gray,precision);
@@ -463,7 +463,10 @@ species unity_linker parent: abstract_unity_linker {
 	reflex trash_acc {
 		ask ext_time_failure {
 			if (my_name = "trash_acc" and (cycle mod (my_frequency * 7)) = 0) { // toutes les 12 semaines on ajoute un déchet
-				create trash {location <- any_location_in(one_of(NBSS).shape);}
+				create trash {
+					shape <- circle(0.1);
+					location <- any_location_in(one_of(NBSS).shape);
+				}
 			}
 		}
 	}
