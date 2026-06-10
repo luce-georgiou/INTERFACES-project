@@ -323,26 +323,26 @@ public class SimulationManagerInteraction : SimulationManager
                     ////pondObj.GetComponent<Renderer>().material = intensity != 0 ? mat_wet : mat_dry; ;
 
 
-                    if (intensity == 0)
-                    {
-                        ChangeColor(pondObj, new Color(0.6f, 0.7f, 0.3f));
-                        pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.2f, pondObj.transform.localScale.z);
-                    }
-                    else if (intensity == 1)
-                    {
-                        ChangeColor(pondObj, Color.blue);
-                        pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.3f, pondObj.transform.localScale.z);
-                    }
-                    else if (intensity == 2)
-                    {
-                        ChangeColor(pondObj, Color.blue);
-                        pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.5f, pondObj.transform.localScale.z);
-                    }
-                    else if (intensity == 3)
-                    {
-                        ChangeColor(pondObj, Color.blue);
-                        pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.8f, pondObj.transform.localScale.z);
-                    }
+                    //if (intensity == 0)
+                    //{
+                    //    ChangeColor(pondObj, new Color(0.6f, 0.7f, 0.3f));
+                    //    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.2f, pondObj.transform.localScale.z);
+                    //}
+                    //else if (intensity == 1)
+                    //{
+                    //    ChangeColor(pondObj, Color.blue);
+                    //    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.3f, pondObj.transform.localScale.z);
+                    //}
+                    //else if (intensity == 2)
+                    //{
+                    //    ChangeColor(pondObj, Color.blue);
+                    //    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.5f, pondObj.transform.localScale.z);
+                    //}
+                    //else if (intensity == 3)
+                    //{
+                    //    ChangeColor(pondObj, Color.blue);
+                    //    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, 0.8f, pondObj.transform.localScale.z);
+                    //}
 
                 }
                 //foreach (var key in geometryMap.Keys.Where(k => k.StartsWith("grass")))
@@ -454,17 +454,25 @@ public class SimulationManagerInteraction : SimulationManager
                     }
                 }
             }
+            else if (name.StartsWith("weeds") || name.StartsWith("trash"))
+            {
+                obj.transform.position = new Vector3(obj.transform.position.x, -1.6f, obj.transform.position.z);
+            }
             else if (name.StartsWith("ponding_area"))
             {
-                Debug.Log("test");
-                GameObject pondObj = GameObject.FindWithTag("pond");
-                Debug.Log("pond: " + pondObj);
+                Material mat = Resources.Load<Material>("Simple Water Shader/Resources/Water_mat_01");
+                obj.GetComponent<Renderer>().material = mat;
+                obj.transform.position = new Vector3(obj.transform.position.x, -1.6f, obj.transform.position.z);
+
+                //Debug.Log("test");
+                //GameObject pondObj = GameObject.FindWithTag("pond");
+                //Debug.Log("pond: " + pondObj);
                 float water_level = attributes[i].water_level;
-                Debug.Log("water: " + water_level);
-                if (name == "ponding_area5")
-                {
-                    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, water_level, pondObj.transform.localScale.z);
-                }
+                //Debug.Log("water: " + water_level);
+                //if (name == "ponding_area5")
+                //{
+                obj.transform.localScale = new Vector3(obj.transform.localScale.x, water_level, obj.transform.localScale.z);
+                Debug.Log(name + " water_level: " + water_level);
             }
             //else if (name.StartsWith("lawn"))
             //{

@@ -93,7 +93,7 @@ species unity_linker parent: abstract_unity_linker {
 		//
 		//do add_background_geometries(microorganisms, up_microorganisms);
 		//do add_background_geometries(gravel, up_gravel);
-		do add_background_geometries(NBSS, up_NBSS);
+		//do add_background_geometries(NBSS, up_NBSS);
 		//do add_background_geometries(swale, up_swale);
 		//do add_background_geometries(lawn_mower, up_lawn_mower);
 	}
@@ -113,9 +113,9 @@ species unity_linker parent: abstract_unity_linker {
 		
 		
 		/* NBSS components */
-		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#green,precision);
-		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
-		unity_properties << up_NBSS;
+//		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#green,precision);
+//		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
+//		unity_properties << up_NBSS;
 		
 //		unity_aspect filter_media_aspect <- geometry_aspect(1.0,#saddlebrown,precision);
 //		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
@@ -125,7 +125,7 @@ species unity_linker parent: abstract_unity_linker {
 //		up_gravel <- geometry_properties("gravel","gravel",gravel_aspect,#no_interaction,false);
 //		unity_properties << up_gravel;
 		
-		unity_aspect ponding_area_aspect <- geometry_aspect(0.2, #blue, precision);
+		unity_aspect ponding_area_aspect <- geometry_aspect(0.4, #blue, precision);
 		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
 		unity_properties << up_ponding_area;
 		
@@ -298,7 +298,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(flower, up_flower); //test
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
 		//do add_geometries_to_send(ponding_area,up_ponding_area);
-		do add_geometries_to_send(lawn, up_lawn);
+		//do add_geometries_to_send(lawn, up_lawn);
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
 	}
 	
@@ -324,7 +324,6 @@ species unity_linker parent: abstract_unity_linker {
 //		write failures_aff_component;
 
 		list<float> water_level_pond <- ponding_area collect (each.water_level);
-		ask ponding_area {write water_level;}
 		
 		map<string,list<unknown>> atts_inlet <-  [
 			"fqt_inlet":: fqt_inlet
@@ -513,10 +512,13 @@ species unity_linker parent: abstract_unity_linker {
 		//do send_message players: unity_player as list mes: ["cycle"::cycle];
 	}
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
-			ask ponding_area where (each.is_obstructed) {
-				if (cycle mod (1*4) = 0 and water_level < 31) {
-					water_level <- water_level + 1.0;
+		ask ponding_area where (each.is_obstructed) {
+			if (cycle mod (1*4) = 0 and water_level < 31) {
+				water_level <- water_level + 1.0;
 			}
+//			else {
+//				water_level <- 0.0;
+//			}
 		}
 	}
 }

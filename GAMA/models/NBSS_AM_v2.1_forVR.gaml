@@ -325,8 +325,8 @@ global control: fsm {
 				}
 			}
 			create ponding_area  {
-				shape <- list_of_geoms_pond[index];
-				location <- list_of_locs[index];
+				shape <- list_of_geoms[index];
+				location <- list_of_locs[index]; // en dessous du sol, mais z corrigé sur Unity
 				my_name<-"ponding_area" + index;
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -713,7 +713,7 @@ species ponding_area parent: engineered_component {
 	bool ponding <- false;
 	
 	bool is_obstructed <- false;
-	float water_level <- 0.4;
+	float water_level <- 0.0;
 	
 	//unusual ponding occurs when filter media has an output_unmanaged_flow
 	reflex unusual_ponding when: (current_date < starting_date) and (my_downstream_comp.my_output_unmanaged_flow.my_flow>=1) and (ponding=false){
@@ -1403,7 +1403,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			graphics "free_area" {
 				draw free_space color: #lightgreen;
 			}
-			
+			species NBSS;
 			species inlet;
 			species outlet;
 			species road;
@@ -1412,7 +1412,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			species flower;
 			species trees;
 			species trash;
-			species NBSS;
+			
 			
 		}
 		display "Rain" type: 2d {
