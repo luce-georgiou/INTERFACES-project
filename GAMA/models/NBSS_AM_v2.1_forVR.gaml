@@ -153,6 +153,10 @@ global control: fsm {
             //send_init_message <- false;
             last_slow_month <- current_date.month;
             slow_start <- gama.machine_time;
+            
+            ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
+			    is_obstructed <- true;
+			}
         }
         transition to: fast_phase 
             when: (gama.machine_time - slow_start) >= slow_duration;
@@ -323,7 +327,7 @@ global control: fsm {
 			create ponding_area  {
 				shape <- list_of_geoms_pond[index];
 				location <- list_of_locs[index];
-				my_name<-"ponding_area";
+				my_name<-"ponding_area" + index;
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
 				my_upstream_comp <- my_NBSS.my_inlet ;
@@ -708,7 +712,8 @@ species ponding_area parent: engineered_component {
 	bool temporary<-true;
 	bool ponding <- false;
 	
-	float water_level <- 0.0;
+	bool is_obstructed <- false;
+	float water_level <- 0.4;
 	
 	//unusual ponding occurs when filter media has an output_unmanaged_flow
 	reflex unusual_ponding when: (current_date < starting_date) and (my_downstream_comp.my_output_unmanaged_flow.my_flow>=1) and (ponding=false){
@@ -1398,7 +1403,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			graphics "free_area" {
 				draw free_space color: #lightgreen;
 			}
-			species NBSS;
+			
 			species inlet;
 			species outlet;
 			species road;
@@ -1407,6 +1412,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			species flower;
 			species trees;
 			species trash;
+			species NBSS;
 			
 		}
 		display "Rain" type: 2d {

@@ -942,7 +942,7 @@ public class SimulationManager : MonoBehaviour
 
         ManageOtherInformation();
         toRemove.Clear();
-        Debug.Log(geometryMap);
+        //Debug.Log(geometryMap);
         if (geometryMap != null) 
             toRemove.UnionWith(geometryMap.Keys);
 

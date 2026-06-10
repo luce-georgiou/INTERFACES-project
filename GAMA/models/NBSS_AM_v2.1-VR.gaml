@@ -297,7 +297,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(weeds, up_weeds);
 		do add_geometries_to_send(flower, up_flower); //test
 		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
-		do add_geometries_to_send(ponding_area,up_ponding_area);
+		//do add_geometries_to_send(ponding_area,up_ponding_area);
 		do add_geometries_to_send(lawn, up_lawn);
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
 	}
@@ -316,12 +316,16 @@ species unity_linker parent: abstract_unity_linker {
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
 		list<string> rain_seasons <- rain collect current_season;
-		list<float> lawn_height <- lawn collect each.height;
-		list<string> lawn_seasons <- lawn collect current_season;
+		//list<float> lawn_height <- lawn collect each.height;
+		//list<string> lawn_seasons <- lawn collect current_season;
 //		list<string> failures_name <- failure_event collect each.my_name;
 //		list<string> failures_aff_component <- failure_event collect each.impacted_agent;
 //		write failures_name;
 //		write failures_aff_component;
+
+		list<float> water_level_pond <- ponding_area collect (each.water_level);
+		ask ponding_area {write water_level;}
+		
 		map<string,list<unknown>> atts_inlet <-  [
 			"fqt_inlet":: fqt_inlet
 		]; 
@@ -330,10 +334,10 @@ species unity_linker parent: abstract_unity_linker {
 			"rain_intensity":: rain_intensity,
 			"rain_seasons":: rain_seasons
 		];
-		map<string,list<unknown>> atts_lawn <- [
-			"lawn_height":: lawn_height,
-			"lawn_seasons":: lawn_seasons
-		];
+//		map<string,list<unknown>> atts_lawn <- [
+//			"lawn_height":: lawn_height,
+//			"lawn_seasons":: lawn_seasons
+//		];
 		//map<string, list<string>> atts_rain_seasons <- ["rain_seasons"::rain_seasons];
 		map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
 //		map<string,list<string>> atts_failures <- [
@@ -350,13 +354,16 @@ species unity_linker parent: abstract_unity_linker {
 			atts_outlet <- atts_outlet + ("failures_outlet":: failures_outlet);
 			
 		}
+		
+		map<string,list<unknown>> atts_ponding_area <- ["water_level":: water_level_pond];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
 		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		do add_geometries_to_send(rain,up_rain,atts_rain);
 		//do add_geometries_to_send(rain,up_rain,atts_rain_seasons);
 		do add_geometries_to_send(trees,up_trees,atts_trees);
-		do add_geometries_to_send(lawn, up_lawn, atts_lawn);
+		//do add_geometries_to_send(lawn, up_lawn, atts_lawn);
+		do add_geometries_to_send(ponding_area, up_ponding_area, atts_ponding_area);
 		//do add_geometries_to_send(failure_event, up_failure_event, atts_failures);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
@@ -504,6 +511,13 @@ species unity_linker parent: abstract_unity_linker {
 		//write "Send message: ";
 		do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
 		//do send_message players: unity_player as list mes: ["cycle"::cycle];
+	}
+	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
+			ask ponding_area where (each.is_obstructed) {
+				if (cycle mod (1*4) = 0 and water_level < 31) {
+					water_level <- water_level + 1.0;
+			}
+		}
 	}
 }
 

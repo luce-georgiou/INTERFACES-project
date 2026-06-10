@@ -35,6 +35,7 @@ TagManager:
   - lawn_mower
   - exclamation
   - park
+  - pond
   layers:
   - Default
   - TransparentFX

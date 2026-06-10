@@ -17,4 +17,5 @@ public class Attributes
     //public string failure_name;
     public string failures_inlet;
     public string failures_outlet;
+    public float water_level;
 }

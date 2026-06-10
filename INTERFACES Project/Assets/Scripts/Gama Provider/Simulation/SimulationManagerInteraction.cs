@@ -134,7 +134,7 @@ public class SimulationManagerInteraction : SimulationManager
 
 
     // Mettre dans cette liste tous les objets statiques
-    private List<string> tagsToIgnore = new List<string> { "ponding_area", "swale", "filter_media", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
+    private List<string> tagsToIgnore = new List<string> {"swale", "filter_media", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     
 
@@ -149,8 +149,8 @@ public class SimulationManagerInteraction : SimulationManager
             {
                 foreach (Vector3 v in vertices)
                 {
-                    Debug.Log(nbs_name);
-                    Debug.Log(v);
+                    //Debug.Log(nbs_name);
+                    //Debug.Log(v);
                 }
             }
         }
@@ -428,12 +428,14 @@ public class SimulationManagerInteraction : SimulationManager
                 // marche avec �a
                 //List<object> treeData = geometryMap[name];
                 //GameObject treeObj = (GameObject)treeData[0];
-
+                
+                GameObject lawn = GameObject.FindWithTag("lawn");
                 if (saison == "winter")
                 {
                     GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
 
-                    //GameObject lawn = GameObject.FindWithTag("lawn");
+                   
+                    ChangeColor(lawn, Color.white); // snow in winter
 
                     if (sapinPrefab != null)
                     {
@@ -444,9 +446,24 @@ public class SimulationManagerInteraction : SimulationManager
                 }
                 else
                 {
+                    ChangeColor(lawn, new Color(0f, 53f/255f, 0f));
                     Transform snowLayer = obj.transform.Find("SnowLayer");
                     if (snowLayer != null)
+                    {
                         Destroy(snowLayer.gameObject);
+                    }
+                }
+            }
+            else if (name.StartsWith("ponding_area"))
+            {
+                Debug.Log("test");
+                GameObject pondObj = GameObject.FindWithTag("pond");
+                Debug.Log("pond: " + pondObj);
+                float water_level = attributes[i].water_level;
+                Debug.Log("water: " + water_level);
+                if (name == "ponding_area5")
+                {
+                    pondObj.transform.localScale = new Vector3(pondObj.transform.localScale.x, water_level, pondObj.transform.localScale.z);
                 }
             }
             //else if (name.StartsWith("lawn"))
