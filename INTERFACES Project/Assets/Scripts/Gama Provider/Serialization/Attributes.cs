@@ -18,4 +18,5 @@ public class Attributes
     public string failures_inlet;
     public string failures_outlet;
     public float water_level;
+    public int fqt_fm;
 }

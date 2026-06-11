@@ -39,13 +39,17 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, Color.blue);
         //}
         //Debug.Log("HoverEnterInteraction : " + obj);
-        if (obj.tag.Equals("lawn_mower") || obj.tag.Equals("weeds"))
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
         {
             //Debug.Log("HoverEnterInteraction : " + obj);
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            SendingMessages.Show("Nettoyer ?");
         }
-
-
+        if (obj.tag.Equals("filter_media"))
+        {
+            SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            SendingMessages.Show("Effectuer curage ?");
+        }
     }
 
 
@@ -59,9 +63,10 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
         //Debug.Log("HoverExitInteraction : " + obj);
-        if (obj.tag.Equals("lawn_mower") || obj.tag.Equals("weeds"))
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
+            SendingMessages.Show("");
         }
     }
 
@@ -74,7 +79,7 @@ public class SimulationManagerInteraction : SimulationManager
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             //Debug.Log("grabbedObject : " + grabbedObject);
 
-            if (grabbedObject.tag.Equals("weeds"))
+            if (grabbedObject.tag.Equals("weeds") || grabbedObject.tag.Equals("trash"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
@@ -97,13 +102,19 @@ public class SimulationManagerInteraction : SimulationManager
             //    ChangeColor(obj, newSelection ? Color.red : Color.gray);
             //    remainingTime = timeWithoutInteraction;
             //}
-            if (grabbedObject.tag.Equals("lawn_mower"))
+            else if (grabbedObject.tag.Equals("lawn_mower"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
                     };
                 ConnectionManager.Instance.SendExecutableAsk("mow_lawn", args);
 
+            }
+            else if (grabbedObject.tag.Equals("filter_media")) {
+                Dictionary<string, string> args = new Dictionary<string, string> {
+                         {"id", grabbedObject.name }
+                    };
+                ConnectionManager.Instance.SendExecutableAsk("curage", args);
             }
 
         }
@@ -134,7 +145,7 @@ public class SimulationManagerInteraction : SimulationManager
 
 
     // Mettre dans cette liste tous les objets statiques
-    private List<string> tagsToIgnore = new List<string> {"swale", "filter_media", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
+    private List<string> tagsToIgnore = new List<string> {"swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     
 
@@ -207,15 +218,15 @@ public class SimulationManagerInteraction : SimulationManager
                     {
                         ChangeColor(obj, Color.yellow);
                     }
-
-                    string failure_name = prefix == "inlet" ? attributes[i].failures_inlet : attributes[i].failures_outlet;
-                    string newMessage = failure_name + " on " + name;
-                    if ((newMessage != lastFailureMessage) && (failure_name != null))
-                    {
-                        lastFailureMessage = newMessage;
-                        StartCoroutine(ShowForDuration(newMessage, 2f));
-                    }
-                    break;
+                    /* Show failure name ingame */
+                    //string failure_name = prefix == "inlet" ? attributes[i].failures_inlet : attributes[i].failures_outlet;
+                    //string newMessage = failure_name + " on " + name;
+                    //if ((newMessage != lastFailureMessage) && (failure_name != null))
+                    //{
+                    //    lastFailureMessage = newMessage;
+                    //    StartCoroutine(ShowForDuration(newMessage, 2f));
+                    //}
+                    //break;
                 }
             }
             //if (name.StartsWith("inlet"))
@@ -355,10 +366,36 @@ public class SimulationManagerInteraction : SimulationManager
                 //}
                 //GameObject groundObj = GameObject.Find("Ground"); si objet dans hierarchy
             }
+            else if (name.StartsWith("filter_media"))
+            {
+                obj.transform.position = new Vector3(obj.transform.position.x, -3.5f, obj.transform.position.z);
+                Material mat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
+                obj.GetComponent<Renderer>().material = mat;
+                Color c = mat.color;
+                int fqt = attributes[i].fqt_fm;
+                if (fqt <= 1)
+                {
+                    int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
+                    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
+                    ChangeColor(obj, Color.red);
+                    ChangeColor(stairsObj0, Color.red);
+                    ChangeColor(stairsObj1, Color.red);
+                }
+                else
+                {
+                    int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
+                    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
+                    ChangeColor(obj, c);
+                    ChangeColor(stairsObj0, c);
+                    ChangeColor(stairsObj1, c);
+                }
+            }
             // gestion de l'aspect de l'environnement selon les saisons
             else if (name.StartsWith("trees"))
             {
-               
+
                 //string saison = attributes[i].tree_seasons;
                 //GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
                 //GameObject treePrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Tree_1_1");
@@ -428,13 +465,13 @@ public class SimulationManagerInteraction : SimulationManager
                 // marche avec �a
                 //List<object> treeData = geometryMap[name];
                 //GameObject treeObj = (GameObject)treeData[0];
-                
+
                 GameObject lawn = GameObject.FindWithTag("lawn");
                 if (saison == "winter")
                 {
                     GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
 
-                   
+
                     ChangeColor(lawn, Color.white); // snow in winter
 
                     if (sapinPrefab != null)
@@ -446,7 +483,7 @@ public class SimulationManagerInteraction : SimulationManager
                 }
                 else
                 {
-                    ChangeColor(lawn, new Color(0f, 53f/255f, 0f));
+                    ChangeColor(lawn, new Color(0f, 53f / 255f, 0f));
                     Transform snowLayer = obj.transform.Find("SnowLayer");
                     if (snowLayer != null)
                     {
@@ -472,7 +509,7 @@ public class SimulationManagerInteraction : SimulationManager
                 //if (name == "ponding_area5")
                 //{
                 obj.transform.localScale = new Vector3(obj.transform.localScale.x, water_level, obj.transform.localScale.z);
-                Debug.Log(name + " water_level: " + water_level);
+                //Debug.Log(name + " water_level: " + water_level);
             }
             //else if (name.StartsWith("lawn"))
             //{
@@ -581,19 +618,46 @@ public class SimulationManagerInteraction : SimulationManager
     protected override void OtherUpdate()
     {
 
+        if (IsGameState(GameState.GAME) && UnityEngine.Random.Range(0.0f, 1.0f) < 0.002f)
+        {
+            string mes = "A message from Unity at time: " + Time.time;
+            //call the action "receive_message" from the unity_linker agent with two arguments: the id of the player and a message
+            Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  mes }};
+
+            Debug.Log("sent to GAMA: " + mes);
+            ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+        }
         if (message != null)
         {
-            Debug.Log("test");
+            //Debug.Log("test");
             //StartCoroutine(ShowForDuration(message.cycle, 10f));
-            StartCoroutine(ShowForDuration(message.message_init, 10f));
-            Debug.Log("received from GAMA: " + message.message_init);
+            StartCoroutine(ShowForDuration(message.message_, 10f));
+            Debug.Log("received from GAMA: " + message.message_);
             message = null;
         }
 
 
     }
 
+    // à modifier pour chaque sortie d'eau vers nappe phréatique
+    //public GameObject Arrow;
 
+    //void Start()
+    //{
+    //    CreateArrow(new Vector3(0, 0, 0), new Vector3(5, 0, 0));
+    //    CreateArrow(new Vector3(10, 0, 0), new Vector3(15, 0, 5));
+    //    CreateArrow(new Vector3(20, 0, 0), new Vector3(25, 0, -5));
+    //}
+
+    //void CreateArrow(Vector3 start, Vector3 end)
+    //{
+    //    GameObject arrow = Instantiate(Arrow);
+    //    FlowArrow fa = arrow.GetComponent<FlowArrow>();
+    //    fa.startPoint = start;
+    //    fa.endPoint = end;
+    //}
 }
 
 
@@ -603,7 +667,7 @@ public class GAMAMessage2
 
 
     //public int cycle;
-    public string message_init;
+    public string message_;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {

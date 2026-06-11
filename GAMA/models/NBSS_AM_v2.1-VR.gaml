@@ -7,7 +7,7 @@ species unity_linker parent: abstract_unity_linker {
 	int max_num_players  <- 1;
 	int min_num_players  <- 1;
 	//unity_property up_sewer_system;
-	//unity_property up_filter_media;
+	unity_property up_filter_media;
 	unity_property up_rain;
 	//unity_property up_programmed_maintenance;
 		//unity_property up_unmanaged_flow;
@@ -117,9 +117,9 @@ species unity_linker parent: abstract_unity_linker {
 //		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
 //		unity_properties << up_NBSS;
 		
-//		unity_aspect filter_media_aspect <- geometry_aspect(1.0,#saddlebrown,precision);
-//		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
-//		unity_properties << up_filter_media;
+		unity_aspect filter_media_aspect <- geometry_aspect(1.5,#saddlebrown,precision);
+		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
+		unity_properties << up_filter_media;
 		
 //		unity_aspect gravel_aspect <- geometry_aspect(1.0, #slategrey, precision); //à voir si je définis la sous-couche en prefab ou non
 //		up_gravel <- geometry_properties("gravel","gravel",gravel_aspect,#no_interaction,false);
@@ -316,6 +316,7 @@ species unity_linker parent: abstract_unity_linker {
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
 		list<string> rain_seasons <- rain collect current_season;
+		list<int> fqt_fm <- filter_media collect (each.function_attributes["my_fqt"]);
 		//list<float> lawn_height <- lawn collect each.height;
 		//list<string> lawn_seasons <- lawn collect current_season;
 //		list<string> failures_name <- failure_event collect each.my_name;
@@ -329,6 +330,9 @@ species unity_linker parent: abstract_unity_linker {
 			"fqt_inlet":: fqt_inlet
 		]; 
 		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
+		map<string,list<unknown>> atts_fm <-  [
+			"fqt_fm":: fqt_fm
+		]; 
 		map<string,list<unknown>> atts_rain <- [
 			"rain_intensity":: rain_intensity,
 			"rain_seasons":: rain_seasons
@@ -363,6 +367,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(trees,up_trees,atts_trees);
 		//do add_geometries_to_send(lawn, up_lawn, atts_lawn);
 		do add_geometries_to_send(ponding_area, up_ponding_area, atts_ponding_area);
+		do add_geometries_to_send(filter_media, up_filter_media, atts_fm);
 		//do add_geometries_to_send(failure_event, up_failure_event, atts_failures);
 		
 		//we want to keep the dynamic_geometry_agent in their current state in Unity, so we add them in the geometries_to_keep list
@@ -506,11 +511,15 @@ species unity_linker parent: abstract_unity_linker {
 	reflex sediment_acc {
 		//quand valeur dans tableau potpall_acc augmente, ajouter une couche de sédiments (et transformer vegetal waste en sediments)
 	}
-	reflex send_message when: send_init_message {
+	reflex send_message when: send_message {
 		//write "Send message: ";
-		do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
-		//do send_message players: unity_player as list mes: ["cycle"::cycle];
+		//do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+		do send_message players: unity_player as list mes: messages;
 	}
+	action receive_message(string id, string mes) {
+		write "Player " + id + " send the message: " + mes;
+	}
+	
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
 		ask ponding_area where (each.is_obstructed) {
 			if (cycle mod (1*4) = 0 and water_level < 31) {
@@ -519,6 +528,17 @@ species unity_linker parent: abstract_unity_linker {
 //			else {
 //				water_level <- 0.0;
 //			}
+		}
+	}
+	action curage(string id) {
+		component ag <- (filter_media first_with (each.name = id));
+		if (ag != nil) {
+			ask ag {
+				function_attributes["my_fqt"] <- 2.0;
+				ask ponding_area where (each.my_NBSS = ag.my_NBSS and each.is_obstructed) {
+					is_obstructed <- false;
+				}
+			}
 		}
 	}
 }

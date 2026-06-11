@@ -38,6 +38,8 @@ global control: fsm {
 	
 	/* Modifs par rapport modèle Emma */
 	bool send_init_message <- false;
+	bool send_message <- false;
+	map messages <- [];
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -112,16 +114,36 @@ global control: fsm {
 				};
 			}
 			loop s over: NBSS where (each.my_name != "swale0") {
-			    create weeds number: 15 {
+			    create weeds number: 25 {
 			        location <- any_location_in(s);
 			    }
+			}
+			
+//			ask component where (each.my_NBSS.my_name = "swale4" or each.my_NBSS.my_name = "swale5") {
+//			    ask filter_media {
+//			        function_attributes["my_fqt"] <- 0.0;
+//			    }
+//			    ask ponding_area {
+//			        is_obstructed <- true;
+//			    }
+//			}
+			ask filter_media where (each.my_name = "filter_media1") {
+				function_attributes["my_fqt"] <- 0.0;
+			}
+			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
+			    is_obstructed <- true;
 			}
 		}
 			//send_init_message <- true; // on entre state phase active -> false
 		//send message explicatif
 		//définir dans unity_linker les interactions nécessaires
 		init_wait <- init_wait + 1;
-		if (init_wait = 1) { send_init_message <- true; }
+		if (init_wait = 1) { 
+			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+			//send_init_message <- true;
+			send_message <- true;
+			
+		}
     	
     	
     	//send_init_message <- false;
@@ -131,6 +153,29 @@ global control: fsm {
         	
     	
     	exit {}
+    }
+    
+    state situation1_active {
+    	minimum_cycle_duration <- 9.0;
+    	enter {
+    		write "active phase for player";
+    		messages <- [];
+    		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
+    		send_message <- true;
+    	}
+    	//transition to: situation1_end when: 
+    	exit {
+    		messages <- [];
+    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
+			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
+    	}
+    }
+    
+    state situation1_end {
+    	minimum_cycle_duration <- 1.0;
+    	enter {
+    		
+    	}
     }
     
     state fast_phase { //initial: true {
@@ -154,14 +199,12 @@ global control: fsm {
             last_slow_month <- current_date.month;
             slow_start <- gama.machine_time;
             
-            ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
-			    is_obstructed <- true;
-			}
+            
         }
         transition to: fast_phase 
             when: (gama.machine_time - slow_start) >= slow_duration;
         exit {
-        	send_init_message <- false;
+        	send_message <- false;
         }
     }
     
@@ -354,7 +397,9 @@ global control: fsm {
 			create filter_media {
 //				shape <- rectangle(30,20);
 //				location <- {myself.location.x, myself.location.y, myself.location.z-1.0};
-				my_name<-"filter_media";
+				shape <- list_of_geoms[index];
+				location <- list_of_locs[index];
+				my_name<-"filter_media" + index;
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
 				my_upstream_comp <- my_NBSS.my_ponding_area;
@@ -759,7 +804,6 @@ species filter_media parent: engineered_component {
 //	aspect default {
 //		draw rectangle(30, 20) color: #pink;
 //	}
-	
 	float partpoll_acc <- 0.0;
 	
 	// sediment accumulation dynamic = 0.3 cm/year (Chabert et al., 2025) 
@@ -768,10 +812,14 @@ species filter_media parent: engineered_component {
 	}
 	
 	//when filter_media is getting clogged (because of sediment accumulation or excess veg), vegetation health is impacted
-	reflex clogged_fm when: (function_attributes["my_fqt"] <=1) and every(2# week){
+	reflex clogged_fm when: (function_attributes["my_fqt"] <=1) {//and every(2# week){
 		ask agents of_generic_species vegetal_component {
 			do clogged_fm_on_veg;
 		}
+		ask ponding_area {
+			is_obstructed <- true; //à tester
+		}
+		
 	}
 	
 	//when vegetation is unhealthy, infiltration performance of filter media is impacted

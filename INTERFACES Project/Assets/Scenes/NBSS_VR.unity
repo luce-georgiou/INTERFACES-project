@@ -1090,7 +1090,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &168991207
 Transform:
   m_ObjectHideFlags: 0
@@ -3088,7 +3088,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &369184854
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3701,7 +3701,7 @@ GameObject:
   - component: {fileID: 432070457}
   - component: {fileID: 432070456}
   m_Layer: 0
-  m_Name: Stairs (4)
+  m_Name: stairs7_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6419,7 +6419,7 @@ GameObject:
   - component: {fileID: 458891700}
   - component: {fileID: 458891699}
   m_Layer: 0
-  m_Name: Stairs (8)
+  m_Name: stairs1_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9519,7 +9519,7 @@ GameObject:
   - component: {fileID: 541272135}
   - component: {fileID: 541272134}
   m_Layer: 0
-  m_Name: Stairs (6)
+  m_Name: stairs4_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13412,7 +13412,7 @@ GameObject:
   - component: {fileID: 650287670}
   - component: {fileID: 650287669}
   m_Layer: 0
-  m_Name: Stairs (15)
+  m_Name: stairs3_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16813,7 +16813,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &786534136
 Transform:
   m_ObjectHideFlags: 0
@@ -24401,7 +24401,7 @@ GameObject:
   - component: {fileID: 948514794}
   - component: {fileID: 948514793}
   m_Layer: 0
-  m_Name: Stairs (5)
+  m_Name: stairs7_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28302,7 +28302,7 @@ GameObject:
   - component: {fileID: 1083393826}
   - component: {fileID: 1083393825}
   m_Layer: 0
-  m_Name: Stairs (10)
+  m_Name: stairs0_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31889,7 +31889,7 @@ GameObject:
   - component: {fileID: 1245047760}
   - component: {fileID: 1245047759}
   m_Layer: 0
-  m_Name: Stairs (13)
+  m_Name: stairs2_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -34659,7 +34659,7 @@ GameObject:
   - component: {fileID: 1260690904}
   - component: {fileID: 1260690903}
   m_Layer: 0
-  m_Name: Stairs (2)
+  m_Name: stairs6_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -37433,7 +37433,7 @@ GameObject:
   - component: {fileID: 1281392266}
   - component: {fileID: 1281392265}
   m_Layer: 0
-  m_Name: Stairs (14)
+  m_Name: stairs3_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40759,7 +40759,7 @@ GameObject:
   - component: {fileID: 1316693862}
   - component: {fileID: 1316693861}
   m_Layer: 0
-  m_Name: Stairs
+  m_Name: stairs5_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43716,7 +43716,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1341975580
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -44363,7 +44363,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1384361259
 Transform:
   m_ObjectHideFlags: 0
@@ -45107,7 +45107,7 @@ GameObject:
   - component: {fileID: 1456411668}
   - component: {fileID: 1456411667}
   m_Layer: 0
-  m_Name: Stairs (11)
+  m_Name: stairs0_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -49537,7 +49537,7 @@ GameObject:
   - component: {fileID: 1700261511}
   - component: {fileID: 1700261510}
   m_Layer: 0
-  m_Name: Stairs (3)
+  m_Name: stairs6_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -52133,7 +52133,7 @@ GameObject:
   - component: {fileID: 1706150211}
   - component: {fileID: 1706150210}
   m_Layer: 0
-  m_Name: Stairs (1)
+  m_Name: stairs5_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -55132,7 +55132,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1783398416
 Transform:
   m_ObjectHideFlags: 0
@@ -55776,7 +55776,7 @@ GameObject:
   - component: {fileID: 1821444522}
   - component: {fileID: 1821444521}
   m_Layer: 0
-  m_Name: Stairs (9)
+  m_Name: stairs1_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -58377,7 +58377,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1842451565
 Transform:
   m_ObjectHideFlags: 0
@@ -58906,7 +58906,7 @@ GameObject:
   - component: {fileID: 1849677856}
   - component: {fileID: 1849677855}
   m_Layer: 0
-  m_Name: Stairs (7)
+  m_Name: stairs4_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -61833,7 +61833,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1889760453
 Transform:
   m_ObjectHideFlags: 0
@@ -62477,7 +62477,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1932628541
 Transform:
   m_ObjectHideFlags: 0
@@ -64080,7 +64080,7 @@ GameObject:
   - component: {fileID: 2126607933}
   - component: {fileID: 2126607932}
   m_Layer: 0
-  m_Name: Stairs (12)
+  m_Name: stairs2_0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66913,6 +66913,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4000014211504346, guid: 51b9e2639774c80489c8dfd478f275f3, type: 3}
   m_PrefabInstance: {fileID: 2130244466}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2242969182250820404
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 140.30066
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -8.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4048734501466936929, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8632306725574266455, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
+      propertyPath: m_Name
+      value: Arrow
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ead63d51c6a64e548a8aa848de0e0348, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -66928,3 +66985,4 @@ SceneRoots:
   - {fileID: 956578703}
   - {fileID: 902830623}
   - {fileID: 1493281296}
+  - {fileID: 2242969182250820404}
