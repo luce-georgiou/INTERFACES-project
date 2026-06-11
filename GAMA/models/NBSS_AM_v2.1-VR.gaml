@@ -325,6 +325,7 @@ species unity_linker parent: abstract_unity_linker {
 //		write failures_aff_component;
 
 		list<float> water_level_pond <- ponding_area collect (each.water_level);
+		//write water_level_pond;
 		
 		map<string,list<unknown>> atts_inlet <-  [
 			"fqt_inlet":: fqt_inlet
@@ -522,6 +523,7 @@ species unity_linker parent: abstract_unity_linker {
 	
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
 		ask ponding_area where (each.is_obstructed) {
+			//write my_name;
 			if (cycle mod (1*4) = 0 and water_level < 31) {
 				water_level <- water_level + 1.0;
 			}
@@ -532,15 +534,21 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	action curage(string id) {
 		component ag <- (filter_media first_with (each.name = id));
+		
 		if (ag != nil) {
 			ask ag {
 				function_attributes["my_fqt"] <- 2.0;
-				ask ponding_area where (each.my_NBSS = ag.my_NBSS and each.is_obstructed) {
-					is_obstructed <- false;
-				}
+			}
+			ask ponding_area where (each.is_obstructed) { // condition à modif selon si transit ou non, et chemin de l'eau
+				is_obstructed <- false;
+				water_level <- 0.0;
 			}
 		}
 	}
+	reflex progress_bar {
+		
+	}
+	
 }
 
 

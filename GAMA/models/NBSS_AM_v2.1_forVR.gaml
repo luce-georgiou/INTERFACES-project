@@ -39,7 +39,9 @@ global control: fsm {
 	/* Modifs par rapport modèle Emma */
 	bool send_init_message <- false;
 	bool send_message <- false;
+	bool send_message_time <- false;
 	map messages <- [];
+	map messages_time <- [];
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -155,19 +157,29 @@ global control: fsm {
     	exit {}
     }
     
+    float active_start_time <- 0.0;
     state situation1_active {
     	minimum_cycle_duration <- 9.0;
     	enter {
     		write "active phase for player";
+    		active_start_time <- gama.machine_time;
     		messages <- [];
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
     		send_message <- true;
+    		send_message <- false;
+    		send_message_time <- true;
+    		
     	}
     	//transition to: situation1_end when: 
+    	transition to: situation1_end when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
     	exit {
     		messages <- [];
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
+			send_message <- true;
+    		send_message <- false;
+    		send_message_time <- false;
+			active_start_time <- 0.0;
     	}
     }
     
@@ -207,6 +219,15 @@ global control: fsm {
         	send_message <- false;
         }
     }
+    
+    reflex update_timer when: active_start_time > 0 {
+	    float elapsed <- (gama.machine_time - active_start_time) / 1000.0;
+	    float remaining <- 180.0 - elapsed;
+	    int minutes <- int(remaining / 60);
+	    int seconds <- int(remaining mod 60);
+	    messages_time <- ["timer_":: string(minutes) + ":" + (seconds < 10 ? "0" : "") + string(seconds)];
+	    //send_message_time <- true;
+	}
     
 
     /* Fin modifs */
@@ -816,8 +837,10 @@ species filter_media parent: engineered_component {
 		ask agents of_generic_species vegetal_component {
 			do clogged_fm_on_veg;
 		}
-		ask ponding_area {
-			is_obstructed <- true; //à tester
+		ask filter_media where (each.function_attributes["my_fqt"] <= 1) {
+			ask ponding_area where (each.my_NBSS = self.my_NBSS) {
+				is_obstructed <- true; //à tester -> toutes les pond sont flooded 
+			}
 		}
 		
 	}

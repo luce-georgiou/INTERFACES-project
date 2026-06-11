@@ -115,6 +115,7 @@ public class SimulationManagerInteraction : SimulationManager
                          {"id", grabbedObject.name }
                     };
                 ConnectionManager.Instance.SendExecutableAsk("curage", args);
+                Debug.LogError("curage done");
             }
 
         }
@@ -613,6 +614,7 @@ public class SimulationManagerInteraction : SimulationManager
     {
         message = GAMAMessage2.CreateFromJSON(content);
     }
+    public TMP_Text timerText;
 
     //action activated at the end of the update phase (every frame)
     protected override void OtherUpdate()
@@ -631,10 +633,18 @@ public class SimulationManagerInteraction : SimulationManager
         }
         if (message != null)
         {
+            if (message.message_ != "")
             //Debug.Log("test");
             //StartCoroutine(ShowForDuration(message.cycle, 10f));
-            StartCoroutine(ShowForDuration(message.message_, 10f));
-            Debug.Log("received from GAMA: " + message.message_);
+            {
+                StartCoroutine(ShowForDuration(message.message_, 10f));
+                Debug.Log("received from GAMA: " + message.message_);
+                
+            }
+            if (message.timer_ != "")
+            {
+                timerText.text = message.timer_;
+            }
             message = null;
         }
 
@@ -668,6 +678,7 @@ public class GAMAMessage2
 
     //public int cycle;
     public string message_;
+    public string timer_;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {
