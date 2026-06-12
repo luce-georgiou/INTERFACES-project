@@ -55,17 +55,17 @@ species unity_linker parent: abstract_unity_linker {
 //	}
 
 	bool do_send_world <- true;
-	list<point> init_locations <- [any_location_in(init_free_space)];
+	list<point> init_locations <- [{100.0, 0.0}]; //[any_location_in(init_free_space)];
 
 	init {
 		do define_properties;
 		player_unity_properties <- [up_default];
 		
-		do add_background_geometries(road, up_road);
+		//do add_background_geometries(road, up_road);
 		do add_background_geometries(building, up_building);
-		do add_background_geometries(park, up_park);
+		//do add_background_geometries(park, up_park);
 		//do add_background_geometries(lawn, up_lawn);
-		do add_background_geometries(grass,up_grass);
+		//do add_background_geometries(grass,up_grass);
 //		do add_background_geometries(grass_2,up_grass2);
 //		do add_background_geometries(grass_3,up_grass3);
 		//do add_background_geometries(flower,up_flower);
@@ -151,9 +151,9 @@ species unity_linker parent: abstract_unity_linker {
 		up_shrubs_plants <- geometry_properties("shrubs_plants","shrubs_plants",shrubs_aspect,#ray_interactable,false);
 		unity_properties << up_shrubs_plants;
 		
-		unity_aspect grass_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_1",1.0,0.0,1.0,0.0,precision);
-		up_grass <- geometry_properties("grass","grass",grass_aspect,#no_interaction,false);
-		unity_properties << up_grass;
+//		unity_aspect grass_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_1",1.0,0.0,1.0,0.0,precision);
+//		up_grass <- geometry_properties("grass","grass",grass_aspect,#no_interaction,false);
+//		unity_properties << up_grass;
 		
 		unity_aspect lawn_aspect <- geometry_aspect(0.1,#green,precision);
 		up_lawn <- geometry_properties("lawn","lawn",lawn_aspect,#no_interaction,false);
@@ -296,7 +296,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(trash, up_trash);
 		do add_geometries_to_send(weeds, up_weeds);
 		do add_geometries_to_send(flower, up_flower); //test
-		do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
+		//do add_geometries_to_send(vegetal_waste,up_vegetal_waste);
 		//do add_geometries_to_send(ponding_area,up_ponding_area);
 		//do add_geometries_to_send(lawn, up_lawn);
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
@@ -546,9 +546,6 @@ species unity_linker parent: abstract_unity_linker {
 				water_level <- 0.0;
 			}
 		}
-	}
-	reflex progress_bar {
-		
 	}
 	
 }

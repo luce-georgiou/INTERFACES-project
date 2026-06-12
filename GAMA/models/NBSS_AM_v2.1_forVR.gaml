@@ -522,7 +522,7 @@ global control: fsm {
     
     float active_start_time <- 0.0;
     state situation1_active {
-    	minimum_cycle_duration <- 9.0;
+    	minimum_cycle_duration <- 1.0; //9.0
     	enter {
     		write "active phase for player";
     		active_start_time <- gama.machine_time;
@@ -535,7 +535,7 @@ global control: fsm {
     		//send_message_time <- true;
     		
     	}
-    	write "elapsed: " + (gama.machine_time - active_start_time);
+    	//write "elapsed: " + (gama.machine_time - active_start_time);
     	//transition to: situation1_end when: 
     	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
     	exit {

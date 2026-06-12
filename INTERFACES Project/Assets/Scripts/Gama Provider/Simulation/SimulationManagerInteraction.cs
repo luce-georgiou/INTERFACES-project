@@ -118,14 +118,16 @@ public class SimulationManagerInteraction : SimulationManager
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             //Debug.Log("grabbedObject : " + grabbedObject);
-
+            int count;
+            float weight = 20f;
             if (grabbedObject.tag.Equals("weeds") || grabbedObject.tag.Equals("trash"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
                     };
+                count = GameObject.FindGameObjectsWithTag(grabbedObject.tag).Length;
                 ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
-
+                progressBar.BarValue = progressBar.BarValue + (weight / count);
             }
             //GameObject obj = ev.interactableObject.transform.gameObject;
             //if (obj.tag.Equals("road"))
@@ -156,6 +158,7 @@ public class SimulationManagerInteraction : SimulationManager
                     };
                 ConnectionManager.Instance.SendExecutableAsk("curage", args);
                 progressBar.BarValue = progressBar.BarValue + 30f;
+                exclamationCanvas.SetActive(false);
                 Debug.LogError("curage done");
             }
 
@@ -184,7 +187,7 @@ public class SimulationManagerInteraction : SimulationManager
         return null;
     }
 
-
+    public GameObject exclamationCanvas;
 
     // Mettre dans cette liste tous les objets statiques
     private List<string> tagsToIgnore = new List<string> {"swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
@@ -207,9 +210,10 @@ public class SimulationManagerInteraction : SimulationManager
                 }
             }
         }
+        
 
-        GameObject exclamationCanvas = GameObject.FindWithTag("exclamation");
-        CanvasGroup cg = exclamationCanvas != null ? exclamationCanvas.GetComponent<CanvasGroup>() : null;
+    //GameObject exclamationCanvas = GameObject.FindWithTag("exclamation");
+    //    CanvasGroup cg = exclamationCanvas != null ? exclamationCanvas.GetComponent<CanvasGroup>() : null;
         //Debug.Log("CanvasGroup found: " + cg);
 
         for (int i = 0; i < infoWorld.names.Count; i++)
@@ -225,7 +229,7 @@ public class SimulationManagerInteraction : SimulationManager
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
 
-            bool showExclamation = false;
+            //bool showExclamation = false;
 
             string[] prefixes = { "inlet", "outlet" };
             foreach (string prefix in prefixes)
@@ -250,7 +254,7 @@ public class SimulationManagerInteraction : SimulationManager
                     {
                         ChangeColor(obj, Color.red);
                         // Afficher "!" flottant au-dessus du composant � l'�tat critique
-                        showExclamation = true;
+                        //showExclamation = true;
                     }
                     else if (fqt == 1)
                     {
@@ -410,10 +414,32 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("filter_media"))
             {
-                obj.transform.position = new Vector3(obj.transform.position.x, -3.5f, obj.transform.position.z);
+                obj.transform.position = new Vector3(obj.transform.position.x, -3.25f, obj.transform.position.z);
                 Material mat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
-                obj.GetComponent<Renderer>().material = mat;
                 Color c = mat.color;
+                if (name == "filter_media5")
+                {
+
+                    mat.SetFloat("_Surface", 1f); // Transparent
+                    mat.SetOverrideTag("RenderType", "Transparent");
+                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    mat.SetInt("_ZWrite", 0);
+                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    mat.renderQueue = 3000;
+
+                    c.a = 0.6f;
+                    mat.SetColor("_BaseColor", c);
+                }
+                else
+                {
+                    c.a = 1f;
+                    mat.SetColor("_BaseColor", c);
+                }
+                obj.GetComponent<Renderer>().material = mat;
+                
+                
+                
                 int fqt = attributes[i].fqt_fm;
                 if (fqt <= 1)
                 {
@@ -423,6 +449,9 @@ public class SimulationManagerInteraction : SimulationManager
                     ChangeColor(obj, Color.red);
                     ChangeColor(stairsObj0, Color.red);
                     ChangeColor(stairsObj1, Color.red);
+                    exclamationCanvas.SetActive(true);
+                    exclamationCanvas.transform.localScale = new Vector3(0.1f, 0.1f, 100f);
+                    exclamationCanvas.transform.position = obj.transform.position + Vector3.up * 8f;
                 }
                 else
                 {
@@ -432,6 +461,7 @@ public class SimulationManagerInteraction : SimulationManager
                     ChangeColor(obj, c);
                     ChangeColor(stairsObj0, c);
                     ChangeColor(stairsObj1, c);
+                    //exclamationCanvas.SetActive(false);
                 }
             }
             // gestion de l'aspect de l'environnement selon les saisons
@@ -668,8 +698,8 @@ public class SimulationManagerInteraction : SimulationManager
                  {"id",ConnectionManager.Instance.GetConnectionId() },
                  {"mes",  mes }};
 
-            Debug.Log("sent to GAMA: " + mes);
-            ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+            //Debug.Log("sent to GAMA: " + mes);
+            //ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
         }
         //timerText.text = "";
         if (message != null)
