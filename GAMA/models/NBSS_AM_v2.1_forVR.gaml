@@ -42,6 +42,7 @@ global control: fsm {
 	bool send_message_time <- false;
 	map messages <- [];
 	map messages_time <- [];
+	int init_wait <- 0;
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -84,150 +85,16 @@ global control: fsm {
 	list<string> list_failures_for_VR <- [];
 	bool failure_happening_bool <- false;
 	
-    float slow_duration <- 3 #minute;
-    float slow_start;
-    int last_slow_month <- -1;
     
-    state situation1_init initial: true {
-	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
-	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
-	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
-	// mauvaise végétation dans quasi toute (sauf une disons, où on dit qu'elle a des fleurs dc les gens en prennent soin)
-	// pb avec la récupération des EP via les canalisations des immeubles (deux bouchées donc tout va dans la même (genre la 4) qui est surchargée
-	//swale 1 à 4 remplies
-	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
-	
-    	//minimum_cycle_duration <- 0.2;
-    	int init_wait <- 0;
-    	enter {
-	    	write "entering situation1_init";
-	    	
-			loop s over: NBSS where (each.my_name = "swale1") {
-	    		create trash number: 10 {
-			        shape <- circle(0.1);
-			        location <- any_location_in(s);
-			    }
-	    	}
-	    	create flower number: 10 {
-		    	//int i <- 0;
-		    	shape <- triangle(0.6);
-		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
-								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
-				};
-			}
-			loop s over: NBSS where (each.my_name != "swale0") {
-			    create weeds number: 25 {
-			        location <- any_location_in(s);
-			    }
-			}
-			
-//			ask component where (each.my_NBSS.my_name = "swale4" or each.my_NBSS.my_name = "swale5") {
-//			    ask filter_media {
-//			        function_attributes["my_fqt"] <- 0.0;
-//			    }
-//			    ask ponding_area {
-//			        is_obstructed <- true;
-//			    }
-//			}
-			ask filter_media where (each.my_name = "filter_media1") {
-				function_attributes["my_fqt"] <- 0.0;
-			}
-			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
-			    is_obstructed <- true;
-			}
-		}
-			//send_init_message <- true; // on entre state phase active -> false
-		//send message explicatif
-		//définir dans unity_linker les interactions nécessaires
-		init_wait <- init_wait + 1;
-		if (init_wait = 1) { 
-			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
-			//send_init_message <- true;
-			send_message <- true;
-			
-		}
-    	
-    	
-    	//send_init_message <- false;
-    	transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
-        	and current_date.month mod 2 = 0
-        	and current_date.month != last_slow_month;
-        	
-    	
-    	exit {}
-    }
     
-    float active_start_time <- 0.0;
-    state situation1_active {
-    	minimum_cycle_duration <- 9.0;
-    	enter {
-    		write "active phase for player";
-    		active_start_time <- gama.machine_time;
-    		messages <- [];
-    		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
-    		send_message <- true;
-    		send_message <- false;
-    		send_message_time <- true;
-    		
-    	}
-    	//transition to: situation1_end when: 
-    	transition to: situation1_end when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
-    	exit {
-    		messages <- [];
-    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
-			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
-			send_message <- true;
-    		send_message <- false;
-    		send_message_time <- false;
-			active_start_time <- 0.0;
-    	}
-    }
-    
-    state situation1_end {
-    	minimum_cycle_duration <- 1.0;
-    	enter {
-    		
-    	}
-    }
-    
-    state fast_phase { //initial: true {
-        //write "fast_phase";
-        //step <- fast_step;
-        minimum_cycle_duration <- 0.2;
-//        enter {
-//        	fast_start <- gama.machine_time;
-//        } 
-        transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
-        	and current_date.month mod 2 = 0
-        	and current_date.month != last_slow_month;
-    }
-    
-    state slow_phase {
-        //write "slow_phase";
-        //step <- slow_step;
-        minimum_cycle_duration <- 3.0;
-        enter {
-            //send_init_message <- false;
-            last_slow_month <- current_date.month;
-            slow_start <- gama.machine_time;
-            
-            
-        }
-        transition to: fast_phase 
-            when: (gama.machine_time - slow_start) >= slow_duration;
-        exit {
-        	send_message <- false;
-        }
-    }
-    
-    reflex update_timer when: active_start_time > 0 {
-	    float elapsed <- (gama.machine_time - active_start_time) / 1000.0;
-	    float remaining <- 180.0 - elapsed;
-	    int minutes <- int(remaining / 60);
-	    int seconds <- int(remaining mod 60);
-	    messages_time <- ["timer_":: string(minutes) + ":" + (seconds < 10 ? "0" : "") + string(seconds)];
-	    //send_message_time <- true;
-	}
+//    reflex update_timer when: active_start_time > 0 {
+//	    float elapsed <- (gama.machine_time - active_start_time) / 1000.0;
+//	    float remaining <- 180.0 - elapsed;
+//	    int minutes <- int(remaining / 60);
+//	    int seconds <- int(remaining mod 60);
+//	    messages_time <- ["timer_":: string(minutes) + ":" + (seconds < 10 ? "0" : "") + string(seconds)];
+//	    //send_message_time <- true;
+//	}
     
 
     /* Fin modifs */
@@ -579,6 +446,145 @@ global control: fsm {
 		end_sim<-true;
 		do pause;
 	}
+	
+	/* gestion des états/phases de jeu */
+	float slow_duration <- 3 #minute;
+    float slow_start;
+    int last_slow_month <- -1;
+    
+    state situation1_init initial: true {
+	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
+	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
+	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
+	// mauvaise végétation dans quasi toute (sauf une disons, où on dit qu'elle a des fleurs dc les gens en prennent soin)
+	// pb avec la récupération des EP via les canalisations des immeubles (deux bouchées donc tout va dans la même (genre la 4) qui est surchargée
+	//swale 1 à 4 remplies
+	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
+	
+    	//minimum_cycle_duration <- 0.2;
+    	minimum_cycle_duration <- 3.0;
+    	enter {
+	    	write "entering situation1_init";
+	    	
+			loop s over: NBSS where (each.my_name = "swale1") {
+	    		create trash number: 10 {
+			        shape <- circle(0.1);
+			        location <- any_location_in(s);
+			    }
+	    	}
+	    	create flower number: 10 {
+		    	//int i <- 0;
+		    	shape <- triangle(0.6);
+		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
+								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
+				};
+			}
+			loop s over: NBSS where (each.my_name != "swale0") {
+			    create weeds number: 25 {
+			        location <- any_location_in(s);
+			    }
+			}
+			
+//			ask component where (each.my_NBSS.my_name = "swale4" or each.my_NBSS.my_name = "swale5") {
+//			    ask filter_media {
+//			        function_attributes["my_fqt"] <- 0.0;
+//			    }
+//			    ask ponding_area {
+//			        is_obstructed <- true;
+//			    }
+//			}
+			ask filter_media where (each.my_name = "filter_media1") {
+				function_attributes["my_fqt"] <- 0.0;
+			}
+			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
+			    is_obstructed <- true;
+			}
+		}
+			//send_init_message <- true; // on entre state phase active -> false
+		//send message explicatif
+		//définir dans unity_linker les interactions nécessaires
+		init_wait <- init_wait + 1;
+		if (init_wait = 2) { 
+			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+			//send_init_message <- true;
+			send_message <- true;
+			
+		}
+    	
+    	
+    	//send_init_message <- false;
+    	transition to: situation1_active when: cycle >= 2;
+    	exit {
+    		messages <- messages + ["timer_start":: "0"];
+    		send_message <- true;
+    	}
+    }
+    
+    float active_start_time <- 0.0;
+    state situation1_active {
+    	minimum_cycle_duration <- 9.0;
+    	enter {
+    		write "active phase for player";
+    		active_start_time <- gama.machine_time;
+    		//write active_start_time;
+    		//messages <- [];
+    		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
+    		messages <- messages + ["timer_start":: "180"];
+    		send_message <- true;
+    		//send_message <- false;
+    		//send_message_time <- true;
+    		
+    	}
+    	write "elapsed: " + (gama.machine_time - active_start_time);
+    	//transition to: situation1_end when: 
+    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
+    	exit {
+    		//messages <- [];
+    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
+			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
+			send_message <- true;
+    		//send_message <- false;
+    		//send_message_time <- false;
+			active_start_time <- 0.0;
+    	}
+    }
+    
+    state situation1_end {
+    	minimum_cycle_duration <- 1.0;
+    	enter {
+    		
+    	}
+    }
+    
+    state fast_phase { //initial: true {
+        //write "fast_phase";
+        //step <- fast_step;
+        minimum_cycle_duration <- 0.2;
+//        enter {
+//        	fast_start <- gama.machine_time;
+//        } 
+        transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
+        	and current_date.month mod 2 = 0
+        	and current_date.month != last_slow_month;
+    }
+    
+    state slow_phase {
+        //write "slow_phase";
+        //step <- slow_step;
+        minimum_cycle_duration <- 3.0;
+        enter {
+            //send_init_message <- false;
+            last_slow_month <- current_date.month;
+            slow_start <- gama.machine_time;
+            
+            
+        }
+        transition to: fast_phase 
+            when: (gama.machine_time - slow_start) >= slow_duration;
+        exit {
+        	send_message <- false;
+        }
+    }
 }
 
 //************************ SPECIES DECLARATION ***************************

@@ -516,6 +516,8 @@ species unity_linker parent: abstract_unity_linker {
 		//write "Send message: ";
 		//do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
 		do send_message players: unity_player as list mes: messages;
+		send_message <- false;
+		messages <- [];
 	}
 	action receive_message(string id, string mes) {
 		write "Player " + id + " send the message: " + mes;

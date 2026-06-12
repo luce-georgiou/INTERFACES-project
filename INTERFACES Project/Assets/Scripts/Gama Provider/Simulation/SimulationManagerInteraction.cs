@@ -22,13 +22,53 @@ public class SimulationManagerInteraction : SimulationManager
 
 
     // Message manager
-    private string lastFailureMessage = "";
+    //private string lastFailureMessage = "";
     IEnumerator ShowForDuration(string msg, float duration)
     {
         SendingMessages.Show(msg);
         yield return new WaitForSeconds(duration);
         SendingMessages.Show("");
     }
+    //private Queue<string> messageQueue = new Queue<string>();
+    //private bool messageRunning = false;
+
+    //void Update()
+    //{
+    //    if (messageQueue.Count > 0 && !messageRunning)
+    //        StartCoroutine(ShowNext());
+    //}
+
+    //IEnumerator ShowNext()
+    //{
+    //    messageRunning = true;
+    //    string msg = messageQueue.Dequeue();
+    //    SendingMessages.Show(msg);
+    //    yield return new WaitForSeconds(10f);
+    //    SendingMessages.Show("");
+    //    messageRunning = false;
+    //}
+
+
+    public TMP_Text timerText;
+    private bool timerRunning = false;
+    IEnumerator CountDown(int duration)
+    {
+        Debug.Log("CountDown started: " + duration);
+        if (timerText == null) { Debug.LogError("timerText is null!"); yield break; }
+        if (timerRunning) yield break;
+        timerRunning = true;
+        int remaining = duration;
+        while (remaining > 0)
+        {
+            timerText.text = remaining / 60 + ":" + (remaining % 60 < 10 ? "0" : "") + remaining % 60;
+            yield return new WaitForSeconds(1f);
+            remaining--;
+        }
+        timerText.text = "0:00";
+        timerRunning = false;
+    }
+
+    public ProgressBar progressBar;
 
     //Defines what happens when a ray passes over an object 
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
@@ -115,6 +155,7 @@ public class SimulationManagerInteraction : SimulationManager
                          {"id", grabbedObject.name }
                     };
                 ConnectionManager.Instance.SendExecutableAsk("curage", args);
+                progressBar.BarValue = progressBar.BarValue + 30f;
                 Debug.LogError("curage done");
             }
 
@@ -614,7 +655,6 @@ public class SimulationManagerInteraction : SimulationManager
     {
         message = GAMAMessage2.CreateFromJSON(content);
     }
-    public TMP_Text timerText;
 
     //action activated at the end of the update phase (every frame)
     protected override void OtherUpdate()
@@ -631,19 +671,26 @@ public class SimulationManagerInteraction : SimulationManager
             Debug.Log("sent to GAMA: " + mes);
             ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
         }
+        //timerText.text = "";
         if (message != null)
         {
             if (message.message_ != "")
             //Debug.Log("test");
             //StartCoroutine(ShowForDuration(message.cycle, 10f));
             {
+                //messageQueue.Enqueue(message.message_);
                 StartCoroutine(ShowForDuration(message.message_, 10f));
                 Debug.Log("received from GAMA: " + message.message_);
                 
             }
-            if (message.timer_ != "")
+            if (!string.IsNullOrWhiteSpace(message.timer_start))
             {
-                timerText.text = message.timer_;
+                Debug.Log("timer reçu = " + message.timer_start);
+                if (message.timer_start == "0")
+                    timerText.text = "";
+                else
+                    progressBar.BarValue = 0f;
+                    StartCoroutine(CountDown(int.Parse(message.timer_start)));
             }
             message = null;
         }
@@ -678,7 +725,7 @@ public class GAMAMessage2
 
     //public int cycle;
     public string message_;
-    public string timer_;
+    public string timer_start;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {
