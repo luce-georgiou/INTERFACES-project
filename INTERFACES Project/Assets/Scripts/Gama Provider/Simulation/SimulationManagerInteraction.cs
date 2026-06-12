@@ -20,6 +20,12 @@ using UnityEngine.ProBuilder.Shapes;
 public class SimulationManagerInteraction : SimulationManager
 {
 
+    public TMP_Text timerText;
+    public ProgressBar progressBar;
+    public GameObject exclamationCanvas;
+
+    // Mettre dans cette liste tous les objets statiques
+    private List<string> tagsToIgnore = new List<string> { "swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     // Message manager
     //private string lastFailureMessage = "";
@@ -29,27 +35,8 @@ public class SimulationManagerInteraction : SimulationManager
         yield return new WaitForSeconds(duration);
         SendingMessages.Show("");
     }
-    //private Queue<string> messageQueue = new Queue<string>();
-    //private bool messageRunning = false;
 
-    //void Update()
-    //{
-    //    if (messageQueue.Count > 0 && !messageRunning)
-    //        StartCoroutine(ShowNext());
-    //}
-
-    //IEnumerator ShowNext()
-    //{
-    //    messageRunning = true;
-    //    string msg = messageQueue.Dequeue();
-    //    SendingMessages.Show(msg);
-    //    yield return new WaitForSeconds(10f);
-    //    SendingMessages.Show("");
-    //    messageRunning = false;
-    //}
-
-
-    public TMP_Text timerText;
+    
     private bool timerRunning = false;
     IEnumerator CountDown(int duration)
     {
@@ -68,7 +55,7 @@ public class SimulationManagerInteraction : SimulationManager
         timerRunning = false;
     }
 
-    public ProgressBar progressBar;
+    
 
     //Defines what happens when a ray passes over an object 
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
@@ -166,6 +153,7 @@ public class SimulationManagerInteraction : SimulationManager
 
     }
 
+    // To find vertices of objects
     Vector3[] GetNBSSVertices(string nbssName)
     {
         GameObject[] nbssObjects = GameObject.FindGameObjectsWithTag("park");
@@ -187,34 +175,26 @@ public class SimulationManagerInteraction : SimulationManager
         return null;
     }
 
-    public GameObject exclamationCanvas;
-
-    // Mettre dans cette liste tous les objets statiques
-    private List<string> tagsToIgnore = new List<string> {"swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park"};//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
-
     
-
+    
+    // Liste toIgnore pour cette méthode
     protected override void ManageAttributes(List<Attributes> attributes)
     {
-
-        for (int i = 0; i < 8; i++)
-        {
-            string nbs_name = "park" + i;
-            Vector3[] vertices = GetNBSSVertices(nbs_name);
-            if (vertices != null)
-            {
-                foreach (Vector3 v in vertices)
-                {
-                    //Debug.Log(nbs_name);
-                    //Debug.Log(v);
-                }
-            }
-        }
-        
-
-    //GameObject exclamationCanvas = GameObject.FindWithTag("exclamation");
-    //    CanvasGroup cg = exclamationCanvas != null ? exclamationCanvas.GetComponent<CanvasGroup>() : null;
-        //Debug.Log("CanvasGroup found: " + cg);
+        /* Afficher vertices gameobjects */
+        //for (int i = 0; i < 8; i++)
+        //{
+        //    string nbs_name = "park" + i;
+        //    Vector3[] vertices = GetNBSSVertices(nbs_name);
+        //    if (vertices != null)
+        //    {
+        //        foreach (Vector3 v in vertices)
+        //        {
+        //            Debug.Log(nbs_name);
+        //            Debug.Log(v);
+        //        }
+        //    }
+        //}
+  
 
         for (int i = 0; i < infoWorld.names.Count; i++)
         {
@@ -223,13 +203,8 @@ public class SimulationManagerInteraction : SimulationManager
             if (tagsToIgnore.Any(tag => name.StartsWith(tag)))
                 continue;
 
-            //Debug.Log(name);
-            //int type = attributes[i].fqt_inlet;
-
             List<object> o = geometryMap[name];
             GameObject obj = (GameObject)o[0];
-
-            //bool showExclamation = false;
 
             string[] prefixes = { "inlet", "outlet" };
             foreach (string prefix in prefixes)
@@ -238,23 +213,9 @@ public class SimulationManagerInteraction : SimulationManager
                 {
                     int fqt = prefix == "inlet" ? attributes[i].fqt_inlet : attributes[i].fqt_outlet;
 
-                    //if (fqt == 0 && cg != null)
-                    //{
-                    //    showExclamation = true;
-                    //    //exclamationCanvas.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-                    //    exclamationCanvas.transform.position = obj.transform.position + Vector3.up * 2f;
-                    //    cg.alpha = 1f;
-                    //}
-                    //else if (cg != null)
-                    //{
-                    //    cg.alpha = 0f;
-                    //}
-
                     if (fqt == 0)
                     {
                         ChangeColor(obj, Color.red);
-                        // Afficher "!" flottant au-dessus du composant � l'�tat critique
-                        //showExclamation = true;
                     }
                     else if (fqt == 1)
                     {

@@ -37,15 +37,15 @@ model NBSSAM
 global control: fsm {
 	
 	/* Modifs par rapport modèle Emma */
-	bool send_init_message <- false;
 	bool send_message <- false;
-	bool send_message_time <- false;
 	map messages <- [];
-	map messages_time <- [];
 	int init_wait <- 0;
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
+	
+	list<string> list_failures_for_VR <- [];
+	bool failure_happening_bool <- false;
 	
 	// Geoms des 8 NBS
 	list<geometry> list_of_geoms <- [
@@ -57,17 +57,6 @@ global control: fsm {
 			rectangle(5.3, 16.7), //3
 			rectangle(5.3, 14.7),  //2
 			rectangle(5.3, 25.1) //1	
-	];
-	// Geoms des 8 ponding areas
-	list<geometry> list_of_geoms_pond <- [
-		rectangle(24.5, 2),  //5
-		rectangle(26.1, 2), //6
-		rectangle(61.5, 2.2), //7
-		rectangle(63.2, 2.2), //8
-		rectangle(2.1, 24.5), //4
-		rectangle(2.1, 16.7), //3
-		rectangle(2.1, 14.7),  //2
-		rectangle(2.1, 25.1) //1	
 	];
 	
 	// Loc des 8 NBS
@@ -81,11 +70,6 @@ global control: fsm {
 		{91.5, -95.95}, //6
 		{91.5, -122.85} //7
 	];
-	
-	list<string> list_failures_for_VR <- [];
-	bool failure_happening_bool <- false;
-	
-    
     
 //    reflex update_timer when: active_start_time > 0 {
 //	    float elapsed <- (gama.machine_time - active_start_time) / 1000.0;
@@ -185,26 +169,21 @@ global control: fsm {
 		
 		/* Creating the urban/vegetal environment */
 
-		create lawn {
-			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
-		    init_free_space <- lawn_geom;
-		    loop i from: 0 to: 7 {
-		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
-		        lawn_geom <- lawn_geom - nbs;
-		    }
-		    shape <- lawn_geom;
-		    free_space <- lawn_geom;
-		}
+//		create lawn {
+//			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
+//		    init_free_space <- lawn_geom;
+//		    loop i from: 0 to: 7 {
+//		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
+//		        lawn_geom <- lawn_geom - nbs;
+//		    }
+//		    shape <- lawn_geom;
+//		    free_space <- lawn_geom;
+//		}
 		create lawn_mower {
 			//geometry rect <- rectangle(85, 85);
 			//location <- any_location_in(rect - free_space);
 			location <- any_location_in(free_space);
 		}
-
-		
-//		create trash number: rnd(0,10) {
-//			location <- any_location_in(free_space);
-//		}
 		create weeds number: rnd(0,10) {
 			location <- any_location_in(free_space);
 		}	
@@ -327,11 +306,6 @@ global control: fsm {
 					myself.my_output_unmanaged_flow <- self;
 				}
 			}
-//			create gravel {
-//				shape <- rectangle(30,20);
-//				location <- {myself.location.x, myself.location.y, myself.location.z-2.0};
-//				//free_space <- free_space - (shape + 0.5);
-//			}
 			my_components <- my_engineered_components union my_vegetal_components;	
 			
 		}
@@ -500,19 +474,12 @@ global control: fsm {
 			    is_obstructed <- true;
 			}
 		}
-			//send_init_message <- true; // on entre state phase active -> false
-		//send message explicatif
-		//définir dans unity_linker les interactions nécessaires
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
 			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
-			//send_init_message <- true;
 			send_message <- true;
 			
 		}
-    	
-    	
-    	//send_init_message <- false;
     	transition to: situation1_active when: cycle >= 2;
     	exit {
     		messages <- messages + ["timer_start":: "0"];
@@ -526,25 +493,17 @@ global control: fsm {
     	enter {
     		write "active phase for player";
     		active_start_time <- gama.machine_time;
-    		//write active_start_time;
-    		//messages <- [];
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
     		messages <- messages + ["timer_start":: "180"];
     		send_message <- true;
-    		//send_message <- false;
-    		//send_message_time <- true;
     		
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	//transition to: situation1_end when: 
     	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
     	exit {
-    		//messages <- [];
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
 			send_message <- true;
-    		//send_message <- false;
-    		//send_message_time <- false;
 			active_start_time <- 0.0;
     	}
     }
