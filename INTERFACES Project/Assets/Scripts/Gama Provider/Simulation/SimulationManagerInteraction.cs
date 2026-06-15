@@ -530,7 +530,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("ponding_area"))
             {
-                Material mat = Resources.Load<Material>("Simple Water Shader/Resources/Water_mat_01");
+                Material mat = Resources.Load<Material>("Materials/Water2/WaterVoronoi");
                 obj.GetComponent<Renderer>().material = mat;
                 obj.transform.position = new Vector3(obj.transform.position.x, -1.6f, obj.transform.position.z);
 
