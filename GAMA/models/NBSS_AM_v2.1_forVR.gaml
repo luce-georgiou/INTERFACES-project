@@ -169,16 +169,16 @@ global control: fsm {
 		
 		/* Creating the urban/vegetal environment */
 
-//		create lawn {
-//			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
-//		    init_free_space <- lawn_geom;
-//		    loop i from: 0 to: 7 {
-//		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
-//		        lawn_geom <- lawn_geom - nbs;
-//		    }
-//		    shape <- lawn_geom;
-//		    free_space <- lawn_geom;
-//		}
+		create lawn {
+			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
+		    init_free_space <- lawn_geom;
+		    loop i from: 0 to: 7 {
+		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
+		        lawn_geom <- lawn_geom - nbs;
+		    }
+		    shape <- lawn_geom;
+		    free_space <- lawn_geom;
+		}
 		create lawn_mower {
 			//geometry rect <- rectangle(85, 85);
 			//location <- any_location_in(rect - free_space);
@@ -436,7 +436,7 @@ global control: fsm {
 	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
 	
     	//minimum_cycle_duration <- 0.2;
-    	minimum_cycle_duration <- 3.0;
+    	minimum_cycle_duration <- 2.0;
     	enter {
 	    	write "entering situation1_init";
 	    	
@@ -499,7 +499,7 @@ global control: fsm {
     		
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; // 3min en ms
+    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 60000; //180000; // 3min en ms
     	exit {
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?

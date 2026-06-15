@@ -44,12 +44,18 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Code Examples/Send Receive Message.unity
     guid: 8e9bc112fa33a4f8385dfe61e2ae03a0
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Code Examples/User Interactions.unity
     guid: 1f2c4c5c9509f4744af09a9eb04d6229
   - enabled: 0
     path: Assets/Scenes/Code Examples/Receive Water Data.unity
     guid: e432add6f06a341039153cf5e865ad9d
+  - enabled: 0
+    path: Assets/Scenes/NBSS_VR.unity
+    guid: 446481ded551fea419775722325f0e2b
+  - enabled: 1
+    path: Assets/Scenes/NBSS_for_VR_headset.unity
+    guid: 8d8dc7f3de2cd6746adca89996252f90
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}

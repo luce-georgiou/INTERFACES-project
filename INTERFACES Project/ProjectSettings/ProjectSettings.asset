@@ -978,7 +978,9 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
+    Purchasing: 0
     UNet: 1
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -1000,11 +1002,11 @@ PlayerSettings:
   captureStartupLogs: {}
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
-  cloudProjectId: 318b90ef-f904-4819-bc66-ed70bb182a15
+  cloudProjectId: b5086459-c015-4671-a82a-51c83b98316c
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: SIMPLE Template
-  organizationId: simple-project
+  organizationId: unity_8236eb7ef189c74d15fc
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

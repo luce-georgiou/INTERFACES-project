@@ -25,6 +25,8 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_weeds;
 	unity_property up_lawn_mower;
 	unity_property up_building;
+	unity_property up_road;
+	unity_property up_park;
 
 	bool do_send_world <- true;
 	list<point> init_locations <- [{100.0, 0.0}]; //[any_location_in(init_free_space)];
@@ -34,6 +36,8 @@ species unity_linker parent: abstract_unity_linker {
 		player_unity_properties <- [up_default];
 		
 		do add_background_geometries(building, up_building);
+		do add_background_geometries(road, up_road);
+		do add_background_geometries(park, up_park);
 	}
 	
 	action define_properties {
@@ -111,17 +115,17 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_lawn_mower;
 		
 		/* Urban environment */
-//		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
-//		up_road <- geometry_properties("road","",road_aspect,#no_interaction,false);
-//		unity_properties << up_road;
+		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
+		up_road <- geometry_properties("road","",road_aspect,#no_interaction,false);
+		unity_properties << up_road;
 		
 		unity_aspect building_aspect <- geometry_aspect(10,#gray,precision);
 		up_building <- geometry_properties("building","",building_aspect,#no_interaction,false);
 		unity_properties << up_building;
 		
-//		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
-//		up_park <- geometry_properties("park","park",park_aspect,#no_interaction,false);
-//		unity_properties << up_park;
+		unity_aspect park_aspect <- geometry_aspect(0.2,#darkgreen,precision);
+		up_park <- geometry_properties("park","park",park_aspect,#no_interaction,false);
+		unity_properties << up_park;
 //		
 	}
 	
