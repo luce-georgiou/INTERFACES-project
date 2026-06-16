@@ -23,6 +23,7 @@ public class SimulationManagerInteraction : SimulationManager
     public TMP_Text timerText;
     public ProgressBar progressBar;
     public GameObject exclamationCanvas;
+    private List<Attributes> lastAttributes;
 
     // Mettre dans cette liste tous les objets statiques
     private List<string> tagsToIgnore = new List<string> { "swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
@@ -144,9 +145,27 @@ public class SimulationManagerInteraction : SimulationManager
                          {"id", grabbedObject.name }
                     };
                 ConnectionManager.Instance.SendExecutableAsk("curage", args);
-                progressBar.BarValue = progressBar.BarValue + 30f;
-                exclamationCanvas.SetActive(false);
-                Debug.LogError("curage done");
+
+                //if (infoWorld == null || lastAttributes == null) return;
+                //int idx = infoWorld.names.IndexOf(grabbedObject.name);
+                //Debug.Log(idx);
+                //int fqt;
+                //if (idx >= 0)
+                //{
+                //    fqt = lastAttributes[idx].fqt_fm; 
+                //    if (fqt >= 2)
+                //    {
+                //        Debug.LogError("noue en bon état");
+                //    }
+                //    else
+                //    {
+                        progressBar.BarValue = progressBar.BarValue + 30f;
+                        exclamationCanvas.SetActive(false);
+                        Debug.LogError("curage done");
+                //    }
+                //}
+                
+                    
             }
 
         }
@@ -194,7 +213,8 @@ public class SimulationManagerInteraction : SimulationManager
         //        }
         //    }
         //}
-  
+
+        lastAttributes = attributes;
 
         for (int i = 0; i < infoWorld.names.Count; i++)
         {
@@ -375,7 +395,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("filter_media"))
             {
-                obj.transform.position = new Vector3(obj.transform.position.x, -3.25f, obj.transform.position.z);
+                obj.transform.position = new Vector3(obj.transform.position.x, -3f, obj.transform.position.z);
                 Material mat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
                 Color c = mat.color;
                 if (name == "filter_media5")
