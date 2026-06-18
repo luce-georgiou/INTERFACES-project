@@ -22,11 +22,15 @@ public class SimulationManagerInteraction : SimulationManager
 
     public TMP_Text timerText;
     public ProgressBar progressBar;
-    public GameObject exclamationCanvas;
+    //public GameObject exclamationCanvas;
     private List<Attributes> lastAttributes;
 
     // Mettre dans cette liste tous les objets statiques
     private List<string> tagsToIgnore = new List<string> { "swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
+
+    private Dictionary<string, GameObject> sedimentMap = new Dictionary<string, GameObject>();
+
+    private Dictionary<string, GameObject> inletMap = new Dictionary<string, GameObject>();
 
     // Message manager
     //private string lastFailureMessage = "";
@@ -160,7 +164,7 @@ public class SimulationManagerInteraction : SimulationManager
                 //    else
                 //    {
                         progressBar.BarValue = progressBar.BarValue + 30f;
-                        exclamationCanvas.SetActive(false);
+                        //exclamationCanvas.SetActive(false);
                         Debug.LogError("curage done");
                 //    }
                 //}
@@ -396,53 +400,97 @@ public class SimulationManagerInteraction : SimulationManager
             else if (name.StartsWith("filter_media"))
             {
                 obj.transform.position = new Vector3(obj.transform.position.x, -3f, obj.transform.position.z);
-                Material mat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
-                Color c = mat.color;
+                Material sourceMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
+                
+                Material mat = new Material(sourceMat);
+                Color c = mat.GetColor("_BaseColor");
+
                 if (name == "filter_media5")
                 {
 
-                    mat.SetFloat("_Surface", 1f); // Transparent
+                    mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    mat.SetFloat("_Surface", 1f);
+                    
+                    mat.SetFloat("_Blend", 0f); // Alpha blend mode
                     mat.SetOverrideTag("RenderType", "Transparent");
                     mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
                     mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
                     mat.SetInt("_ZWrite", 0);
                     mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
                     mat.renderQueue = 3000;
+                    //mat.SetFloat("_Alpha", 0.5f);
 
                     c.a = 0.6f;
-                    mat.SetColor("_BaseColor", c);
+                    
+                    //Debug.Log(c.a);
                 }
                 else
                 {
                     c.a = 1f;
-                    mat.SetColor("_BaseColor", c);
+                    
                 }
+                mat.SetColor("_BaseColor", c);
                 obj.GetComponent<Renderer>().material = mat;
-                
-                
-                
+
+                //creating sediment accumulation
+                int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                if (!sedimentMap.ContainsKey("SedimentAcc" + idx))
+                {
+                    GameObject sed_obj = GameObject.Find("SedimentAcc" + idx);
+                    if (sed_obj != null)
+                        sedimentMap["SedimentAcc" + idx] = sed_obj;
+                }
+
+                GameObject sedimentObj = sedimentMap.ContainsKey("SedimentAcc" + idx)
+                    ? sedimentMap["SedimentAcc" + idx]
+                    : null;
+
                 int fqt = attributes[i].fqt_fm;
                 if (fqt <= 1)
                 {
-                    int idx = int.Parse(obj.name.Replace("filter_media", ""));
-                    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
-                    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
-                    ChangeColor(obj, Color.red);
-                    ChangeColor(stairsObj0, Color.red);
-                    ChangeColor(stairsObj1, Color.red);
-                    exclamationCanvas.SetActive(true);
-                    exclamationCanvas.transform.localScale = new Vector3(0.1f, 0.1f, 100f);
-                    exclamationCanvas.transform.position = obj.transform.position + Vector3.up * 8f;
+                    
+                   
+                    
+                    sedimentObj.SetActive(true);
+                    sedimentObj.transform.position = new Vector3(sedimentObj.transform.position.x, -1.4f, sedimentObj.transform.position.z);
+                    float sediment_acc = attributes[i].sediments_fm;
+                    sedimentObj.transform.localScale = new Vector3(sedimentObj.transform.localScale.x, sediment_acc, sedimentObj.transform.localScale.z);
+                    //Debug.Log(sedimentObj.name);
+
+                    //Debug.Log(sediment_acc);
+                    
+
+                    //float targetHeight = obj.GetComponent<Renderer>().bounds.size.y;
+                    //float objHeight = sedimentObj.GetComponent<Renderer>().bounds.size.y;
+                    //Debug.Log(targetHeight);
+                    //Debug.Log(objHeight);   
+
+                    //sedimentObj.transform.position = new Vector3(
+                    //    sedimentObj.transform.position.x,
+                    //    sedimentObj.transform.position.y + targetHeight / 2f + objHeight / 2f,
+                    //    sedimentObj.transform.position.z
+                    //);
+                    //    int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                    //    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
+                    //    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
+                    //    ChangeColor(obj, Color.red);
+                    //    ChangeColor(stairsObj0, Color.red);
+                    //    ChangeColor(stairsObj1, Color.red);
+                    //    exclamationCanvas.SetActive(true);
+                    //    exclamationCanvas.transform.localScale = new Vector3(0.1f, 0.1f, 100f);
+                    //    exclamationCanvas.transform.position = obj.transform.position + Vector3.up * 8f;
                 }
                 else
                 {
-                    int idx = int.Parse(obj.name.Replace("filter_media", ""));
-                    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
-                    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
-                    ChangeColor(obj, c);
-                    ChangeColor(stairsObj0, c);
-                    ChangeColor(stairsObj1, c);
-                    //exclamationCanvas.SetActive(false);
+                    sedimentObj.SetActive(false);
+                    //    int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                    //    GameObject stairsObj0 = GameObject.Find("stairs" + idx + "_0");
+                    //    GameObject stairsObj1 = GameObject.Find("stairs" + idx + "_1");
+                    //    ChangeColor(obj, c);
+                    //    ChangeColor(stairsObj0, c);
+                    //    ChangeColor(stairsObj1, c);
+                    //    //exclamationCanvas.SetActive(false);
                 }
             }
             // gestion de l'aspect de l'environnement selon les saisons
@@ -551,9 +599,10 @@ public class SimulationManagerInteraction : SimulationManager
             else if (name.StartsWith("ponding_area"))
             {
                 Material mat = Resources.Load<Material>("Materials/Water2/WaterVoronoi");
+                mat.SetFloat("_Alpha", 0.5f);
                 obj.GetComponent<Renderer>().material = mat;
-                obj.transform.position = new Vector3(obj.transform.position.x, -1.6f, obj.transform.position.z);
-
+                obj.transform.position = new Vector3(obj.transform.position.x, -1.7f, obj.transform.position.z);
+                
                 //Debug.Log("test");
                 //GameObject pondObj = GameObject.FindWithTag("pond");
                 //Debug.Log("pond: " + pondObj);
@@ -563,6 +612,14 @@ public class SimulationManagerInteraction : SimulationManager
                 //{
                 obj.transform.localScale = new Vector3(obj.transform.localScale.x, water_level, obj.transform.localScale.z);
                 //Debug.Log(name + " water_level: " + water_level);
+                if (water_level <= 0f)
+                {
+                    obj.SetActive(false);
+                }
+                else
+                {
+                    obj.SetActive(true);
+                }
             }
             //else if (name.StartsWith("lawn"))
             //{
@@ -685,6 +742,24 @@ public class SimulationManagerInteraction : SimulationManager
         //timerText.text = "";
         if (message != null)
         {
+            if (message.init_ != "")
+            {
+                GameObject[] inletObjs = GameObject.FindGameObjectsWithTag("inlet");
+                Material sourceMat = Resources.Load<Material>("Pipe constructor/Materials/Pipe_D");
+                Color c = sourceMat.GetColor("_BaseColor");
+                foreach (GameObject inletObj in inletObjs)
+                {
+                    Debug.Log(inletObj.name);
+                    ChangeColor(inletObj, Color.blue);
+                }
+                if (message.init_ != "regular_state")
+                {
+                    GameObject blockedInletObj = GameObject.Find(message.init_);
+                    //Debug.Log("looking for: " + message.init_ + " -> found: " + blockedInletObj);
+                    if (blockedInletObj != null)
+                        ChangeColor(blockedInletObj, Color.white);
+                }
+            }
             if (message.message_ != "")
             //Debug.Log("test");
             //StartCoroutine(ShowForDuration(message.cycle, 10f));
@@ -737,6 +812,7 @@ public class GAMAMessage2
     //public int cycle;
     public string message_;
     public string timer_start;
+    public string init_;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {

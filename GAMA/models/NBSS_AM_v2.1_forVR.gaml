@@ -458,7 +458,15 @@ global control: fsm {
 			        location <- any_location_in(s);
 			    }
 			}
-			
+			point blocked_inlet <- {list_of_locs[2].x - list_of_geoms[2].width/2, list_of_locs[2].y};
+			geometry perimeter <- circle(1.0) at_location blocked_inlet;
+			create weeds number: 5 {
+				location <- any_location_in(perimeter);
+			}
+			create trash number: 5 {
+				shape <- circle(0.1);
+				location <- any_location_in(perimeter);
+			}
 //			ask component where (each.my_NBSS.my_name = "swale4" or each.my_NBSS.my_name = "swale5") {
 //			    ask filter_media {
 //			        function_attributes["my_fqt"] <- 0.0;
@@ -467,20 +475,30 @@ global control: fsm {
 //			        is_obstructed <- true;
 //			    }
 //			}
-			ask filter_media where (each.my_name = "filter_media1") {
+			ask filter_media where (each.my_name = "filter_media2") {
 				function_attributes["my_fqt"] <- 0.0;
+				partpoll_acc <- 2.0;
 			}
-			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5") {
+			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
 			    is_obstructed <- true;
 			}
+			//set date to rainy day
+			starting_date <- date(string(int(20070429)));
+			write starting_date;
 		}
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
+			messages <- messages + ["message_"::"Les deux nuits précédentes..."];
+			send_message <- true;
+			
+			
+		}
+		if (init_wait = 3) { 
 			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: cycle >= 2;
+    	transition to: situation1_active when: cycle >= 5;
     	exit {
     		messages <- messages + ["timer_start":: "0"];
     		send_message <- true;
@@ -493,13 +511,14 @@ global control: fsm {
     	enter {
     		write "active phase for player";
     		active_start_time <- gama.machine_time;
+    		messages <- messages + ["init_":: "pipe2_3"];
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
     		messages <- messages + ["timer_start":: "180"];
     		send_message <- true;
-    		
+    		//set day to day after rainday (no rain)
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 60000; //180000; // 3min en ms
+    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; //180000; // 3min en ms
     	exit {
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?

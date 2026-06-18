@@ -64,17 +64,17 @@ species unity_linker parent: abstract_unity_linker {
 		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
 		unity_properties << up_filter_media;
 		
-		unity_aspect ponding_area_aspect <- geometry_aspect(0.4, #blue, precision);
+		unity_aspect ponding_area_aspect <- geometry_aspect(0.1, #blue, precision);
 		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
 		unity_properties << up_ponding_area;
 		
-		unity_aspect inlet_aspect <- geometry_aspect(0.75,#gray,precision);
-		up_inlet <- geometry_properties("inlet","inlet",inlet_aspect,#ray_interactable,false);
-		unity_properties << up_inlet;
-		
-		unity_aspect outlet_aspect <- geometry_aspect(0.75,#gray,precision);
-		up_outlet <- geometry_properties("outlet","outlet",outlet_aspect,#ray_interactable,false);
-		unity_properties << up_outlet;
+//		unity_aspect inlet_aspect <- geometry_aspect(0.75,#gray,precision);
+//		up_inlet <- geometry_properties("inlet","inlet",inlet_aspect,#ray_interactable,false);
+//		unity_properties << up_inlet;
+//		
+//		unity_aspect outlet_aspect <- geometry_aspect(0.75,#gray,precision);
+//		up_outlet <- geometry_properties("outlet","outlet",outlet_aspect,#ray_interactable,false);
+//		unity_properties << up_outlet;
 		
 
 		/* Vegetation */
@@ -147,13 +147,14 @@ species unity_linker parent: abstract_unity_linker {
 	
 	// modify state of species according to health/biodiv
 	reflex send_agents when: not empty(unity_player) {
-		list<int> fqt_inlet <- inlet collect (each.function_attributes["my_fqt"]);
+		//list<int> fqt_inlet <- inlet collect (each.function_attributes["my_fqt"]);
 		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
-		list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
+		//list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
 		list<string> tree_seasons <- trees collect current_season; 
 		list<string> rain_seasons <- rain collect current_season;
 		list<int> fqt_fm <- filter_media collect (each.function_attributes["my_fqt"]);
+		list<float> fm_sediments <- filter_media collect (each.partpoll_acc);
 		//list<float> lawn_height <- lawn collect each.height;
 		//list<string> lawn_seasons <- lawn collect current_season;
 //		list<string> failures_name <- failure_event collect each.my_name;
@@ -164,12 +165,13 @@ species unity_linker parent: abstract_unity_linker {
 		list<float> water_level_pond <- ponding_area collect (each.water_level);
 		//write water_level_pond;
 		
-		map<string,list<unknown>> atts_inlet <-  [
-			"fqt_inlet":: fqt_inlet
-		]; 
-		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
+//		map<string,list<unknown>> atts_inlet <-  [
+//			"fqt_inlet":: fqt_inlet
+//		]; 
+//		map<string,list<int>> atts_outlet <- ["fqt_outlet":: fqt_outlet];
 		map<string,list<unknown>> atts_fm <-  [
-			"fqt_fm":: fqt_fm
+			"fqt_fm":: fqt_fm,
+			"sediments_fm":: fm_sediments
 		]; 
 		map<string,list<unknown>> atts_rain <- [
 			"rain_intensity":: rain_intensity,
@@ -185,21 +187,21 @@ species unity_linker parent: abstract_unity_linker {
 //			"failure_name":: failures_name,
 //			"impacted_component":: failures_aff_component
 //		];
-		if one_of(inlet).my_failures != [] {
-			list<string> failures_inlet <- inlet collect last(each.my_failures).my_name;
-			atts_inlet <- atts_inlet + ("failures_inlet":: failures_inlet);
-			
-		}
-		if one_of(outlet).my_failures != [] {
-			list<string> failures_outlet <- outlet collect last(each.my_failures).my_name;
-			atts_outlet <- atts_outlet + ("failures_outlet":: failures_outlet);
-			
-		}
+//		if one_of(inlet).my_failures != [] {
+//			list<string> failures_inlet <- inlet collect last(each.my_failures).my_name;
+//			atts_inlet <- atts_inlet + ("failures_inlet":: failures_inlet);
+//			
+//		}
+//		if one_of(outlet).my_failures != [] {
+//			list<string> failures_outlet <- outlet collect last(each.my_failures).my_name;
+//			atts_outlet <- atts_outlet + ("failures_outlet":: failures_outlet);
+//			
+//		}
 		
 		map<string,list<unknown>> atts_ponding_area <- ["water_level":: water_level_pond];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
-		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
-		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
+//		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
+//		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		do add_geometries_to_send(rain,up_rain,atts_rain);
 		//do add_geometries_to_send(rain,up_rain,atts_rain_seasons);
 		do add_geometries_to_send(trees,up_trees,atts_trees);
@@ -342,8 +344,8 @@ species unity_linker parent: abstract_unity_linker {
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
 		ask ponding_area where (each.is_obstructed) {
 			//write my_name;
-			if (cycle mod (1*4) = 0 and water_level < 31) {
-				water_level <- water_level + 1.0;
+			if ( water_level < 0.5) { //cycle mod (1*4) = 0 and
+				water_level <- water_level + 0.05;
 			}
 //			else {
 //				water_level <- 0.0;
@@ -351,16 +353,20 @@ species unity_linker parent: abstract_unity_linker {
 		}
 	}
 	action curage(string id) {
-		component ag <- (filter_media first_with (each.name = id));
-		
-		if (ag != nil) {
-			ask ag {
-				function_attributes["my_fqt"] <- 2.0;
+		filter_media fm <- (filter_media first_with (each.name = id));
+		if (fm != nil) {
+			ask fm {
+				if (function_attributes["my_fqt"] <= 1) {
+					function_attributes["my_fqt"] <- 2;
+					partpoll_acc <- 0.0;
+					ask ponding_area where (each.is_obstructed) { // condition à modif selon si transit ou non, et chemin de l'eau
+						is_obstructed <- false;
+						water_level <- 0.0;
+					}
+				}
 			}
-			ask ponding_area where (each.is_obstructed) { // condition à modif selon si transit ou non, et chemin de l'eau
-				is_obstructed <- false;
-				water_level <- 0.0;
-			}
+			messages <- messages + ["init_":: "regular_state"];
+			send_message <- true;
 		}
 	}
 	
