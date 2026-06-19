@@ -520,6 +520,7 @@ global control: fsm {
     	//write "elapsed: " + (gama.machine_time - active_start_time);
     	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; //180000; // 3min en ms
     	exit {
+    		messages <- messages + ["init_":: "regular_state"];
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
 			send_message <- true;

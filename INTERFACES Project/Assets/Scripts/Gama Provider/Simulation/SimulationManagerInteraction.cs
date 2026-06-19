@@ -30,8 +30,6 @@ public class SimulationManagerInteraction : SimulationManager
 
     private Dictionary<string, GameObject> sedimentMap = new Dictionary<string, GameObject>();
 
-    private Dictionary<string, GameObject> inletMap = new Dictionary<string, GameObject>();
-
     // Message manager
     //private string lastFailureMessage = "";
     IEnumerator ShowForDuration(string msg, float duration)
@@ -109,6 +107,7 @@ public class SimulationManagerInteraction : SimulationManager
         if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
+            Debug.Log("grabbed: " + grabbedObject.name + " tag: " + grabbedObject.tag);
             //Debug.Log("grabbedObject : " + grabbedObject);
             int count;
             float weight = 20f;
@@ -171,6 +170,31 @@ public class SimulationManagerInteraction : SimulationManager
                 
                     
             }
+            else if (grabbedObject.tag.Equals("lawn"))
+            {
+                Debug.Log("lawn grabbed");
+                //if transparent then opaque else opposé
+                Material sourceMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
+                Material mat = new Material(sourceMat);
+                Color c = mat.GetColor("_BaseColor");
+                mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+                mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                mat.SetFloat("_Surface", 1f);
+
+                mat.SetFloat("_Blend", 0f); // Alpha blend mode
+                mat.SetOverrideTag("RenderType", "Transparent");
+                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                mat.SetInt("_ZWrite", 0);
+                mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                mat.renderQueue = 3000;
+
+                c.a = 0.6f;
+                mat.SetColor("_BaseColor", c);
+                grabbedObject.GetComponent<Renderer>().material = mat;
+            }
+            //GameObject lawn = GameObject.Find("Plane");
+
 
         }
 
