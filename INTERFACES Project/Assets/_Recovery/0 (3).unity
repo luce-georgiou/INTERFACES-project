@@ -19964,7 +19964,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1d28fb500b738854eb980c28bfeee5f8, type: 2}
+  - {fileID: 2100000, guid: adbf8e9ec8593f64b8727d25fd4e08c2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -25942,12 +25942,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95a7f903705177c4899ecf11afdf176e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  selectedAlpha: 0.5
-  disableDuration: 20
-  rend: {fileID: 0}
-  mat: {fileID: 0}
-  transparentMat: {fileID: 0}
-  opaqueMat: {fileID: 0}
+  selectedAlpha: 0.6
+  disableDuration: 15
 --- !u!43 &911488887
 Mesh:
   m_ObjectHideFlags: 0

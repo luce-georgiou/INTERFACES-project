@@ -170,29 +170,29 @@ public class SimulationManagerInteraction : SimulationManager
                 
                     
             }
-            else if (grabbedObject.tag.Equals("lawn"))
-            {
-                Debug.Log("lawn grabbed");
-                //if transparent then opaque else opposé
-                Material sourceMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
-                Material mat = new Material(sourceMat);
-                Color c = mat.GetColor("_BaseColor");
-                mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
-                mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                mat.SetFloat("_Surface", 1f);
+            //else if (grabbedObject.tag.Equals("lawn"))
+            //{
+            //    Debug.Log("lawn grabbed");
+            //    //if transparent then opaque else opposé
+            //    Material sourceMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
+            //    Material mat = new Material(sourceMat);
+            //    Color c = mat.GetColor("_BaseColor");
+            //    mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+            //    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            //    mat.SetFloat("_Surface", 1f);
 
-                mat.SetFloat("_Blend", 0f); // Alpha blend mode
-                mat.SetOverrideTag("RenderType", "Transparent");
-                mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                mat.SetInt("_ZWrite", 0);
-                mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                mat.renderQueue = 3000;
+            //    mat.SetFloat("_Blend", 0f); // Alpha blend mode
+            //    mat.SetOverrideTag("RenderType", "Transparent");
+            //    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            //    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            //    mat.SetInt("_ZWrite", 0);
+            //    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            //    mat.renderQueue = 3000;
 
-                c.a = 0.6f;
-                mat.SetColor("_BaseColor", c);
-                grabbedObject.GetComponent<Renderer>().material = mat;
-            }
+            //    c.a = 0.6f;
+            //    mat.SetColor("_BaseColor", c);
+            //    grabbedObject.GetComponent<Renderer>().material = mat;
+            //}
             //GameObject lawn = GameObject.Find("Plane");
 
 
@@ -591,30 +591,30 @@ public class SimulationManagerInteraction : SimulationManager
                 //List<object> treeData = geometryMap[name];
                 //GameObject treeObj = (GameObject)treeData[0];
 
-                GameObject lawn = GameObject.FindWithTag("lawn");
-                if (saison == "winter")
-                {
-                    GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
+                //GameObject lawn = GameObject.FindWithTag("lawn");
+                //if (saison == "winter")
+                //{
+                //    GameObject sapinPrefab = Resources.Load<GameObject>("Prefabs/Snowy_Low_Poly_Trees/Pine_Snowy1");
 
 
-                    ChangeColor(lawn, Color.white); // snow in winter
+                //    ChangeColor(lawn, Color.white); // snow in winter
 
-                    if (sapinPrefab != null)
-                    {
-                        GameObject snow = Instantiate(sapinPrefab, obj.transform.position, obj.transform.rotation);
-                        snow.name = "SnowLayer";
-                        snow.transform.SetParent(obj.transform);
-                    }
-                }
-                else
-                {
-                    ChangeColor(lawn, new Color(0f, 53f / 255f, 0f));
-                    Transform snowLayer = obj.transform.Find("SnowLayer");
-                    if (snowLayer != null)
-                    {
-                        Destroy(snowLayer.gameObject);
-                    }
-                }
+                //    if (sapinPrefab != null)
+                //    {
+                //        GameObject snow = Instantiate(sapinPrefab, obj.transform.position, obj.transform.rotation);
+                //        snow.name = "SnowLayer";
+                //        snow.transform.SetParent(obj.transform);
+                //    }
+                //}
+                //else
+                //{
+                //    ChangeColor(lawn, new Color(0f, 53f / 255f, 0f));
+                //    Transform snowLayer = obj.transform.Find("SnowLayer");
+                //    if (snowLayer != null)
+                //    {
+                //        Destroy(snowLayer.gameObject);
+                //    }
+                //}
             }
             else if (name.StartsWith("weeds") || name.StartsWith("trash"))
             {
