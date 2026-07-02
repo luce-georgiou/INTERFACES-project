@@ -40,6 +40,8 @@ global control: fsm {
 	bool send_message <- false;
 	map messages <- [];
 	int init_wait <- 0;
+	float score <- 0.0;
+	float weight_score <- 0.0;
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -498,7 +500,7 @@ global control: fsm {
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: cycle >= 5;
+    	transition to: situation1_active when: cycle >= 5; //mettre timer qui inclut les deux premières phases pour déclencher phase active
     	exit {
     		messages <- messages + ["timer_start":: "0"];
     		send_message <- true;
@@ -525,15 +527,72 @@ global control: fsm {
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
 			send_message <- true;
 			active_start_time <- 0.0;
+			score <- 0.0;
     	}
     }
     
     state situation1_end {
     	minimum_cycle_duration <- 1.0;
     	enter {
-    		
+    		// analyse du jeu
     	}
     }
+    
+    state situation2_passive {
+    	minimum_cycle_duration <- 2.0;
+    	enter {
+    		active_start_time <- gama.machine_time;
+    		ask trash {
+    			do die;
+    		}
+    		ask weeds {
+    			do die;
+    		}
+    		ask filter_media {
+				function_attributes["my_fqt"] <- 3.0;
+				partpoll_acc <- 0.0;
+			}
+			ask ponding_area {
+				is_obstructed <- false;
+				water_level <- 0.0;
+			}
+			starting_date <- date(string(int(20070429))); //mettre en été
+			messages <- messages + ["scenario":: "2"];
+			send_message <- true;
+    	}
+    	transition to: situation2_transition when: (gama.machine_time - active_start_time) >= 180000;
+    	exit {
+    		active_start_time <- 0.0;
+    	}
+    }
+    
+    state situation2_transition {
+    	minimum_cycle_duration <- 20.0;
+    	enter {
+    		active_start_time <- gama.machine_time;
+    	}
+    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000;
+    	exit {
+    		active_start_time <- 0.0;
+    	}
+    }
+    
+    state situation2_active {
+    	minimum_cycle_duration <- 1.0;
+    	enter {
+    		active_start_time <- gama.machine_time;
+    	}
+    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; //if then state fail else if else
+    	exit {
+    		active_start_time <- 0.0;
+    	}
+    }
+    
+    //state2 fail -> en dessous progress bar 50% premier état, implémenter progress bar dans gama et envoyer le score en message
+    //state ok -> 50-80%
+    //state top -> >80%
+    
+
     
     state fast_phase { //initial: true {
         //write "fast_phase";
