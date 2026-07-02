@@ -32,7 +32,7 @@ public class MenuRadialManager : MonoBehaviour
 
         // On place le menu un peu au-dessus de l'objet
         // Change le 0.5f (50 centimètres) par une valeur plus grande, comme 2.0f (2 mètres) ou même 3.0f.
-        transform.position = positionCible.position + new Vector3(0, 3f, 0);
+        transform.position = positionCible.position + new Vector3(0, 3.0f, 0);
         conteneurMenu.SetActive(true);
     }
 
