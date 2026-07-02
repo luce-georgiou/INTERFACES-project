@@ -65,7 +65,7 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_filter_media;
 		
 		unity_aspect ponding_area_aspect <- geometry_aspect(0.1, #blue, precision);
-		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
+		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#ray_interactable,false);
 		unity_properties << up_ponding_area;
 		
 //		unity_aspect inlet_aspect <- geometry_aspect(0.75,#gray,precision);
@@ -363,13 +363,31 @@ species unity_linker parent: abstract_unity_linker {
 						is_obstructed <- false;
 						water_level <- 0.0;
 					}
+					//score <- score + 30.0;
+					weight_score <- 30.0;
+					messages <- messages + ["init_":: "regular_state"];
+					messages <- messages + ["add_to_score":: string(weight_score)];
+					send_message <- true;	
 				}
 			}
-			messages <- messages + ["init_":: "regular_state"];
-			send_message <- true;
 		}
 	}
 	
+	// scénario 2 actions
+	action arroser(string id) {
+		filter_media fm <- (filter_media first_with (each.name = id));
+		if (fm != nil) {
+			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
+				water_level <- 2.0;
+			}
+			weight_score <- 15.0;
+			messages <- messages + ["add_to_score":: string(weight_score)];
+			send_message <- true;
+		}
+	}
+	action planter_flore_locale(string id) {
+		
+	}	
 }
 
 

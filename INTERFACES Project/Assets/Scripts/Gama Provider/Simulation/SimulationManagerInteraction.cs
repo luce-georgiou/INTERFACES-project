@@ -69,16 +69,37 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, Color.blue);
         //}
         //Debug.Log("HoverEnterInteraction : " + obj);
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
+        if (obj.tag.Equals("weeds"))
         {
             //Debug.Log("HoverEnterInteraction : " + obj);
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
             SendingMessages.Show("Nettoyer ?");
         }
+        if (obj.tag.Equals("trash"))
+        {
+            SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            SendingMessages.Show("Ces déchets empoisonnent l’eau et écrasent les plantes. Un mégot = 500L d’eau polluée !\nNettoyer ?");
+        }
         if (obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
             SendingMessages.Show("Effectuer curage ?");
+        }
+        if (obj.tag.Equals("ponding_area"))
+        {
+            Debug.Log("test");
+            if (obj.name.Equals("ponding_area4") || obj.name.Equals("ponding_area5") || obj.name.Equals("ponding_area6") || obj.name.Equals("ponding_area7"))
+            {
+                SendingMessages.Show("Noue de transit");
+            }
+            else
+            {
+                SendingMessages.Show("Noue d'infiltration");
+            }
+        }
+        if (obj.tag.Equals("NBSS"))
+        {
+            Debug.Log("test");
         }
     }
 
@@ -93,7 +114,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
         //Debug.Log("HoverExitInteraction : " + obj);
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media"))
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media") || obj.tag.Equals("ponding_area"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
             SendingMessages.Show("");
@@ -143,32 +164,26 @@ public class SimulationManagerInteraction : SimulationManager
                 ConnectionManager.Instance.SendExecutableAsk("mow_lawn", args);
 
             }
-            else if (grabbedObject.tag.Equals("filter_media")) {
-                Dictionary<string, string> args = new Dictionary<string, string> {
-                         {"id", grabbedObject.name }
-                    };
-                ConnectionManager.Instance.SendExecutableAsk("curage", args);
+            //else if (grabbedObject.tag.Equals("filter_media")) {
+            //    Dictionary<string, string> args = new Dictionary<string, string> {
+            //             {"id", grabbedObject.name }
+            //        };
+            //    ConnectionManager.Instance.SendExecutableAsk("curage", args);
 
-                //if (infoWorld == null || lastAttributes == null) return;
-                //int idx = infoWorld.names.IndexOf(grabbedObject.name);
-                //Debug.Log(idx);
-                //int fqt;
-                //if (idx >= 0)
-                //{
-                //    fqt = lastAttributes[idx].fqt_fm; 
-                //    if (fqt >= 2)
-                //    {
-                //        Debug.LogError("noue en bon état");
-                //    }
-                //    else
-                //    {
-                        progressBar.BarValue = progressBar.BarValue + 30f;
-                        //exclamationCanvas.SetActive(false);
-                        Debug.LogError("curage done");
-                //    }
-                //}
-                
-                    
+            //    progressBar.BarValue = progressBar.BarValue + float.Parse(message.add_to_score);
+            //    Debug.LogError("curage done");
+            //}
+            else if (grabbedObject.tag.Equals("filter_media"))
+            {
+                // On ouvre le menu radial en lui passant la position de l'objet ET son ID
+                if (MenuRadialManager.Instance != null)
+                {
+                    MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name);
+                }
+                else
+                {
+                    Debug.LogError("MenuRadialManager est introuvable ! As-tu bien mis le script dans la scène ?");
+                }
             }
             //else if (grabbedObject.tag.Equals("lawn"))
             //{
@@ -802,6 +817,13 @@ public class SimulationManagerInteraction : SimulationManager
                     progressBar.BarValue = 0f;
                     StartCoroutine(CountDown(int.Parse(message.timer_start)));
             }
+            if (message.scenario == "2")
+            {
+                Debug.Log("Scenario2 enclenché");
+                // changer matériau fm en sol sec
+                // mettre soleil aveuglant + poussière
+                // enable gameobject scenario 2
+            }
             message = null;
         }
 
@@ -837,6 +859,9 @@ public class GAMAMessage2
     public string message_;
     public string timer_start;
     public string init_;
+    public string scenario;
+    public string score;
+    public string add_to_score;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {
