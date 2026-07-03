@@ -36,6 +36,7 @@ TagManager:
   - exclamation
   - park
   - pond
+  - nbss_area
   layers:
   - Default
   - TransparentFX

@@ -27,6 +27,7 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_building;
 	unity_property up_road;
 	unity_property up_park;
+	unity_property up_nbss_area;
 
 	bool do_send_world <- true;
 	list<point> init_locations <- [{100.0, 0.0}]; //[any_location_in(init_free_space)];
@@ -59,6 +60,10 @@ species unity_linker parent: abstract_unity_linker {
 //		unity_aspect NBSS_aspect <- geometry_aspect(0.15,#green,precision);
 //		up_NBSS <- geometry_properties("NBSS","NBSS",NBSS_aspect,#no_interaction,false);
 //		unity_properties << up_NBSS;
+
+		unity_aspect nbss_area_aspect <- prefab_aspect("Prefabs/NBSSAreaPrefab",1.0,0.0,1.0,0.0,precision);
+		up_nbss_area <- geometry_properties("nbss_area","nbss_area",nbss_area_aspect,#ray_interactable,false);
+		unity_properties << up_nbss_area;
 		
 		unity_aspect filter_media_aspect <- geometry_aspect(1.5,#saddlebrown,precision);
 		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
@@ -137,6 +142,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(flower, up_flower);
 		//do add_geometries_to_send(lawn, up_lawn);
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
+		do add_geometries_to_send(nbss_area, up_nbss_area);
 	}
 	
 	// sending messages
@@ -378,7 +384,7 @@ species unity_linker parent: abstract_unity_linker {
 		filter_media fm <- (filter_media first_with (each.name = id));
 		if (fm != nil) {
 			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
-				water_level <- 2.0;
+				water_level <- water_level + 0.2;
 			}
 			weight_score <- 15.0;
 			messages <- messages + ["add_to_score":: string(weight_score)];
@@ -386,7 +392,7 @@ species unity_linker parent: abstract_unity_linker {
 		}
 	}
 	action planter_flore_locale(string id) {
-		
+		agent ag <- (filter_media + nbss_area) first_with(each.name = id);
 	}	
 }
 

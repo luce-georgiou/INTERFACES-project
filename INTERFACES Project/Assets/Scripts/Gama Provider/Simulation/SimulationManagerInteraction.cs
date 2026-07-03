@@ -635,13 +635,57 @@ public class SimulationManagerInteraction : SimulationManager
             {
                 obj.transform.position = new Vector3(obj.transform.position.x, -1.6f, obj.transform.position.z);
             }
+            else if (name.StartsWith("nbss_area"))
+            {
+                //if (message.scenario == "2")
+                //{
+                //    ChangeColor(obj, new Color(149f / 255f, 133f / 255f, 29f / 255f));
+                //}
+                //else if (message.scenario == "1")
+                //{
+                //    ChangeColor(obj, new Color(0f, 58f / 255f, 0f));
+                //}
+
+                obj.transform.position = new Vector3(obj.transform.position.x, 0.8f, obj.transform.position.z);
+                char index = name[name.Length - 1];
+                if (index == '0' || index == '1' || index == '2' || index == '3')
+                {
+                    obj.transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+                }
+                switch (index)
+                {
+                    case '0':
+                        obj.transform.localScale = new Vector3(0.8f, 1.2f, 1.02f);
+                        break;
+                    case '1':
+                        obj.transform.localScale = new Vector3(0.8f, 1.2f, 1.1f);
+                        break;
+                    case '2':
+                    case '3':
+                        obj.transform.localScale = new Vector3(1f, 1.2f, 2.56f);
+                        break;
+                    case '4':
+                        obj.transform.localScale = new Vector3(0.9f, 1.2f, 1f);
+                        break;
+                    case '5':
+                        obj.transform.localScale = new Vector3(0.9f, 1.2f, 0.7f);
+                        break;
+                    case '6':
+                        obj.transform.localScale = new Vector3(0.9f, 1.2f, 0.6f);
+                        break;
+                    case '7':
+                        obj.transform.localScale = new Vector3(0.9f, 1.2f, 1.05f);
+                        break;
+                }
+
+            }
             else if (name.StartsWith("ponding_area"))
             {
                 Material mat = Resources.Load<Material>("Materials/Water2/WaterVoronoi");
                 mat.SetFloat("_Alpha", 0.5f);
                 obj.GetComponent<Renderer>().material = mat;
                 obj.transform.position = new Vector3(obj.transform.position.x, -1.7f, obj.transform.position.z);
-                
+
                 //Debug.Log("test");
                 //GameObject pondObj = GameObject.FindWithTag("pond");
                 //Debug.Log("pond: " + pondObj);

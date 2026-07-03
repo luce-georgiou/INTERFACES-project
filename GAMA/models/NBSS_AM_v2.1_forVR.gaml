@@ -212,6 +212,10 @@ global control: fsm {
 //					};
 //				}
 //			}
+			create nbss_area {
+				shape <- list_of_geoms[index] + 3.0;
+				location <- list_of_locs[index];
+			}
 			
 			create inlet {
 				shape <- circle(0.5);
@@ -667,6 +671,12 @@ species building parent: urban_environment {
 species park parent: urban_environment {
 	aspect default {
 		draw shape color: #green;
+	}
+}
+
+species nbss_area parent: NBSS {
+	aspect default {
+		draw shape border:#black color:#yellow; 
 	}
 }
 
@@ -1518,6 +1528,7 @@ experiment "Interface (EN)"	type: gui autorun: true {
 			graphics "free_area" {
 				draw free_space color: #lightgreen;
 			}
+			species nbss_area;
 			species NBSS;
 			species inlet;
 			species outlet;
