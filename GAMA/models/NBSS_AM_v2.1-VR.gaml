@@ -28,6 +28,7 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_road;
 	unity_property up_park;
 	unity_property up_nbss_area;
+	unity_property up_local_flora;
 
 	bool do_send_world <- true;
 	list<point> init_locations <- [{100.0, 0.0}]; //[any_location_in(init_free_space)];
@@ -70,7 +71,7 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_filter_media;
 		
 		unity_aspect ponding_area_aspect <- geometry_aspect(0.1, #blue, precision);
-		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#ray_interactable,false);
+		up_ponding_area <- geometry_properties("ponding_area","ponding_area",ponding_area_aspect,#no_interaction,false);
 		unity_properties << up_ponding_area;
 		
 //		unity_aspect inlet_aspect <- geometry_aspect(0.75,#gray,precision);
@@ -98,6 +99,10 @@ species unity_linker parent: abstract_unity_linker {
 		unity_aspect flower_aspect <- prefab_aspect("Prefabs/DEMOLowPolyFlowers/Prefabs/SM_Dandelion_Small",1.0,0.0,1.0,0.0,precision);
 		up_flower <- geometry_properties("flower","flower",flower_aspect,#no_interaction,false);
 		unity_properties << up_flower;
+		
+		unity_aspect local_flora_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_2",1.0,0.0,1.0,0.0,precision);
+		up_local_flora <- geometry_properties("local_flora","local_flora",local_flora_aspect,#no_interaction,false);
+		unity_properties << up_local_flora;
 		
 		
 		/* Trash/Invasive vegetation */
@@ -143,6 +148,7 @@ species unity_linker parent: abstract_unity_linker {
 		//do add_geometries_to_send(lawn, up_lawn);
 		do add_geometries_to_send(lawn_mower, up_lawn_mower);
 		do add_geometries_to_send(nbss_area, up_nbss_area);
+		do add_geometries_to_send(local_flora, up_local_flora);
 	}
 	
 	// sending messages
@@ -358,6 +364,8 @@ species unity_linker parent: abstract_unity_linker {
 //			}
 		}
 	}
+	
+	// scénario 1 actions
 	action curage(string id) {
 		filter_media fm <- (filter_media first_with (each.name = id));
 		if (fm != nil) {
@@ -392,8 +400,32 @@ species unity_linker parent: abstract_unity_linker {
 		}
 	}
 	action planter_flore_locale(string id) {
-		agent ag <- (filter_media + nbss_area) first_with(each.name = id);
-	}	
+		filter_media ag_fm <- filter_media first_with (each.name = id);
+	    
+	    NBSS target_nbss <- nil;
+	    if (ag_fm != nil) {
+	        target_nbss <- ag_fm.my_NBSS;
+	    }
+	    
+	    if (target_nbss != "") {
+	        list<filter_media> fm_valides <- filter_media where (each.my_NBSS = target_nbss);
+	        
+	        agent zone_cible <- one_of(fm_valides);
+	        
+	        if (zone_cible != nil) {
+	            create local_flora number: 25 {
+	                location <- any_location_in(zone_cible.shape);
+	            }
+	            write "local_flora created";
+	        }
+	    }	
+	}
+//	action planter_barriere_veg(string id) {
+//		nbss_area ag <- nbss_area first_with (each.name = id);
+//		if (ag != nil) {
+//			create shrubs_plants;
+//		}
+//	}
 }
 
 

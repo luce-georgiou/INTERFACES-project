@@ -37,6 +37,7 @@ TagManager:
   - park
   - pond
   - nbss_area
+  - local_flora
   layers:
   - Default
   - TransparentFX

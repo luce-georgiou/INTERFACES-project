@@ -215,6 +215,7 @@ global control: fsm {
 			create nbss_area {
 				shape <- list_of_geoms[index] + 3.0;
 				location <- list_of_locs[index];
+				my_NBSS<- myself;
 			}
 			
 			create inlet {
@@ -675,10 +676,13 @@ species park parent: urban_environment {
 }
 
 species nbss_area parent: NBSS {
+	NBSS my_NBSS;
 	aspect default {
 		draw shape border:#black color:#yellow; 
 	}
 }
+
+species local_flora {}
 
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
 

@@ -83,23 +83,28 @@ public class SimulationManagerInteraction : SimulationManager
         if (obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            SendingMessages.Show("Effectuer curage ?");
+            //SendingMessages.Show("Effectuer curage ?");
         }
-        if (obj.tag.Equals("ponding_area"))
+        //if (obj.tag.Equals("ponding_area"))
+        //{
+        //    Debug.Log("test");
+        //    if (obj.name.Equals("ponding_area4") || obj.name.Equals("ponding_area5") || obj.name.Equals("ponding_area6") || obj.name.Equals("ponding_area7"))
+        //    {
+        //        SendingMessages.Show("Noue de transit");
+        //    }
+        //    else
+        //    {
+        //        SendingMessages.Show("Noue d'infiltration");
+        //    }
+        //}
+        if (obj.tag.Equals("nbss_area"))
         {
-            Debug.Log("test");
-            if (obj.name.Equals("ponding_area4") || obj.name.Equals("ponding_area5") || obj.name.Equals("ponding_area6") || obj.name.Equals("ponding_area7"))
-            {
-                SendingMessages.Show("Noue de transit");
-            }
-            else
-            {
-                SendingMessages.Show("Noue d'infiltration");
-            }
+            SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            //SendingMessages.Show("Effectuer curage ?");
         }
         if (obj.tag.Equals("NBSS"))
         {
-            Debug.Log("test");
+            Debug.Log("NBSS détecté");
         }
     }
 
@@ -114,7 +119,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
         //Debug.Log("HoverExitInteraction : " + obj);
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media") || obj.tag.Equals("ponding_area"))
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media") || obj.tag.Equals("ponding_area") || obj.tag.Equals("nbss_area"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
             SendingMessages.Show("");
@@ -178,12 +183,15 @@ public class SimulationManagerInteraction : SimulationManager
                 // On ouvre le menu radial en lui passant la position de l'objet ET son ID
                 if (MenuRadialManager.Instance != null)
                 {
-                    MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name);
+                    MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "filter_media");
                 }
                 else
                 {
                     Debug.LogError("MenuRadialManager est introuvable ! As-tu bien mis le script dans la scène ?");
                 }
+            }
+            else if (grabbedObject.tag.Equals("nbss_area")) {
+                MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "NBSS_area");
             }
             //else if (grabbedObject.tag.Equals("lawn"))
             //{
