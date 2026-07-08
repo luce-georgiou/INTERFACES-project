@@ -10,13 +10,17 @@ public class MenuRadialManager : MonoBehaviour
     public GameObject conteneurFilterMedia;
     public GameObject conteneurNBSSArea;
 
-    [Header("Paramètres des buissons")]
-    public GameObject prefabShrub; // Glisse ton UNIQUE buisson ici
+    [Header("Paramètres des barrières")]
+    public GameObject prefabShrub;
+    public GameObject prefabMetalFence;
     public float decalageVersRoute = 2.5f;
     public float espacementEntreShrubs = 1.0f; // Distance (en mètres) entre chaque buisson
+    public float spaceBetweenFences = 3.0f;
 
     // Cette variable va mémoriser l'ID du filter_media sur lequel on a cliqué
     private string idObjetActuel = "";
+
+    [SerializeField] private ProgressBar progressBarObj;
 
     private void Awake()
     {
@@ -64,7 +68,7 @@ public class MenuRadialManager : MonoBehaviour
     // créer barrière végétale
     
 
-    public void CreerBarriereVeg(GameObject noueCliquee)
+    public void CreerBarriere(GameObject noueCliquee, GameObject fenceType)
     {
         // --- 1. TROUVER LA ROUTE LA PLUS PROCHE ---
         GameObject[] toutesLesRoutes = GameObject.FindGameObjectsWithTag("road");
@@ -135,11 +139,27 @@ public class MenuRadialManager : MonoBehaviour
             Vector3 positionShrub = centreBarriere + (directionLigne * d);
             Quaternion rotationAleatoire = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
 
-            Instantiate(prefabShrub, positionShrub, rotationAleatoire);
+            Instantiate(fenceType, positionShrub, rotationAleatoire);
             compteur++;
         }
 
         Debug.Log($"SUCCÈS : {compteur} buissons plantés parallèlement à {noueCliquee.name}");
+    }
+
+    public void PoserPaillage(GameObject noueCliquee)
+    {
+        Material mat = Resources.Load<Material>("Stylize Wood Texture/Materials/Stylize Wood ");
+        noueCliquee.GetComponent<Renderer>().material = mat;
+
+        int idx = int.Parse(noueCliquee.name.Replace("nbss_area", ""));
+        GameObject fmObj = GameObject.Find("filter_media" +  idx);
+
+        Vector3 tailleFM = fmObj.GetComponent<Renderer>().bounds.size;
+        GameObject paillageObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        paillageObj.name = "paillage" + idx;
+        paillageObj.transform.localScale = new Vector3(tailleFM.x, 0.2f, tailleFM.z);
+        paillageObj.GetComponent<Renderer>().material = mat;
+        paillageObj.transform.position = noueCliquee.transform.position + new Vector3(0, -2.3f, 0);
     }
 
     // --- LES BOUTONS DE TON MENU RADIAL ---
@@ -168,7 +188,18 @@ public class MenuRadialManager : MonoBehaviour
 
     public void BoutonActionPaillage()
     {
-        EnvoyerCommandeGama("paillage");
+        GameObject zoneAPailler = GameObject.Find(idObjetActuel);
+        if (zoneAPailler != null)
+        {
+            PoserPaillage(zoneAPailler);
+        }
+        else
+        {
+            Debug.LogError("impossible de poser paillage");
+        }
+        FermerMenu();
+        //EnvoyerCommandeGama("point_gain");
+        progressBarObj.BarValue = progressBarObj.BarValue + 20f;
     }
 
     public void BoutonActionBarriereVeg()
@@ -177,7 +208,7 @@ public class MenuRadialManager : MonoBehaviour
 
         if (zoneAAmemenager != null)
         {
-            CreerBarriereVeg(zoneAAmemenager);
+            CreerBarriere(zoneAAmemenager, prefabShrub);
             Debug.Log("barrière créée");
         }
         else
@@ -187,9 +218,29 @@ public class MenuRadialManager : MonoBehaviour
 
         // 3. On ferme le menu
         FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue + 20f;
     }
 
-    
+    public void BoutonActionMetalFence()
+    {
+        GameObject zoneAAmemenager = GameObject.Find(idObjetActuel);
+
+        if (zoneAAmemenager != null)
+        {
+            CreerBarriere(zoneAAmemenager, prefabMetalFence);
+            Debug.Log("barrière créée");
+        }
+        else
+        {
+            Debug.LogWarning("Impossible de retrouver la zone : " + idObjetActuel);
+        }
+
+        // 3. On ferme le menu
+        FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue - 5f;
+    }
+
+
 
     // --- FONCTION UTILITAIRE CENTRALE ---
     // Évite de répéter le code de connexion pour chaque bouton

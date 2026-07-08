@@ -351,6 +351,15 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	action receive_message(string id, string mes) {
 		write "Player " + id + " send the message: " + mes;
+		if (mes = "skip") {
+			do_skip <- true; 
+		}
+		else if (mes = "scenario1") {
+			launch_sc1 <- true;
+		}
+		else if (mes = "scenario2") {
+			launch_sc2 <- true;
+		}
 	}
 	
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
@@ -418,12 +427,24 @@ species unity_linker parent: abstract_unity_linker {
 	            }
 	            write "local_flora created";
 	        }
+	        weight_score <- 25.0;
+			messages <- messages + ["add_to_score":: string(weight_score)];
+			send_message <- true;
 	    }	
 	}
 //	action planter_barriere_veg(string id) {
 //		nbss_area ag <- nbss_area first_with (each.name = id);
 //		if (ag != nil) {
 //			create shrubs_plants;
+//		}
+//	}
+
+//	action point_gain(string id) {
+//		agent ag <- (agent first_with (each.name = id));
+//		if (ag != nil) {
+//			weight_score <- 20.0;
+//			messages <- messages + ["add_to_score":: string(weight_score)];
+//			send_message <- true;
 //		}
 //	}
 }

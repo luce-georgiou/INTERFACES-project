@@ -39,9 +39,13 @@ global control: fsm {
 	/* Modifs par rapport modèle Emma */
 	bool send_message <- false;
 	map messages <- [];
+	bool do_skip <- false;
+	bool launch_sc1 <- false;
+	bool launch_sc2 <- false;
 	int init_wait <- 0;
 	float score <- 0.0;
 	float weight_score <- 0.0;
+	string scenario <- "";
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -433,7 +437,7 @@ global control: fsm {
     float slow_start;
     int last_slow_month <- -1;
     
-    state situation1_init initial: true {
+    state situation1_init {
 	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
 	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
 	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
@@ -446,7 +450,10 @@ global control: fsm {
     	minimum_cycle_duration <- 2.0;
     	enter {
 	    	write "entering situation1_init";
-	    	
+	    	scenario <- "1_0";
+	    	active_start_time <- gama.machine_time;
+	    	messages <- messages + ["timer_start":: "180"];
+	    	send_message <- true;
 			loop s over: NBSS where (each.my_name = "swale1") {
 	    		create trash number: 10 {
 			        shape <- circle(0.1);
@@ -505,8 +512,9 @@ global control: fsm {
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: cycle >= 5; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
     	exit {
+    		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
     		send_message <- true;
     	}
@@ -525,7 +533,7 @@ global control: fsm {
     		//set day to day after rainday (no rain)
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; //180000; // 3min en ms
+    	transition to: slow_phase when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_1"); //180000; // 3min en ms
     	exit {
     		messages <- messages + ["init_":: "regular_state"];
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
@@ -536,16 +544,17 @@ global control: fsm {
     	}
     }
     
-    state situation1_end {
-    	minimum_cycle_duration <- 1.0;
-    	enter {
-    		// analyse du jeu
-    	}
-    }
+//    state situation1_end {
+//    	minimum_cycle_duration <- 1.0;
+//    	enter {
+//    		// analyse du jeu
+//    	}
+//    }
     
     state situation2_passive {
     	minimum_cycle_duration <- 2.0;
     	enter {
+    		scenario <- "2_0";
     		active_start_time <- gama.machine_time;
     		ask trash {
     			do die;
@@ -565,31 +574,49 @@ global control: fsm {
 			messages <- messages + ["scenario":: "2"];
 			send_message <- true;
     	}
-    	transition to: situation2_transition when: (gama.machine_time - active_start_time) >= 180000;
+    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 180000 or (do_skip and scenario = "2_0");
     	exit {
     		active_start_time <- 0.0;
+    		do_skip <- false;
     	}
     }
     
-    state situation2_transition {
-    	minimum_cycle_duration <- 20.0;
-    	enter {
-    		active_start_time <- gama.machine_time;
-    	}
-    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000;
-    	exit {
-    		active_start_time <- 0.0;
-    	}
-    }
+//    state situation2_transition {
+//    	minimum_cycle_duration <- 20.0;
+//    	enter {
+//    		
+//    		active_start_time <- gama.machine_time;
+//    	}
+//    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000;
+//    	exit {
+//    		active_start_time <- 0.0;
+//    		
+//    	}
+//    }
     
     state situation2_active {
     	minimum_cycle_duration <- 1.0;
     	enter {
+    		scenario <- "2_1";
     		active_start_time <- gama.machine_time;
     	}
-    	transition to: slow_phase when: (gama.machine_time - active_start_time) >= 180000; //if then state fail else if else
+    	transition to: menu when: (gama.machine_time - active_start_time) >= 180000 or (do_skip and scenario = "2_1"); //if then state fail else if else
     	exit {
     		active_start_time <- 0.0;
+    		do_skip <- false;
+    	}
+    }
+    
+    state menu initial: true {
+    	minimum_cycle_duration <- 10.0;
+    	enter {
+    		scenario <- "menu";
+    	}
+    	transition to: situation1_init when: launch_sc1;
+    	transition to: situation2_passive when: launch_sc2;
+    	exit {
+    		launch_sc1 <- false;
+    		launch_sc2 <- false;
     	}
     }
     
