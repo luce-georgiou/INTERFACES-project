@@ -5,11 +5,13 @@ using UnityEngine.SceneManagement;
 public class InterfaceButton : MonoBehaviour
 {
     public GameObject menuPanel;
+    public GameObject DisplayCanvas;
 
     void Start()
     {
         if (menuPanel != null)
         {
+            DisplayCanvas.SetActive(false);
             menuPanel.SetActive(true);
         }
     }
@@ -24,6 +26,8 @@ public class InterfaceButton : MonoBehaviour
                  {"id",ConnectionManager.Instance.GetConnectionId() },
                  {"mes",  mes }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+
+        DisplayCanvas.SetActive(true);
     }
 
     public void LaunchSc2()
@@ -37,6 +41,8 @@ public class InterfaceButton : MonoBehaviour
                  {"id",ConnectionManager.Instance.GetConnectionId() },
                  {"mes",  mes }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+
+        DisplayCanvas.SetActive(true);
     }
 
     public void QuitGame()

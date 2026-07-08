@@ -437,7 +437,21 @@ global control: fsm {
     float slow_start;
     int last_slow_month <- -1;
     
-    state situation1_init {
+    state menu initial: true {
+    	//minimum_cycle_duration <- 10.0;
+    	enter {
+    		scenario <- "menu";
+    		write scenario;
+    	}
+    	transition to: situation1_passive when: launch_sc1;
+    	transition to: situation2_passive when: launch_sc2;
+    	exit {
+    		launch_sc1 <- false;
+    		launch_sc2 <- false;
+    	}
+    }
+    
+    state situation1_passive {
 	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
 	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
 	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
@@ -447,12 +461,12 @@ global control: fsm {
 	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
 	
     	//minimum_cycle_duration <- 0.2;
-    	minimum_cycle_duration <- 2.0;
+    	//minimum_cycle_duration <- 2.0;
     	enter {
 	    	write "entering situation1_init";
 	    	scenario <- "1_0";
 	    	active_start_time <- gama.machine_time;
-	    	messages <- messages + ["timer_start":: "180"];
+	    	messages <- messages + ["timer_start":: "60"];
 	    	send_message <- true;
 			loop s over: NBSS where (each.my_name = "swale1") {
 	    		create trash number: 10 {
@@ -512,7 +526,7 @@ global control: fsm {
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
@@ -522,9 +536,10 @@ global control: fsm {
     
     float active_start_time <- 0.0;
     state situation1_active {
-    	minimum_cycle_duration <- 1.0; //9.0
+    	//minimum_cycle_duration <- 1.0; //9.0
     	enter {
     		write "active phase for player";
+    		scenario <- "1_1";
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["init_":: "pipe2_3"];
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
@@ -533,11 +548,15 @@ global control: fsm {
     		//set day to day after rainday (no rain)
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: slow_phase when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_1"); //180000; // 3min en ms
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_1"); //180000; // 3min en ms
     	exit {
+    		do_skip <- false;
+    		messages <- messages + ["timer_start":: "0"];
     		messages <- messages + ["init_":: "regular_state"];
     		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
 			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
+			messages <- messages + ["scenario":: "menu"];
+			write "transition to " + scenario;
 			send_message <- true;
 			active_start_time <- 0.0;
 			score <- 0.0;
@@ -552,10 +571,15 @@ global control: fsm {
 //    }
     
     state situation2_passive {
-    	minimum_cycle_duration <- 2.0;
+    	//minimum_cycle_duration <- 2.0;
     	enter {
     		scenario <- "2_0";
+    		write scenario;
     		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "C'est la canicule, et les plus à plaindre sont les plantes!"];
+    		messages <- messages + ["timer_start":: "60"];
+    		//write messages;
+    		send_message <- true;
     		ask trash {
     			do die;
     		}
@@ -570,14 +594,18 @@ global control: fsm {
 				is_obstructed <- false;
 				water_level <- 0.0;
 			}
-			starting_date <- date(string(int(20070429))); //mettre en été
-			messages <- messages + ["scenario":: "2"];
-			send_message <- true;
+			//starting_date <- date(string(int(20070429))); //mettre en été
+//			messages <- messages + ["scenario":: "2"];
+//			send_message <- true;
     	}
-    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 180000 or (do_skip and scenario = "2_0");
+    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 60000 or (do_skip and scenario = "2_0");
     	exit {
+    		do_skip <- false;
+    		messages <- messages + ["timer_start":: "0"];
+    		send_message <- true;
     		active_start_time <- 0.0;
     		do_skip <- false;
+    		write "exiting sc2_passive";
     	}
     }
     
@@ -595,30 +623,25 @@ global control: fsm {
 //    }
     
     state situation2_active {
-    	minimum_cycle_duration <- 1.0;
+    	//minimum_cycle_duration <- 1.0;
     	enter {
     		scenario <- "2_1";
     		active_start_time <- gama.machine_time;
+    		messages <- messages + ["timer_start":: "180"];
+    		send_message <- true;
     	}
     	transition to: menu when: (gama.machine_time - active_start_time) >= 180000 or (do_skip and scenario = "2_1"); //if then state fail else if else
     	exit {
+    		do_skip <- false;
+    		messages <- messages + ["timer_start":: "0"];
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
     		active_start_time <- 0.0;
     		do_skip <- false;
     	}
     }
     
-    state menu initial: true {
-    	minimum_cycle_duration <- 10.0;
-    	enter {
-    		scenario <- "menu";
-    	}
-    	transition to: situation1_init when: launch_sc1;
-    	transition to: situation2_passive when: launch_sc2;
-    	exit {
-    		launch_sc1 <- false;
-    		launch_sc2 <- false;
-    	}
-    }
+    
     
     //state2 fail -> en dessous progress bar 50% premier état, implémenter progress bar dans gama et envoyer le score en message
     //state ok -> 50-80%

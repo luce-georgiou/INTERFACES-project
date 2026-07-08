@@ -20,7 +20,10 @@ using UnityEngine.ProBuilder.Shapes;
 public class SimulationManagerInteraction : SimulationManager
 {
 
+    public GameObject DisplayCanvas;
+    public GameObject menuPanel;
     public TMP_Text timerText;
+    private Coroutine timerCoroutine;
     public ProgressBar progressBar;
     //public GameObject exclamationCanvas;
     private List<Attributes> lastAttributes;
@@ -39,26 +42,36 @@ public class SimulationManagerInteraction : SimulationManager
         SendingMessages.Show("");
     }
 
-    
-    private bool timerRunning = false;
     IEnumerator CountDown(int duration)
     {
         Debug.Log("CountDown started: " + duration);
-        if (timerText == null) { Debug.LogError("timerText is null!"); yield break; }
-        if (timerRunning) yield break;
-        timerRunning = true;
+
+        if (timerText == null)
+        {
+            Debug.LogError("timerText is null!");
+            yield break;
+        }
+
+        // SUPPRESSION du booléen timerRunning qui causait le blocage
+
         int remaining = duration;
+
         while (remaining > 0)
         {
+            // Mise à jour de l'affichage (ex: 3:00)
             timerText.text = remaining / 60 + ":" + (remaining % 60 < 10 ? "0" : "") + remaining % 60;
+
+            // On attend 1 seconde
             yield return new WaitForSeconds(1f);
+
             remaining--;
         }
+
+        // Fin du chrono
         timerText.text = "0:00";
-        timerRunning = false;
     }
 
-    
+
 
     //Defines what happens when a ray passes over an object 
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
@@ -863,11 +876,33 @@ public class SimulationManagerInteraction : SimulationManager
             if (!string.IsNullOrWhiteSpace(message.timer_start))
             {
                 Debug.Log("timer reçu = " + message.timer_start);
+
                 if (message.timer_start == "0")
+                {
+                    // 1. On efface le texte
                     timerText.text = "";
+
+                    // 2. On coupe véritablement le timer s'il était en cours
+                    if (timerCoroutine != null)
+                    {
+                        StopCoroutine(timerCoroutine);
+                        timerCoroutine = null; // On réinitialise la mémoire
+                    }
+                }
                 else
+                {
                     progressBar.BarValue = 0f;
-                    StartCoroutine(CountDown(int.Parse(message.timer_start)));
+
+                    // (Optionnel mais recommandé) Sécurité : on arrête un potentiel ancien timer
+                    // avant d'en lancer un nouveau pour éviter qu'ils ne se superposent
+                    if (timerCoroutine != null)
+                    {
+                        StopCoroutine(timerCoroutine);
+                    }
+
+                    // On lance le nouveau timer et on le sauvegarde dans notre variable
+                    timerCoroutine = StartCoroutine(CountDown(int.Parse(message.timer_start)));
+                }
             }
             if (message.scenario == "2")
             {
@@ -875,6 +910,11 @@ public class SimulationManagerInteraction : SimulationManager
                 // changer matériau fm en sol sec
                 // mettre soleil aveuglant + poussière
                 // enable gameobject scenario 2
+            }
+            if (message.scenario == "menu") {
+                Debug.Log("Afficher menu");
+                DisplayCanvas.SetActive(false);
+                menuPanel.SetActive(true);
             }
             message = null;
         }
