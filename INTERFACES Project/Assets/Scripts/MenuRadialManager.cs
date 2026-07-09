@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Globalization;
 
 public class MenuRadialManager : MonoBehaviour
 {
@@ -19,6 +20,9 @@ public class MenuRadialManager : MonoBehaviour
 
     // Cette variable va mémoriser l'ID du filter_media sur lequel on a cliqué
     private string idObjetActuel = "";
+    private float weight_score = 0.0f;
+    // Mémorise l'heure exacte (en secondes) de la dernière mise à jour du score
+    private float tempsDernierScore = 0f;
 
     [SerializeField] private ProgressBar progressBarObj;
 
@@ -32,6 +36,36 @@ public class MenuRadialManager : MonoBehaviour
     void Start()
     {
         FermerMenu();
+    }
+
+    private void OnEnable()
+    {
+        //SimulationManagerInteraction.OnGAMAMessageReceived -= TreatMessage;
+        SimulationManagerInteraction.OnGAMAMessageReceived += TreatMessage;
+    }
+    private void OnDisable()
+    {
+        SimulationManagerInteraction.OnGAMAMessageReceived -= TreatMessage;
+    }
+    private void TreatMessage(GAMAMessage2 mes)
+    {
+        //Debug.Log(mes);
+        if (!string.IsNullOrWhiteSpace(mes.add_to_score))
+        {
+            if (Time.time - tempsDernierScore < 0.01f)
+            {
+                Debug.LogWarning("Fantôme bloqué ! (Message en double ignoré)");
+                return; // On arrête la lecture ici pour ce message précis
+            }
+
+            // On met à jour l'heure du dernier score pour le prochain coup
+            tempsDernierScore = Time.time;
+
+            Debug.Log("add to the score : " +  mes.add_to_score);
+            weight_score = float.Parse(mes.add_to_score, CultureInfo.InvariantCulture);
+            progressBarObj.BarValue += weight_score;
+
+        }
     }
 
     // On a ajouté le paramètre "objectId"
@@ -254,6 +288,9 @@ public class MenuRadialManager : MonoBehaviour
 
             // On envoie l'action à GAMA
             ConnectionManager.Instance.SendExecutableAsk(nomActionGama, args);
+            //Debug.Log(weight_score);
+            //progressBarObj.BarValue = progressBarObj.BarValue + weight_score;
+            //Debug.Log("score curage ajouté : " + progressBarObj.BarValue);
             Debug.Log($"Action '{nomActionGama}' envoyée pour l'objet : {idObjetActuel}");
         }
 

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Linq;
 
 [RequireComponent(typeof(UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable))]
-public class DisableObject : MonoBehaviour
+public class RemoveObjects : MonoBehaviour
 {
     private UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable interactable;
 

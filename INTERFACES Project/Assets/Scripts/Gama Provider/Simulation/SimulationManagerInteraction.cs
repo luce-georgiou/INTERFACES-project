@@ -19,13 +19,17 @@ using UnityEngine.ProBuilder.Shapes;
 
 public class SimulationManagerInteraction : SimulationManager
 {
-
+    public GameObject Scenario1;
+    public GameObject Scenario2;
+    public Material defaultSky;
+    public Material summerSky;
     public GameObject DisplayCanvas;
     public GameObject menuPanel;
     public TMP_Text timerText;
     private Coroutine timerCoroutine;
     public ProgressBar progressBar;
     //public GameObject exclamationCanvas;
+    GAMAMessage2 message = null;
     private List<Attributes> lastAttributes;
 
     // Mettre dans cette liste tous les objets statiques
@@ -52,10 +56,7 @@ public class SimulationManagerInteraction : SimulationManager
             yield break;
         }
 
-        // SUPPRESSION du booléen timerRunning qui causait le blocage
-
         int remaining = duration;
-
         while (remaining > 0)
         {
             // Mise à jour de l'affichage (ex: 3:00)
@@ -69,6 +70,17 @@ public class SimulationManagerInteraction : SimulationManager
 
         // Fin du chrono
         timerText.text = "0:00";
+
+        //envoyer message à Gama avec score en fin de phase
+        SendMessageToGama(progressBar.BarValue.ToString());
+    }
+
+    public void SendMessageToGama(string mes)
+    {
+        Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  mes }};
+        ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
     }
 
 
@@ -77,14 +89,8 @@ public class SimulationManagerInteraction : SimulationManager
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
     {
          GameObject obj = ev.interactableObject.transform.gameObject;
-        //if (obj.tag.Equals("inlet") || obj.tag.Equals("outlet"))
-        //{
-        //    ChangeColor(obj, Color.blue);
-        //}
-        //Debug.Log("HoverEnterInteraction : " + obj);
         if (obj.tag.Equals("weeds"))
         {
-            //Debug.Log("HoverEnterInteraction : " + obj);
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
             SendingMessages.Show("Nettoyer ?");
         }
@@ -96,7 +102,6 @@ public class SimulationManagerInteraction : SimulationManager
         if (obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            //SendingMessages.Show("Effectuer curage ?");
         }
         //if (obj.tag.Equals("ponding_area"))
         //{
@@ -113,7 +118,6 @@ public class SimulationManagerInteraction : SimulationManager
         if (obj.tag.Equals("nbss_area"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            //SendingMessages.Show("Effectuer curage ?");
         }
         if (obj.tag.Equals("NBSS"))
         {
@@ -132,7 +136,7 @@ public class SimulationManagerInteraction : SimulationManager
         //    ChangeColor(obj, isSelected ? Color.red : Color.gray);
         //}
         //Debug.Log("HoverExitInteraction : " + obj);
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("filter_media") || obj.tag.Equals("ponding_area") || obj.tag.Equals("nbss_area"))
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("nbss_area") || obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.white);
             SendingMessages.Show("");
@@ -482,16 +486,17 @@ public class SimulationManagerInteraction : SimulationManager
                     //mat.SetFloat("_Alpha", 0.5f);
 
                     c.a = 0.6f;
-                    
+
                     //Debug.Log(c.a);
+                    mat.SetColor("_BaseColor", c);
+                    obj.GetComponent<Renderer>().material = mat;
                 }
-                else
-                {
-                    c.a = 1f;
+                //else
+                //{
+                //    c.a = 1f;
                     
-                }
-                mat.SetColor("_BaseColor", c);
-                obj.GetComponent<Renderer>().material = mat;
+                //}
+                
 
                 //creating sediment accumulation
                 int idx = int.Parse(obj.name.Replace("filter_media", ""));
@@ -706,16 +711,8 @@ public class SimulationManagerInteraction : SimulationManager
                 mat.SetFloat("_Alpha", 0.5f);
                 obj.GetComponent<Renderer>().material = mat;
                 obj.transform.position = new Vector3(obj.transform.position.x, -1.7f, obj.transform.position.z);
-
-                //Debug.Log("test");
-                //GameObject pondObj = GameObject.FindWithTag("pond");
-                //Debug.Log("pond: " + pondObj);
                 float water_level = attributes[i].water_level;
-                //Debug.Log("water: " + water_level);
-                //if (name == "ponding_area5")
-                //{
                 obj.transform.localScale = new Vector3(obj.transform.localScale.x, water_level, obj.transform.localScale.z);
-                //Debug.Log(name + " water_level: " + water_level);
                 if (water_level <= 0f)
                 {
                     obj.SetActive(false);
@@ -793,19 +790,6 @@ public class SimulationManagerInteraction : SimulationManager
         return stairs;
     }
 
-    protected void BuildEnvironment()
-    {
-        // Swale 4
-        BuildSwale(24.5f, 1.5f, 2f, 5, new Vector3(90f, 0.0f, 45.64999f)).transform.rotation = Quaternion.Euler(0, -90, 0);
-        BuildSwale(24.5f, 1.5f, 2f, 5, new Vector3(93f, 0.0f, 45.64999f)).transform.rotation = Quaternion.Euler(0, 90, 0); // tourne de 90�;
-    }
-
-
-    //void Start()
-    //{
-    //    BuildEnvironment();
-    //}
-
     //Defines what happens when the main button (of the right controller) is trigger 
     protected override void TriggerMainButton()
     {
@@ -821,11 +805,13 @@ public class SimulationManagerInteraction : SimulationManager
 
 
 
-    GAMAMessage2 message = null;
+    public static event Action<GAMAMessage2> OnGAMAMessageReceived;
 
     protected override void ManageOtherMessages(string content)
     {
+        Debug.LogError("--- LE CRIEUR S'APPRÊTE À CRIER ---");
         message = GAMAMessage2.CreateFromJSON(content);
+        OnGAMAMessageReceived?.Invoke(message);
     }
 
     //action activated at the end of the update phase (every frame)
@@ -886,6 +872,7 @@ public class SimulationManagerInteraction : SimulationManager
                     if (timerCoroutine != null)
                     {
                         StopCoroutine(timerCoroutine);
+                        SendMessageToGama(progressBar.BarValue.ToString());
                         timerCoroutine = null; // On réinitialise la mémoire
                     }
                 }
@@ -898,11 +885,40 @@ public class SimulationManagerInteraction : SimulationManager
                     if (timerCoroutine != null)
                     {
                         StopCoroutine(timerCoroutine);
+                        SendMessageToGama(progressBar.BarValue.ToString());
                     }
 
                     // On lance le nouveau timer et on le sauvegarde dans notre variable
                     timerCoroutine = StartCoroutine(CountDown(int.Parse(message.timer_start)));
                 }
+            }
+            GameObject[] nbssAreaObjs = GameObject.FindGameObjectsWithTag("nbss_area");
+            GameObject[] fmObjs = GameObject.FindGameObjectsWithTag("filter_media");
+            GameObject[] parkObjs = GameObject.FindGameObjectsWithTag("park");
+            GameObject lawnObj = GameObject.FindGameObjectWithTag("lawn");
+            if (message.scenario == "1")
+            {
+                Debug.Log("Scenario1 enclenché");
+                Scenario1.SetActive(true);
+                Scenario2.SetActive(false);
+
+                // Assigning spring materials to vegetal components
+                Material matNBSS = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass05");
+                Material matLawn = Resources.Load<Material>("Materials/Lawn_Opaque");
+                Material matPark = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass06");
+                foreach (GameObject obj in nbssAreaObjs.Concat(fmObjs))
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matNBSS;
+                }
+                lawnObj.GetComponent<Renderer>().sharedMaterial = matLawn;
+                foreach (GameObject obj in parkObjs)
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matPark;
+                }
+
+                // Update sky box to spring sky
+                RenderSettings.skybox = defaultSky;
+                DynamicGI.UpdateEnvironment();
             }
             if (message.scenario == "2")
             {
@@ -910,9 +926,33 @@ public class SimulationManagerInteraction : SimulationManager
                 // changer matériau fm en sol sec
                 // mettre soleil aveuglant + poussière
                 // enable gameobject scenario 2
+                Scenario1.SetActive(false);
+                Scenario2.SetActive(true);
+
+                // Assigning summer/dry materials to vegetal components
+                Material matDrySoil = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Dry03");
+                Material matSummerGrass0 = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass02");
+                Material matSummerGrass1 = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass01");
+
+                foreach (GameObject obj in nbssAreaObjs.Concat(fmObjs))
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matDrySoil;
+                }
+                lawnObj.GetComponent<Renderer>().sharedMaterial = matSummerGrass0;
+                foreach (GameObject obj in parkObjs)
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matSummerGrass1;
+                }
+
+                // Update sky box to summer sky
+                RenderSettings.skybox = summerSky;
+                DynamicGI.UpdateEnvironment();
+                
             }
             if (message.scenario == "menu") {
                 Debug.Log("Afficher menu");
+                Scenario1.SetActive(false);
+                Scenario2.SetActive(false);
                 DisplayCanvas.SetActive(false);
                 menuPanel.SetActive(true);
             }

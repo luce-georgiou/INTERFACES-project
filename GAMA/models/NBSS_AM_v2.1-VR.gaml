@@ -360,6 +360,10 @@ species unity_linker parent: abstract_unity_linker {
 		else if (mes = "scenario2") {
 			launch_sc2 <- true;
 		}
+		else { //On traite le score en fin de phase
+			score <- float(mes);
+			write score;
+		}
 	}
 	
 	reflex is_flooding when: ponding_area one_matches (each.is_obstructed) {
@@ -387,9 +391,10 @@ species unity_linker parent: abstract_unity_linker {
 						water_level <- 0.0;
 					}
 					//score <- score + 30.0;
-					weight_score <- 30.0;
+					//weight_score <- 30;
 					messages <- messages + ["init_":: "regular_state"];
-					messages <- messages + ["add_to_score":: string(weight_score)];
+					messages <- messages + ["add_to_score":: "30"];
+					write "--- ENVOI DU SCORE A UNITY ---";
 					send_message <- true;	
 				}
 			}
@@ -403,8 +408,8 @@ species unity_linker parent: abstract_unity_linker {
 			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
 				water_level <- water_level + 0.2;
 			}
-			weight_score <- 15.0;
-			messages <- messages + ["add_to_score":: string(weight_score)];
+			//weight_score <- 15;
+			messages <- messages + ["add_to_score":: string(15)];
 			send_message <- true;
 		}
 	}
@@ -427,8 +432,8 @@ species unity_linker parent: abstract_unity_linker {
 	            }
 	            write "local_flora created";
 	        }
-	        weight_score <- 25.0;
-			messages <- messages + ["add_to_score":: string(weight_score)];
+	        //weight_score <- 25;
+			messages <- messages + ["add_to_score":: string(25)];
 			send_message <- true;
 	    }	
 	}

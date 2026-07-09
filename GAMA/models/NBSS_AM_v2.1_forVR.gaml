@@ -466,8 +466,10 @@ global control: fsm {
 	    	write "entering situation1_init";
 	    	scenario <- "1_0";
 	    	active_start_time <- gama.machine_time;
+	    	messages <- messages + ["scenario":: "1"];
 	    	messages <- messages + ["timer_start":: "60"];
 	    	send_message <- true;
+			score <- 0.0;
 			loop s over: NBSS where (each.my_name = "swale1") {
 	    		create trash number: 10 {
 			        shape <- circle(0.1);
@@ -486,7 +488,7 @@ global control: fsm {
 			        location <- any_location_in(s);
 			    }
 			}
-			point blocked_inlet <- {list_of_locs[2].x - list_of_geoms[2].width/2, list_of_locs[2].y};
+			point blocked_inlet <- {list_of_locs[2].x + list_of_geoms[2].width/2, list_of_locs[2].y};
 			geometry perimeter <- circle(1.0) at_location blocked_inlet;
 			create weeds number: 5 {
 				location <- any_location_in(perimeter);
@@ -559,7 +561,7 @@ global control: fsm {
 			write "transition to " + scenario;
 			send_message <- true;
 			active_start_time <- 0.0;
-			score <- 0.0;
+			
     	}
     }
     
@@ -576,10 +578,12 @@ global control: fsm {
     		scenario <- "2_0";
     		write scenario;
     		active_start_time <- gama.machine_time;
+    		messages <- messages + ["scenario":: "2"];
     		messages <- messages + ["message_":: "C'est la canicule, et les plus à plaindre sont les plantes!"];
     		messages <- messages + ["timer_start":: "60"];
     		//write messages;
     		send_message <- true;
+    		score <- 0.0;
     		ask trash {
     			do die;
     		}
@@ -595,7 +599,7 @@ global control: fsm {
 				water_level <- 0.0;
 			}
 			//starting_date <- date(string(int(20070429))); //mettre en été
-//			messages <- messages + ["scenario":: "2"];
+//			
 //			send_message <- true;
     	}
     	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 60000 or (do_skip and scenario = "2_0");
@@ -637,7 +641,6 @@ global control: fsm {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
     		active_start_time <- 0.0;
-    		do_skip <- false;
     	}
     }
     
