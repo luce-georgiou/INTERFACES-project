@@ -54,7 +54,7 @@ public class MenuRadialManager : MonoBehaviour
         {
             if (Time.time - tempsDernierScore < 0.01f)
             {
-                Debug.LogWarning("Fantôme bloqué ! (Message en double ignoré)");
+                Debug.LogWarning("Doublon de score bloqué");
                 return; // On arrête la lecture ici pour ce message précis
             }
 
@@ -64,13 +64,18 @@ public class MenuRadialManager : MonoBehaviour
             Debug.Log("add to the score : " +  mes.add_to_score);
             weight_score = float.Parse(mes.add_to_score, CultureInfo.InvariantCulture);
             progressBarObj.BarValue += weight_score;
-
+            Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  progressBarObj.BarValue.ToString() }};
+            ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
         }
     }
 
     // On a ajouté le paramètre "objectId"
     public void OuvrirMenu(Transform positionCible, string objectId, string typeObjet)
     {
+        if (!SimulationManagerInteraction.interactionsAutorisees) return;
+
         Debug.Log("Le menu essaie de s'ouvrir pour l'objet : " + objectId);
         idObjetActuel = objectId; // On sauvegarde l'ID pour l'utiliser plus tard
 

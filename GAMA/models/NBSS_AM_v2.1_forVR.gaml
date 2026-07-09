@@ -467,33 +467,34 @@ global control: fsm {
 	    	scenario <- "1_0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "1"];
+	    	messages <- messages + ["phase":: "passive"];
 	    	messages <- messages + ["timer_start":: "60"];
 	    	send_message <- true;
 			score <- 0.0;
-			loop s over: NBSS where (each.my_name = "swale1") {
-	    		create trash number: 10 {
-			        shape <- circle(0.1);
-			        location <- any_location_in(s);
-			    }
-	    	}
-	    	create flower number: 10 {
-		    	//int i <- 0;
-		    	shape <- triangle(0.6);
-		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
-								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
-				};
-			}
-			loop s over: NBSS where (each.my_name != "swale0") {
-			    create weeds number: 25 {
-			        location <- any_location_in(s);
-			    }
-			}
+//			loop s over: NBSS where (each.my_name = "swale1") {
+//	    		create trash number: 10 {
+//			        shape <- circle(0.1);
+//			        location <- any_location_in(s);
+//			    }
+//	    	}
+//	    	create flower number: 10 {
+//		    	//int i <- 0;
+//		    	shape <- triangle(0.6);
+//		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
+//								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
+//				};
+//			}
+//			loop s over: NBSS where (each.my_name != "swale0") {
+//			    create weeds number: 25 {
+//			        location <- any_location_in(s);
+//			    }
+//			}
 			point blocked_inlet <- {list_of_locs[2].x + list_of_geoms[2].width/2, list_of_locs[2].y};
 			geometry perimeter <- circle(1.0) at_location blocked_inlet;
-			create weeds number: 5 {
+			create weeds number: 8 {
 				location <- any_location_in(perimeter);
 			}
-			create trash number: 5 {
+			create trash number: 8 {
 				shape <- circle(0.1);
 				location <- any_location_in(perimeter);
 			}
@@ -542,6 +543,7 @@ global control: fsm {
     	enter {
     		write "active phase for player";
     		scenario <- "1_1";
+    		messages <- messages + ["phase":: "active"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["init_":: "pipe2_3"];
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
@@ -549,19 +551,67 @@ global control: fsm {
     		send_message <- true;
     		//set day to day after rainday (no rain)
     	}
+    	write score;
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 180000) or (do_skip and scenario = "1_1"); //180000; // 3min en ms
+    	transition to: situation1_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)
+    		or (do_skip and scenario = "1_1" and score < 50.0); //180000; // 3min en ms
+		transition to: situation1_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 50.0)
+    		or (do_skip and scenario = "1_1" and score >= 50.0);
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
     		messages <- messages + ["init_":: "regular_state"];
-    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
-			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
-			messages <- messages + ["scenario":: "menu"];
+//    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
+//			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
 			write "transition to " + scenario;
 			send_message <- true;
 			active_start_time <- 0.0;
 			
+    	}
+    }
+    
+    state situation1_fail {
+    	enter {
+    		write "fail ending for scenario 1";
+    		scenario <- "1_2a";
+    		messages <- messages + ["phase":: "passive"];
+    		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "Temps écoulé !"];
+    		messages <- messages + ["message_":: "Bien essayé, mais les noues ne s'écoulent toujours pas correctement... Recommencez en agissant mieux !"];
+    		send_message <- true;
+    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+			    water_level <- 1.2;
+			}
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "1_2a");
+    	exit {
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
+    		do_skip <- false;
+    		active_start_time <- 0.0;
+    	}
+    }
+    
+    state situation1_success {
+    	enter {
+    		write "success ending for scenario 1";
+    		scenario <- "1_2b";
+    		messages <- messages + ["phase":: "passive"];
+    		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "Temps écoulé !"];
+    		messages <- messages + ["message_":: "Bien joué, l'écoulement est rétabli ! Comment éviter cette situation à l'avenir ?"];
+    		send_message <- true;
+//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+//			    is_obstructed <- false;
+//			    water_level <- 0.0;
+//			}
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "1_2b");
+    	exit {
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
+    		do_skip <- false;
+    		active_start_time <- 0.0;
     	}
     }
     
@@ -579,6 +629,7 @@ global control: fsm {
     		write scenario;
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["scenario":: "2"];
+    		messages <- messages + ["phase":: "passive"];
     		messages <- messages + ["message_":: "C'est la canicule, et les plus à plaindre sont les plantes!"];
     		messages <- messages + ["timer_start":: "60"];
     		//write messages;
@@ -630,6 +681,7 @@ global control: fsm {
     	//minimum_cycle_duration <- 1.0;
     	enter {
     		scenario <- "2_1";
+    		messages <- messages + ["phase":: "active"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["timer_start":: "180"];
     		send_message <- true;

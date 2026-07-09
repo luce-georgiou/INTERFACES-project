@@ -362,7 +362,8 @@ species unity_linker parent: abstract_unity_linker {
 		}
 		else { //On traite le score en fin de phase
 			score <- float(mes);
-			write score;
+			score <- float(mes replace (",", "."));
+			write "score : " + score;
 		}
 	}
 	
@@ -393,8 +394,7 @@ species unity_linker parent: abstract_unity_linker {
 					//score <- score + 30.0;
 					//weight_score <- 30;
 					messages <- messages + ["init_":: "regular_state"];
-					messages <- messages + ["add_to_score":: "30"];
-					write "--- ENVOI DU SCORE A UNITY ---";
+					messages <- messages + ["add_to_score":: "45.0"];
 					send_message <- true;	
 				}
 			}

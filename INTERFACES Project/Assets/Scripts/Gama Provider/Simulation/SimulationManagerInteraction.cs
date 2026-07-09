@@ -19,6 +19,7 @@ using UnityEngine.ProBuilder.Shapes;
 
 public class SimulationManagerInteraction : SimulationManager
 {
+    public static bool interactionsAutorisees = true;
     public GameObject Scenario1;
     public GameObject Scenario2;
     public Material defaultSky;
@@ -72,7 +73,7 @@ public class SimulationManagerInteraction : SimulationManager
         timerText.text = "0:00";
 
         //envoyer message à Gama avec score en fin de phase
-        SendMessageToGama(progressBar.BarValue.ToString());
+        //SendMessageToGama(progressBar.BarValue.ToString());
     }
 
     public void SendMessageToGama(string mes)
@@ -146,22 +147,27 @@ public class SimulationManagerInteraction : SimulationManager
     //Defines what happens when a object is selected
     protected override void SelectInteraction(SelectEnterEventArgs ev)
     {
+        if (!interactionsAutorisees) return;
 
         if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             Debug.Log("grabbed: " + grabbedObject.name + " tag: " + grabbedObject.tag);
             //Debug.Log("grabbedObject : " + grabbedObject);
-            int count;
-            float weight = 20f;
+            int count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
+            float weight = 45f;
             if (grabbedObject.tag.Equals("weeds") || grabbedObject.tag.Equals("trash"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
                     };
-                count = GameObject.FindGameObjectsWithTag(grabbedObject.tag).Length;
-                ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
-                progressBar.BarValue = progressBar.BarValue + (weight / count);
+                //count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
+                if (count > 0)
+                {
+                    ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
+                    progressBar.BarValue = progressBar.BarValue + (weight / count);
+                    SendMessageToGama(progressBar.BarValue.ToString());
+                }
             }
             //GameObject obj = ev.interactableObject.transform.gameObject;
             //if (obj.tag.Equals("road"))
@@ -809,7 +815,6 @@ public class SimulationManagerInteraction : SimulationManager
 
     protected override void ManageOtherMessages(string content)
     {
-        Debug.LogError("--- LE CRIEUR S'APPRÊTE À CRIER ---");
         message = GAMAMessage2.CreateFromJSON(content);
         OnGAMAMessageReceived?.Invoke(message);
     }
@@ -872,7 +877,7 @@ public class SimulationManagerInteraction : SimulationManager
                     if (timerCoroutine != null)
                     {
                         StopCoroutine(timerCoroutine);
-                        SendMessageToGama(progressBar.BarValue.ToString());
+                        //SendMessageToGama(progressBar.BarValue.ToString());
                         timerCoroutine = null; // On réinitialise la mémoire
                     }
                 }
@@ -885,7 +890,7 @@ public class SimulationManagerInteraction : SimulationManager
                     if (timerCoroutine != null)
                     {
                         StopCoroutine(timerCoroutine);
-                        SendMessageToGama(progressBar.BarValue.ToString());
+                        //SendMessageToGama(progressBar.BarValue.ToString());
                     }
 
                     // On lance le nouveau timer et on le sauvegarde dans notre variable
@@ -956,6 +961,16 @@ public class SimulationManagerInteraction : SimulationManager
                 DisplayCanvas.SetActive(false);
                 menuPanel.SetActive(true);
             }
+
+            if (message.phase == "active")
+            {
+                interactionsAutorisees = true;
+            }
+            if (message.phase == "passive")
+            {
+                interactionsAutorisees = false;
+                MenuRadialManager.Instance.FermerMenu();
+            }
             message = null;
         }
 
@@ -994,6 +1009,7 @@ public class GAMAMessage2
     public string scenario;
     public string score;
     public string add_to_score;
+    public string phase;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {

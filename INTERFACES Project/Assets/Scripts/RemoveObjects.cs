@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using System.Collections;
 using System.Linq;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable))]
 public class RemoveObjects : MonoBehaviour
@@ -33,6 +34,7 @@ public class RemoveObjects : MonoBehaviour
 
     private void DesactiverObjet(SelectEnterEventArgs args)
     {
+        if (!SimulationManagerInteraction.interactionsAutorisees) return;
         StartCoroutine(SequenceMessageEtDesactivation());
     }
 
@@ -45,6 +47,12 @@ public class RemoveObjects : MonoBehaviour
         //if (rend != null) rend.enabled = false;
 
         progressBarObj.BarValue = progressBarObj.BarValue + 10f / count;
+
+        Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  progressBarObj.BarValue.ToString() }};
+        ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+
         SendingMessages.Show("Les cendres acidifient le sol et tuent les micro-organismes.\n+10");
         yield return new WaitForSeconds(3f);
         SendingMessages.Show("");
