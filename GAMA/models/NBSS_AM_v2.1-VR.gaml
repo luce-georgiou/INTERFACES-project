@@ -363,7 +363,7 @@ species unity_linker parent: abstract_unity_linker {
 		else { //On traite le score en fin de phase
 			score <- float(mes);
 			score <- float(mes replace (",", "."));
-			write "score : " + score;
+			//write "score : " + score;
 		}
 	}
 	
@@ -402,7 +402,7 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	
 	// scénario 2 actions
-	action arroser(string id) {
+	action water_plants(string id) {
 		filter_media fm <- (filter_media first_with (each.name = id));
 		if (fm != nil) {
 			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
@@ -430,7 +430,7 @@ species unity_linker parent: abstract_unity_linker {
 	            create local_flora number: 25 {
 	                location <- any_location_in(zone_cible.shape);
 	            }
-	            write "local_flora created";
+	            //write "local_flora created";
 	        }
 	        //weight_score <- 25;
 			messages <- messages + ["add_to_score":: string(25)];

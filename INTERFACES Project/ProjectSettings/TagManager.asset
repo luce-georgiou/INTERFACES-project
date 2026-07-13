@@ -38,6 +38,7 @@ TagManager:
   - pond
   - nbss_area
   - local_flora
+  - paillage
   layers:
   - Default
   - TransparentFX

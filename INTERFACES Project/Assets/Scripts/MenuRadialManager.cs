@@ -7,9 +7,20 @@ public class MenuRadialManager : MonoBehaviour
     // Singleton pour pouvoir y accéder facilement depuis ton script d'interaction
     public static MenuRadialManager Instance;
 
+    [Header("Scenarios")]
+    public Transform Scenario1;
+    public Transform Scenario2;
+
     [Header("Visuel du Menu")]
     public GameObject conteneurFilterMedia;
     public GameObject conteneurNBSSArea;
+    public GameObject SC1_Buttons;
+    public GameObject SC2_Buttons;
+    public GameObject conteneurArrosage;
+
+    [Header("Matériaux")]
+    [SerializeField] private Material burntGrassMat;
+    [SerializeField] private Material healthyGrassMat;
 
     [Header("Paramètres des barrières")]
     public GameObject prefabShrub;
@@ -94,6 +105,16 @@ public class MenuRadialManager : MonoBehaviour
         {
             transform.position = positionCible.position + new Vector3(0, 3f, 0);
             conteneurFilterMedia.SetActive(true);
+            if (SimulationManagerInteraction.scenario == 1)
+            {
+                SC1_Buttons.SetActive(true);
+                SC2_Buttons.SetActive(false);
+            }
+            else if (SimulationManagerInteraction.scenario == 2)
+            {
+                SC1_Buttons.SetActive(false);
+                SC2_Buttons.SetActive(true);
+            }
         }
     }
 
@@ -101,6 +122,9 @@ public class MenuRadialManager : MonoBehaviour
     {
         conteneurFilterMedia.SetActive(false);
         conteneurNBSSArea.SetActive(false);
+        conteneurArrosage.SetActive(false);
+        SC1_Buttons.SetActive(false);
+        SC2_Buttons.SetActive(false);
         idObjetActuel = ""; // On nettoie l'ID par sécurité
     }
 
@@ -169,16 +193,32 @@ public class MenuRadialManager : MonoBehaviour
         Vector3 centreBarriere = noueCliquee.transform.position + (directionDecalage * decalageVersRoute);
 
         // --- 3. SPAWN PARALLÈLE ---
-        float moitie = longueurNoue / 2f;
+        float moitie = (longueurNoue - 9f) / 2f;
         int compteur = 0;
+        Debug.LogWarning(fenceType.name);
+        bool isShrub = fenceType.name.Contains("Bush");
+        Debug.LogWarning(isShrub);
+        float spaceBetweenObjs = isShrub ? espacementEntreShrubs : spaceBetweenFences;
 
-        for (float d = -moitie; d <= moitie; d += espacementEntreShrubs)
+        for (float d = -moitie; d <= moitie; d += spaceBetweenObjs)
         {
             // d avance le long de "directionLigne" (soit tout en X, soit tout en Z)
             Vector3 positionShrub = centreBarriere + (directionLigne * d);
-            Quaternion rotationAleatoire = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+            Vector3 positionFinale = positionShrub;
+            Quaternion rotationAlignee = Quaternion.LookRotation(directionLigne);
+            if (isShrub)
+            {
+                rotationAlignee = Quaternion.Euler(0, Random.Range(0f, 360f), 0);
+            }
+            else
+            {
+                float decalageCorrectionPivot = 9.0f;
 
-            Instantiate(fenceType, positionShrub, rotationAleatoire);
+                positionFinale -= (directionLigne * decalageCorrectionPivot);
+                fenceType.transform.localScale = new Vector3(fenceType.transform.localScale.x, 0.3f, fenceType.transform.localScale.z);
+            }
+
+            Instantiate(fenceType, positionFinale, rotationAlignee, Scenario2.transform);
             compteur++;
         }
 
@@ -195,10 +235,19 @@ public class MenuRadialManager : MonoBehaviour
 
         Vector3 tailleFM = fmObj.GetComponent<Renderer>().bounds.size;
         GameObject paillageObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        paillageObj.transform.SetParent(Scenario2, true);
         paillageObj.name = "paillage" + idx;
+        paillageObj.tag = "paillage";
         paillageObj.transform.localScale = new Vector3(tailleFM.x, 0.2f, tailleFM.z);
         paillageObj.GetComponent<Renderer>().material = mat;
         paillageObj.transform.position = noueCliquee.transform.position + new Vector3(0, -2.3f, 0);
+    }
+
+    public void MowGrass(GameObject swale)
+    {
+        int idx = int.Parse(swale.name.Replace("nbss_area", ""));
+        GameObject grassObj = GameObject.Find("Grass_NBSS" + idx);
+        grassObj.SetActive(false);
     }
 
     // --- LES BOUTONS DE TON MENU RADIAL ---
@@ -212,7 +261,10 @@ public class MenuRadialManager : MonoBehaviour
     public void BoutonActionArroser()
     {
         // Remplace "amenager_noue" par le nom exact de l'action dans GAMA
-        EnvoyerCommandeGama("arroser");
+        //EnvoyerCommandeGama("arroser");
+        conteneurArrosage.SetActive(true);
+        SC1_Buttons.SetActive(false);
+        SC2_Buttons.SetActive(false);
     }
 
     public void BoutonActionReplanter()
@@ -220,9 +272,13 @@ public class MenuRadialManager : MonoBehaviour
         EnvoyerCommandeGama("planter_flore_locale");
     }
 
-    public void BoutonActionDesimpermeabiliser()
+    public void BoutonActionTondre()
     {
-        EnvoyerCommandeGama("desimpermeabiliser_sol");
+        GameObject swale = GameObject.Find(idObjetActuel);
+        MowGrass(swale);
+
+        FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue - 15f;
     }
 
     public void BoutonActionPaillage()
@@ -277,6 +333,57 @@ public class MenuRadialManager : MonoBehaviour
         // 3. On ferme le menu
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 5f;
+    }
+
+    public void BoutonActionGazon()
+    {
+        GameObject noue = GameObject.Find(idObjetActuel);
+        //Material burntGrassMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
+    }
+
+    public void BoutonActionArroserMaintenant()
+    {
+        GameObject fm = GameObject.Find(idObjetActuel);
+        int idx = int.Parse(fm.name.Replace("filter_media", ""));
+        GameObject nbss_area = GameObject.Find("nbss_area" + idx);
+        GameObject grass = GameObject.Find("Grass_NBSS" + idx);
+        
+        fm.GetComponent<Renderer>().material = burntGrassMat;
+        nbss_area.GetComponent<Renderer>().material = burntGrassMat;
+        Renderer[] tousLesRenderers = grass.GetComponentsInChildren<Renderer>();
+        foreach (Renderer rend in tousLesRenderers)
+        {
+            if (rend != null)
+            {
+                rend.material.color = Color.black;
+            }
+        }
+
+        conteneurArrosage.SetActive(false);
+        progressBarObj.BarValue = progressBarObj.BarValue - 10f;
+    }
+
+    public void BoutonArroserPlusTardOuTot()
+    {
+        GameObject fm = GameObject.Find(idObjetActuel);
+        int idx = int.Parse(fm.name.Replace("filter_media", ""));
+        GameObject nbss_area = GameObject.Find("nbss_area" + idx);
+        GameObject grass = GameObject.Find("Grass_NBSS" + idx);
+
+        fm.GetComponent<Renderer>().material = healthyGrassMat;
+        nbss_area.GetComponent<Renderer>().material = healthyGrassMat;
+        Renderer[] tousLesRenderers = grass.GetComponentsInChildren<Renderer>();
+        Color c = new Color(0, 58f / 255f, 0);
+        foreach (Renderer rend in tousLesRenderers)
+        {
+            if (rend != null)
+            {
+                rend.material.color = c;
+            }
+        }
+
+        EnvoyerCommandeGama("water_plants");
+        //conteneurArrosage.SetActive(false);
     }
 
 

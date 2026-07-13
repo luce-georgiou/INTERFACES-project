@@ -16,7 +16,7 @@ public class RemoveObjects : MonoBehaviour
     void Awake()
     {
         interactable = GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable>();
-        count = FindObjectsOfType<GameObject>()
+        count = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None)
                     .Count(go => go.name.StartsWith("Cylinder"));
 
         Debug.Log("Nombre de cylindres trouvés : " + count);

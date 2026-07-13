@@ -15,6 +15,7 @@ public class MakeTransparent : MonoBehaviour
 
     public Material transparentMat;
     public Material opaqueMat;
+    public Material summerGrassMat;
 
     private XRSimpleInteractable simpleInteractable;
 
@@ -29,7 +30,8 @@ public class MakeTransparent : MonoBehaviour
         tempColor.a = selectedAlpha;
         transparentMat.color = tempColor;
         opaqueMat = Resources.Load<Material>("Materials/Lawn_Opaque");
-        
+        summerGrassMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass02");
+
         originalColor = new Color(0f, 58f / 255f, 0f, 1f);
         rend = GetComponent<Renderer>();
         mat = rend.material;
@@ -71,7 +73,15 @@ public class MakeTransparent : MonoBehaviour
         Debug.Log("4. Les 30 secondes sont écoulées ! Réactivation du collider...");
         //originalColor.a = 1f;
         //rend.material.color = originalColor;
-        rend.material = opaqueMat;
+        if (SimulationManagerInteraction.scenario == 1)
+        {
+            rend.material = opaqueMat;
+        }
+        else if (SimulationManagerInteraction.scenario == 2)
+        {
+            rend.material = summerGrassMat;
+        }
+        
         //SetAlpha(1f);
         //Debug.Log("back to og color");
         col.enabled = true;

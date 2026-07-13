@@ -20,6 +20,7 @@ using UnityEngine.ProBuilder.Shapes;
 public class SimulationManagerInteraction : SimulationManager
 {
     public static bool interactionsAutorisees = true;
+    public static int scenario;
     public GameObject Scenario1;
     public GameObject Scenario2;
     public Material defaultSky;
@@ -904,6 +905,7 @@ public class SimulationManagerInteraction : SimulationManager
             if (message.scenario == "1")
             {
                 Debug.Log("Scenario1 enclenché");
+                scenario = 1;
                 Scenario1.SetActive(true);
                 Scenario2.SetActive(false);
 
@@ -927,12 +929,23 @@ public class SimulationManagerInteraction : SimulationManager
             }
             if (message.scenario == "2")
             {
+                
                 Debug.Log("Scenario2 enclenché");
+                scenario = 2;
                 // changer matériau fm en sol sec
                 // mettre soleil aveuglant + poussière
                 // enable gameobject scenario 2
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(true);
+                //reset paillage et elem changés par sc1
+                GameObject[] paillageObjs = GameObject.FindGameObjectsWithTag("paillage");
+                foreach (GameObject obj in paillageObjs)
+                {
+                    if (obj != null)
+                    {
+                        obj.SetActive(false); 
+                    }
+                }
 
                 // Assigning summer/dry materials to vegetal components
                 Material matDrySoil = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Dry03");

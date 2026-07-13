@@ -46,6 +46,7 @@ global control: fsm {
 	float score <- 0.0;
 	float weight_score <- 0.0;
 	string scenario <- "";
+	int index_meteo <- 0;
 	
 	geometry free_space; //<- init_free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
@@ -467,6 +468,7 @@ global control: fsm {
 	    	scenario <- "1_0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "1"];
+	    	messages <- messages + ["init_":: "pipe2_3"];
 	    	messages <- messages + ["phase":: "passive"];
 	    	messages <- messages + ["timer_start":: "60"];
 	    	send_message <- true;
@@ -514,18 +516,23 @@ global control: fsm {
 			    is_obstructed <- true;
 			}
 			//set date to rainy day
-			starting_date <- date(string(int(20070429)));
+			//starting_date <- date(string(int(20070429)));
 			write starting_date;
+			ask rain {
+				write runoff.my_flow; 
+			}
 		}
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
 			messages <- messages + ["message_"::"Les deux nuits précédentes..."];
+			//write messages;
 			send_message <- true;
 			
 			
 		}
-		if (init_wait = 3) { 
+		if (init_wait = 50) { 
 			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+			//write messages;
 			send_message <- true;
 			
 		}
@@ -545,13 +552,12 @@ global control: fsm {
     		scenario <- "1_1";
     		messages <- messages + ["phase":: "active"];
     		active_start_time <- gama.machine_time;
-    		messages <- messages + ["init_":: "pipe2_3"];
+    		
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
     		messages <- messages + ["timer_start":: "180"];
     		send_message <- true;
     		//set day to day after rainday (no rain)
     	}
-    	write score;
     	//write "elapsed: " + (gama.machine_time - active_start_time);
     	transition to: situation1_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)
     		or (do_skip and scenario = "1_1" and score < 50.0); //180000; // 3min en ms
@@ -686,12 +692,84 @@ global control: fsm {
     		messages <- messages + ["timer_start":: "180"];
     		send_message <- true;
     	}
-    	transition to: menu when: (gama.machine_time - active_start_time) >= 180000 or (do_skip and scenario = "2_1"); //if then state fail else if else
+    	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)
+    		or (do_skip and scenario = "2_1" and score < 50.0); //180000; // 3min en ms
+		transition to: situation2_partial_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 50.0 and score < 75.0)
+    		or (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
+		transition to: situation2_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 75.0)
+    		or (do_skip and scenario = "2_1" and score >= 75.0);
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
+    		//messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
+    		active_start_time <- 0.0;
+    	}
+    }
+    
+    state situation2_fail {
+    	enter {
+    		write "failure ending for scenario 2";
+    		scenario <- "2_2a";
+    		messages <- messages + ["phase":: "passive"];
+    		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "Temps écoulé !"];
+    		messages <- messages + ["message_":: "Trop tard… La noue est devenue un désert urbain. Recommencez en agissant plus vite et mieux !"];
+    		send_message <- true;
+//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+//			    is_obstructed <- false;
+//			    water_level <- 0.0;
+//			}
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2a");
+    	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
+    		do_skip <- false;
+    		active_start_time <- 0.0;
+    	}
+    }
+    state situation2_partial_success {
+    	enter {
+    		write "partial success ending for scenario 2";
+    		scenario <- "2_2b";
+    		messages <- messages + ["phase":: "passive"];
+    		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "Temps écoulé !"];
+    		messages <- messages + ["message_":: "Bravo ! La noue est sauvée… pour l’instant. Mais sans pluie, elle reste fragile. Continuez à la protéger !"];
+    		send_message <- true;
+//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+//			    is_obstructed <- false;
+//			    water_level <- 0.0;
+//			}
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2b");
+    	exit {
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
+    		do_skip <- false;
+    		active_start_time <- 0.0;
+    	}
+    }
+    state situation2_success {
+    	enter {
+    		write "success ending for scenario 2";
+    		scenario <- "2_2c";
+    		messages <- messages + ["phase":: "passive"];
+    		active_start_time <- gama.machine_time;
+    		messages <- messages + ["message_":: "Temps écoulé !"];
+    		messages <- messages + ["message_":: "Incroyable ! Grâce à vous, ce réseau de noues est paré contre la chaleur. Partagez ces gestes avec votre entourage !"];
+    		send_message <- true;
+//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+//			    is_obstructed <- false;
+//			    water_level <- 0.0;
+//			}
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2c");
+    	exit {
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
+    		do_skip <- false;
     		active_start_time <- 0.0;
     	}
     }
@@ -805,32 +883,54 @@ species rain {
 	date last_rain;
 	list<int> runoff_history <- [];
 
-	reflex create_runoff {
-		runoff.my_flow <- 0.0;
-		loop i from:0 to:weather_data.rows-1 {
-			if current_date = date(string(int(weather_data[0,i]))) {
-				//Rainfall event <= 20mm in a day are considered as a runoff flow of 1
-				if (float(weather_data[1,i]) <= 20.0 and float(weather_data[1,i]) > 5.0) {
-					runoff.my_flow <- 1.0;
-				}
-				//Rainfall event between 20mm and 80mm in a day are considered as a runoff flow of 2
-				if (float(weather_data[1,i]) > 20.0 and float(weather_data[1,i]) <= 80.0 ) {
-					runoff.my_flow <- 2.0;
-				}
-				//Rainfall event > 80mm in a day are considered as a runoff flow of 3
-				if (float(weather_data[1,i]) > 80.0 ) {
-					runoff.my_flow <- 3.0;
-				}
-			rainfall <- - float(weather_data[1,i]);
-			}
-		
-			
-		}
-		add(runoff.my_flow) to: runoff_history;
-			if (runoff.my_flow != 0) {
-				last_rain <- current_date;
-			}	
+	reflex create_runoff when: index_meteo < weather_data.rows {
+	    date date_donnee <- date(string(int(weather_data[0, index_meteo])));
+	    if (current_date >= date_donnee) {
+	        //rainfall <- - float(weather_data[1, index_meteo]);
+	        if (scenario = "1_0") {
+	        	do change_runoff(1.0);
+        	}
+	        else if (scenario = "2_0") {
+	        	do change_runoff(0.0);
+	        }
+	        add(runoff.my_flow) to: runoff_history;
+//	        if (runoff.my_flow != 0.0) {
+//	            last_rain <- current_date;
+//	        } 
+	        index_meteo <- index_meteo + 1;
+	    }
 	}
+	
+	action change_runoff(float intensity) {
+		runoff.my_flow <- intensity;
+	}
+
+//	reflex create_runoff {
+//		runoff.my_flow <- 0.0;
+//		loop i from:0 to:weather_data.rows-1 {
+//			if current_date = date(string(int(weather_data[0,i]))) {
+//				//Rainfall event <= 20mm in a day are considered as a runoff flow of 1
+//				if (float(weather_data[1,i]) <= 20.0 and float(weather_data[1,i]) > 5.0) {
+//					runoff.my_flow <- 1.0;
+//				}
+//				//Rainfall event between 20mm and 80mm in a day are considered as a runoff flow of 2
+//				if (float(weather_data[1,i]) > 20.0 and float(weather_data[1,i]) <= 80.0 ) {
+//					runoff.my_flow <- 2.0;
+//				}
+//				//Rainfall event > 80mm in a day are considered as a runoff flow of 3
+//				if (float(weather_data[1,i]) > 80.0 ) {
+//					runoff.my_flow <- 3.0;
+//				}
+//			rainfall <- - float(weather_data[1,i]);
+//			}
+//		
+//			
+//		}
+//		add(runoff.my_flow) to: runoff_history;
+//			if (runoff.my_flow != 0) {
+//				last_rain <- current_date;
+//			}	
+//	}
 }
 
 /* Declaration of the species NBSS */
