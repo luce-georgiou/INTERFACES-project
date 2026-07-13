@@ -690,6 +690,7 @@ global control: fsm {
     		messages <- messages + ["phase":: "active"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["timer_start":: "180"];
+    		messages <- messages + ["message_":: "A toi de jouer ! Essaie de rétablir la bonne santé de cet espace en cette chaleur brûlante..."];
     		send_message <- true;
     	}
     	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)

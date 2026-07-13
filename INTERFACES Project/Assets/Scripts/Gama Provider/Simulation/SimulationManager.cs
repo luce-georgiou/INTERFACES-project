@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
+using System.Collections;
 
 public class SimulationManager : MonoBehaviour
 {
@@ -102,6 +103,13 @@ public class SimulationManager : MonoBehaviour
     HashSet<string> toRemove = new HashSet<string>();
 
     bool hasSimulator ;
+
+    public IEnumerator ShowForDuration(string msg, float duration)
+    {
+        SendingMessages.Show(msg);
+        yield return new WaitForSeconds(duration);
+        SendingMessages.Show("");
+    }
 
     // ############################################ UNITY FUNCTIONS ############################################
     void Awake()

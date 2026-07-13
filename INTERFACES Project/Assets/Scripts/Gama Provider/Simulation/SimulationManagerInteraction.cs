@@ -41,12 +41,12 @@ public class SimulationManagerInteraction : SimulationManager
 
     // Message manager
     //private string lastFailureMessage = "";
-    IEnumerator ShowForDuration(string msg, float duration)
-    {
-        SendingMessages.Show(msg);
-        yield return new WaitForSeconds(duration);
-        SendingMessages.Show("");
-    }
+    //public IEnumerator ShowForDuration(string msg, float duration)
+    //{
+    //    SendingMessages.Show(msg);
+    //    yield return new WaitForSeconds(duration);
+    //    SendingMessages.Show("");
+    //}
 
     IEnumerator CountDown(int duration)
     {

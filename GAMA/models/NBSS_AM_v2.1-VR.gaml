@@ -395,6 +395,7 @@ species unity_linker parent: abstract_unity_linker {
 					//weight_score <- 30;
 					messages <- messages + ["init_":: "regular_state"];
 					messages <- messages + ["add_to_score":: "45.0"];
+					messages <- messages + ["message_":: "Parfait ! On a enlevé l'accumulation de sédiments, l'eau peut de nouveau s'infilter dans les sols."];
 					send_message <- true;	
 				}
 			}
@@ -402,7 +403,7 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	
 	// scénario 2 actions
-	action water_plants(string id) {
+	action water_late_early(string id) {
 		filter_media fm <- (filter_media first_with (each.name = id));
 		if (fm != nil) {
 			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
@@ -410,6 +411,7 @@ species unity_linker parent: abstract_unity_linker {
 			}
 			//weight_score <- 15;
 			messages <- messages + ["add_to_score":: string(15)];
+			messages <- messages + ["message_":: "Arroser aux heures plus fraîches permet de préserver ce qu'il reste de biodiversité... Mais attention à ne pas gaspiller d'eau !"];
 			send_message <- true;
 		}
 	}
@@ -434,8 +436,30 @@ species unity_linker parent: abstract_unity_linker {
 	        }
 	        //weight_score <- 25;
 			messages <- messages + ["add_to_score":: string(25)];
+			messages <- messages + ["message_":: "Ces plantes supportent la sécheresse et aident la noue à survivre grâce à leurs racines profondes."];
 			send_message <- true;
 	    }	
+	}
+	action plant_flowers(string id) {
+		filter_media ag_fm <- filter_media first_with (each.name = id);
+	    
+	    NBSS target_nbss <- nil;
+	    if (ag_fm != nil) {
+	        target_nbss <- ag_fm.my_NBSS;
+	    }
+	    if (target_nbss != "") {
+	    	point loc <- target_nbss.location;
+	    	geometry geom <- target_nbss.shape;
+	    	create flower number: 10 {
+		    	shape <- triangle(0.6);
+		    	location <- {loc.x - geom.width/2 + (index mod 5) * geom.width/4,
+								loc.y + (index < 5 ? 2.5 : -2.5)
+				};
+			}
+			messages <- messages + ["add_to_score":: string(-5)];
+			messages <- messages + ["message_":: "Jolies ! Mais... Est-ce vraiment utile ?"];
+			send_message <- true;
+	    }
 	}
 //	action planter_barriere_veg(string id) {
 //		nbss_area ag <- nbss_area first_with (each.name = id);

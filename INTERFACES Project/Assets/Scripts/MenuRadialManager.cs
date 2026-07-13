@@ -99,7 +99,8 @@ public class MenuRadialManager : MonoBehaviour
         if (typeObjet == "NBSS_area")
         {
             transform.position = positionCible.position + new Vector3(0, 1f, 0);
-            conteneurNBSSArea.SetActive(true);
+            if (SimulationManagerInteraction.scenario == 1) conteneurNBSSArea.SetActive(false);
+            else conteneurNBSSArea.SetActive(true);
         }
         else if (typeObjet == "filter_media")
         {
@@ -258,6 +259,11 @@ public class MenuRadialManager : MonoBehaviour
         EnvoyerCommandeGama("curage");
     }
 
+    public void BoutonActionFlowers()
+    {
+        EnvoyerCommandeGama("plant_flowers");
+    }
+
     public void BoutonActionArroser()
     {
         // Remplace "amenager_noue" par le nom exact de l'action dans GAMA
@@ -338,7 +344,29 @@ public class MenuRadialManager : MonoBehaviour
     public void BoutonActionGazon()
     {
         GameObject noue = GameObject.Find(idObjetActuel);
+        int idx = int.Parse(noue.name.Replace("filter_media", ""));
+        GameObject grass = GameObject.Find("Grass_NBSS" + idx);
         //Material burntGrassMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
+        foreach (Transform enfant in grass.transform)
+        {
+            // Random.Range(0f, 100f) génère un nombre aléatoire entre 0 et 100
+            // Si ce nombre est inférieur à ton pourcentage, on éteint l'objet
+            if (Random.Range(0f, 100f) < 30f)
+            {
+                enfant.gameObject.SetActive(false);
+            }
+            else
+            {
+                Renderer rend = enfant.GetComponent<Renderer>();
+                if (rend != null)
+                {
+                    rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
+                }
+            }
+        }
+        FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue - 20f;
+        SimulationManager.Instance.StartCoroutine(SimulationManager.Instance.ShowForDuration("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 5f));
     }
 
     public void BoutonActionArroserMaintenant()
@@ -382,7 +410,7 @@ public class MenuRadialManager : MonoBehaviour
             }
         }
 
-        EnvoyerCommandeGama("water_plants");
+        EnvoyerCommandeGama("water_late_early");
         //conteneurArrosage.SetActive(false);
     }
 
