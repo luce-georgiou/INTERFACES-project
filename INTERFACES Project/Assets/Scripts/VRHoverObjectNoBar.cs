@@ -34,7 +34,7 @@ public class VRHoverObjetSimple : MonoBehaviour
             // C'EST ICI QU'ON MET LA LIGNE !
             // On envoie le message configuré dans l'inspecteur, 0f pour la vie, 
             // et FALSE pour dire au manager : "Ne montre pas la barre de santé !"
-            TooltipManager.Instance.AfficherTooltip(messageAAfficher, 0f, false, transform, new Vector3(0, 1.2f, 0), 3f);
+            TooltipManager.Instance.AfficherTooltip(messageAAfficher, 0f, false, transform, new Vector3(0, 0.5f, 0), 3f);
         }
     }
 

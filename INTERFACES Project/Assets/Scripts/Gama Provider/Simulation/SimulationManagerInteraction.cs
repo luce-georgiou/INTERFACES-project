@@ -40,6 +40,10 @@ public class SimulationManagerInteraction : SimulationManager
     private Dictionary<string, GameObject> sedimentMap = new Dictionary<string, GameObject>();
 
     private int totalWeedsTrashInitial = -1;
+    
+    // for sc1 ponding areas
+    private bool unblocked = false;
+    public static bool unclogged = false;
 
     // Message manager
     //private string lastFailureMessage = "";
@@ -152,73 +156,48 @@ public class SimulationManagerInteraction : SimulationManager
     {
         if (!interactionsAutorisees) return;
 
-        if (totalWeedsTrashInitial == -1)
-        {
-            totalWeedsTrashInitial = GameObject.FindGameObjectsWithTag("weeds").Length +
-                                 GameObject.FindGameObjectsWithTag("trash").Length;
-        }
+        //if (totalWeedsTrashInitial == -1)
+        //{
+        //    totalWeedsTrashInitial = GameObject.FindGameObjectsWithTag("weeds").Length +
+        //                         GameObject.FindGameObjectsWithTag("trash").Length;
+        //}
 
         if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             Debug.Log("grabbed: " + grabbedObject.name + " tag: " + grabbedObject.tag);
             //Debug.Log("grabbedObject : " + grabbedObject);
-            int count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
+            //int count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
             
             float weight = 45f;
             if (grabbedObject.tag.Equals("weeds") || grabbedObject.tag.Equals("trash"))
             {
+                //SendingMessages.Show("Moins de déchets = moins de pollution pour l’eau et le sol.");
+                //StartCoroutine(Wait());
                 Dictionary<string, string> args = new Dictionary<string, string> {
                          {"id", grabbedObject.name }
                     };
-                //count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
-                if (count > 0)
-                {
-                    Debug.Log("count : " + count);
-                    //count -= 1;
-                    ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
-                    progressBar.BarValue = progressBar.BarValue + (weight / totalWeedsTrashInitial);
-                    SendMessageToGama(progressBar.BarValue.ToString());
-                    if (count == 1 && scenario == 1)
-                    {
-                        GameObject pond2 = GameObject.Find("ponding_area2");
-                        Renderer rend = pond2.GetComponent<Renderer>();
-                        Debug.Log(rend.material.GetVector("_Direction_1"));
-                        rend.material.SetVector("_Direction_1", new Vector2(0f, 0.5f));
-                        Debug.Log(rend.material.GetVector("_Direction_1"));
-                        //List<GameObject> ponds = new List<GameObject>
-                        //{
-
-                        //    GameObject.Find("ponding_area4"),
-                        //    GameObject.Find("ponding_area5"),
-                        //    GameObject.Find("ponding_area6")
-                        //};
-                        //foreach (GameObject pond in ponds)
-                        //{
-                        //    Renderer rend = pond.GetComponent<Renderer>();
-                        //    rend.material.SetVector("_Direction_1", new Vector2(0.5f, 0f));
-                        //}
-
-                        StartCoroutine(ShowForDuration("Moins de déchets = moins de pollution pour l’eau et le sol.", 5f));
-                    }
-                }
+                ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
+                progressBar.BarValue = progressBar.BarValue + weight;
+                SendMessageToGama(progressBar.BarValue.ToString());
+                unblocked = true;
                 
-            }
-            //GameObject obj = ev.interactableObject.transform.gameObject;
-            //if (obj.tag.Equals("road"))
-            //{
-            //    Dictionary<string, string> args = new Dictionary<string, string>
-            //    {
-            //        {"id", obj.name }
-            //    };
-            //    ConnectionManager.Instance.SendExecutableAsk("block_road", args);
-            //    bool newSelection = !SelectedObjects.Contains(obj);
-            //    if (newSelection) SelectedObjects.Add(obj);
-            //    else SelectedObjects.Remove(obj);
+                //count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
+                //if (count > 0)
+                //{
+                //    Debug.Log("count : " + count);
+                //    //count -= 1;
+                //    ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
+                //    progressBar.BarValue = progressBar.BarValue + (weight / totalWeedsTrashInitial);
+                //    SendMessageToGama(progressBar.BarValue.ToString());
+                //    if (count == 1 && scenario == 1)
+                //    {
+                //        unblocked = true;
+                //        StartCoroutine(ShowForDuration("Moins de déchets = moins de pollution pour l’eau et le sol.", 5f));
+                //    }
+                //}
 
-            //    ChangeColor(obj, newSelection ? Color.red : Color.gray);
-            //    remainingTime = timeWithoutInteraction;
-            //}
+            }
             else if (grabbedObject.tag.Equals("lawn_mower"))
             {
                 Dictionary<string, string> args = new Dictionary<string, string> {
@@ -242,6 +221,7 @@ public class SimulationManagerInteraction : SimulationManager
                 if (MenuRadialManager.Instance != null)
                 {
                     MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "filter_media");
+                    
                 }
                 else
                 {
@@ -250,6 +230,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (grabbedObject.tag.Equals("nbss_area")) {
                 MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "NBSS_area");
+                SendingMessages.Show("Moins de déchets = moins de pollution pour l’eau et le sol.");
             }
             //else if (grabbedObject.tag.Equals("lawn"))
             //{
@@ -750,7 +731,21 @@ public class SimulationManagerInteraction : SimulationManager
             {
                 Material mat = Resources.Load<Material>("Materials/Water2/WaterVoronoi");
                 mat.SetFloat("_Alpha", 0.5f);
-                obj.GetComponent<Renderer>().material = mat;
+                Renderer rend = obj.GetComponent<Renderer>();
+                rend.material = mat;
+
+                // if name = ponding_area2 and unblocked
+                if (obj.name == "ponding_area2" && unblocked)
+                {
+                    rend.material.SetVector("_Direction_1", new Vector2(-1f, 0f));
+                }
+
+                //if name = ponding_area4 5 6 and unclogged
+                if ((obj.name == "ponding area4" || obj.name == "ponding area5" || obj.name == "ponding area6") && unclogged)
+                { 
+                    rend.material.SetVector("_Direction_1", new Vector2(0f, 1f)); 
+                }
+
                 obj.transform.position = new Vector3(obj.transform.position.x, -1.7f, obj.transform.position.z);
                 float water_level = attributes[i].water_level;
                 obj.transform.localScale = new Vector3(obj.transform.localScale.x, water_level, obj.transform.localScale.z);
@@ -896,8 +891,8 @@ public class SimulationManagerInteraction : SimulationManager
             //Debug.Log("test");
             //StartCoroutine(ShowForDuration(message.cycle, 10f));
             {
-                //messageQueue.Enqueue(message.message_);
-                StartCoroutine(ShowForDuration(message.message_, 10f));
+                SendingMessages.Show(message.message_);
+                //StartCoroutine(ShowForDuration(message.message_, 10f));
                 Debug.Log("received from GAMA: " + message.message_);
                 
             }
@@ -1024,6 +1019,10 @@ public class SimulationManagerInteraction : SimulationManager
         }
 
 
+    }
+    private IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(5f);
     }
 
     // à modifier pour chaque sortie d'eau vers nappe phréatique

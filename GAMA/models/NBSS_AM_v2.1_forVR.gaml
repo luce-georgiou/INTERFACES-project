@@ -524,14 +524,14 @@ global control: fsm {
 		}
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
-			messages <- messages + ["message_"::"Les deux nuits précédentes..."];
+			messages <- messages + ["message_"::"Depuis les deux derniers jours, il pleut une pluie torrentielle..."];
 			//write messages;
 			send_message <- true;
 			
 			
 		}
 		if (init_wait = 50) { 
-			messages <- messages + ["message_"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
+			messages <- messages + ["message_"::"Vous incarnez un gestionnaire chargé de l'entretien de cet espace. C'est à vous d'inspecter les noues et de vous assurer de leur bon fonctionnement."];
 			//write messages;
 			send_message <- true;
 			

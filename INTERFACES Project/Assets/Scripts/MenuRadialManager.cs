@@ -104,7 +104,6 @@ public class MenuRadialManager : MonoBehaviour
             {
                 conteneurNBSSArea.SetActive(true);
                 PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, 0.2f, 0));
-                Debug.Log(conteneurNBSSArea.transform.position);
             }
         }
         else if (typeObjet == "filter_media")
@@ -112,7 +111,6 @@ public class MenuRadialManager : MonoBehaviour
             //transform.position = positionCible.position; //+ new Vector3(0, 3f, 0);
             conteneurFilterMedia.SetActive(true);
             PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, -0.3f, 0));
-            Debug.Log(conteneurNBSSArea.transform.position);
             if (SimulationManagerInteraction.scenario == 1)
             {
                 SC1_Buttons.SetActive(true);
@@ -264,6 +262,7 @@ public class MenuRadialManager : MonoBehaviour
     public void BoutonActionCurage()
     {
         EnvoyerCommandeGama("curage");
+        SimulationManagerInteraction.unclogged = true;
     }
 
     public void BoutonActionFlowers()
@@ -375,7 +374,8 @@ public class MenuRadialManager : MonoBehaviour
         }
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 20f;
-        SimulationManager.Instance.StartCoroutine(SimulationManager.Instance.ShowForDuration("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 5f));
+        SendingMessages.Show("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !");
+        //SimulationManager.Instance.StartCoroutine(SimulationManager.Instance.ShowForDuration("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 5f));
     }
 
     public void BoutonActionArroserMaintenant()

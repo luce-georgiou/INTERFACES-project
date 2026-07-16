@@ -228,10 +228,16 @@ species unity_linker parent: abstract_unity_linker {
 	action maintenance_remove(string id) {
 		agent ag <- (trash + weeds + vegetal_waste) first_with (each.name = id) ;
 		if (ag != nil) {
-			ask ag {
-				remove key: self from: myself.geometries_to_send;
-				do die;
-			} // ask all weeds and trash to die -> faster
+			ask (trash + weeds + vegetal_waste) {
+	            remove key: self from: myself.geometries_to_send;
+	            do die;
+	        }
+			messages <- messages + ["message_":: "Moins de déchets = moins de pollution pour l’eau et le sol."];
+			send_message <- true;
+//			ask ag {
+//				remove key: self from: myself.geometries_to_send;
+//				do die;
+//			} // ask all weeds and trash to die -> faster
 		}
 	}
 //	action maintenance_repair(string id) {

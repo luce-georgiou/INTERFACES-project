@@ -35,6 +35,8 @@ public class RemoveObjects : MonoBehaviour
     private void DesactiverObjet(SelectEnterEventArgs args)
     {
         if (!SimulationManagerInteraction.interactionsAutorisees) return;
+        GetComponent<Renderer>().enabled = false;
+        GetComponent<Collider>().enabled = false;
         StartCoroutine(SequenceMessageEtDesactivation());
     }
 
@@ -55,8 +57,10 @@ public class RemoveObjects : MonoBehaviour
 
         SendingMessages.Show("Les cendres acidifient le sol et tuent les micro-organismes.\n+10");
         yield return new WaitForSeconds(3f);
-        SendingMessages.Show("");
+        //SendingMessages.Show("");
 
-        gameObject.SetActive(false);
+        Destroy(gameObject);
+        //gameObject.SetActive(false);
     }
+
 }

@@ -104,12 +104,12 @@ public class SimulationManager : MonoBehaviour
 
     bool hasSimulator ;
 
-    public IEnumerator ShowForDuration(string msg, float duration)
-    {
-        SendingMessages.Show(msg);
-        yield return new WaitForSeconds(duration);
-        SendingMessages.Show("");
-    }
+    //public IEnumerator ShowForDuration(string msg, float duration)
+    //{
+    //    SendingMessages.Show(msg);
+    //    yield return new WaitForSeconds(duration);
+    //    SendingMessages.Show("");
+    //}
 
     // ############################################ UNITY FUNCTIONS ############################################
     void Awake()
