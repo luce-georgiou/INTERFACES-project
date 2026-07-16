@@ -6,6 +6,7 @@ public class InterfaceButton : MonoBehaviour
 {
     public GameObject menuPanel;
     public GameObject DisplayCanvas;
+    public GameObject commandsPanel;
 
     void Start()
     {
@@ -13,6 +14,7 @@ public class InterfaceButton : MonoBehaviour
         {
             DisplayCanvas.SetActive(false);
             menuPanel.SetActive(true);
+            commandsPanel.SetActive(false);
         }
     }
     public void LaunchSc1()
@@ -23,11 +25,12 @@ public class InterfaceButton : MonoBehaviour
 
         string mes = "scenario1";
         Dictionary<string, string> args = new Dictionary<string, string> {
-                 {"id",ConnectionManager.Instance.GetConnectionId() },
-                 {"mes",  mes }};
+                    {"id",ConnectionManager.Instance.GetConnectionId() },
+                    {"mes",  mes }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
 
         DisplayCanvas.SetActive(true);
+        
     }
 
     public void LaunchSc2()
@@ -54,12 +57,29 @@ public class InterfaceButton : MonoBehaviour
 
     public void SkipPhase()
     {
-        Debug.Log("Le bouton a été cliqué !");
+        Debug.Log("Skip to next phase");
 
         string mes = "skip";
         Dictionary<string, string> args = new Dictionary<string, string> {
                 {"id",ConnectionManager.Instance.GetConnectionId() },
                 {"mes",  mes }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+    }
+
+    public void SeeCommands()
+    {
+        Debug.Log("Commands menu");
+
+        menuPanel.SetActive(false);
+        commandsPanel.SetActive(true);
+    }
+
+    public void OK()
+    {
+        Debug.Log("OK");
+
+        menuPanel.SetActive(true);
+        commandsPanel.SetActive(false);
+
     }
 }

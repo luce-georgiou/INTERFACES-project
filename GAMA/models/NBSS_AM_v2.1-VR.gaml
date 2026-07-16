@@ -231,7 +231,7 @@ species unity_linker parent: abstract_unity_linker {
 			ask ag {
 				remove key: self from: myself.geometries_to_send;
 				do die;
-			}
+			} // ask all weeds and trash to die -> faster
 		}
 	}
 //	action maintenance_repair(string id) {
@@ -294,24 +294,24 @@ species unity_linker parent: abstract_unity_linker {
 //	}
 
 	// faire pousser des mauvaises herbes quand la végétation n'est pas saine
-	reflex invasive_weeds {
-		ask vegetation_cover {
-			if invasive = true {
-				create weeds {location <- any_location_in(one_of(NBSS).shape) every(100 #cycle);}
-			}
-		}
-	}
+//	reflex invasive_weeds {
+//		ask vegetation_cover {
+//			if invasive = true {
+//				create weeds {location <- any_location_in(one_of(NBSS).shape) every(100 #cycle);}
+//			}
+//		}
+//	}
 	// accumulation de déchets
-	reflex trash_acc {
-		ask ext_time_failure {
-			if (my_name = "trash_acc" and (cycle mod (my_frequency * 7)) = 0) { // toutes les 12 semaines on ajoute un déchet
-				create trash {
-					shape <- circle(0.1);
-					location <- any_location_in(one_of(NBSS).shape);
-				}
-			}
-		}
-	}
+//	reflex trash_acc {
+//		ask ext_time_failure {
+//			if (my_name = "trash_acc" and (cycle mod (my_frequency * 7)) = 0) { // toutes les 12 semaines on ajoute un déchet
+//				create trash {
+//					shape <- circle(0.1);
+//					location <- any_location_in(one_of(NBSS).shape);
+//				}
+//			}
+//		}
+//	}
 	// lawn growing
 //	reflex lawn_growth {
 //		if (current_season = "spring") { // herbe pousse plus vite au printemps = plus de tonte nécessaire
@@ -396,6 +396,10 @@ species unity_linker parent: abstract_unity_linker {
 					messages <- messages + ["init_":: "regular_state"];
 					messages <- messages + ["add_to_score":: "45.0"];
 					messages <- messages + ["message_":: "Parfait ! On a enlevé l'accumulation de sédiments, l'eau peut de nouveau s'infilter dans les sols."];
+					send_message <- true;	
+				}
+				else {
+					messages <- messages + ["message_":: "Rien ne se passe... Le problème vient sûrement d'une autre noue."];
 					send_message <- true;	
 				}
 			}

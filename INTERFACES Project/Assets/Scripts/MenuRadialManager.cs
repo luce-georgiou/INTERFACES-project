@@ -72,7 +72,7 @@ public class MenuRadialManager : MonoBehaviour
             // On met à jour l'heure du dernier score pour le prochain coup
             tempsDernierScore = Time.time;
 
-            Debug.Log("add to the score : " +  mes.add_to_score);
+            Debug.Log("add to the score : " + mes.add_to_score);
             weight_score = float.Parse(mes.add_to_score, CultureInfo.InvariantCulture);
             progressBarObj.BarValue += weight_score;
             Dictionary<string, string> args = new Dictionary<string, string> {
@@ -98,14 +98,21 @@ public class MenuRadialManager : MonoBehaviour
 
         if (typeObjet == "NBSS_area")
         {
-            transform.position = positionCible.position + new Vector3(0, 1f, 0);
+            //transform.position = positionCible.position; //+ new Vector3(0, 1f, 0);
             if (SimulationManagerInteraction.scenario == 1) conteneurNBSSArea.SetActive(false);
-            else conteneurNBSSArea.SetActive(true);
+            else 
+            {
+                conteneurNBSSArea.SetActive(true);
+                PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, 0.2f, 0));
+                Debug.Log(conteneurNBSSArea.transform.position);
+            }
         }
         else if (typeObjet == "filter_media")
         {
-            transform.position = positionCible.position + new Vector3(0, 3f, 0);
+            //transform.position = positionCible.position; //+ new Vector3(0, 3f, 0);
             conteneurFilterMedia.SetActive(true);
+            PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, -0.3f, 0));
+            Debug.Log(conteneurNBSSArea.transform.position);
             if (SimulationManagerInteraction.scenario == 1)
             {
                 SC1_Buttons.SetActive(true);
@@ -130,7 +137,7 @@ public class MenuRadialManager : MonoBehaviour
     }
 
     // créer barrière végétale
-    
+
 
     public void CreerBarriere(GameObject noueCliquee, GameObject fenceType)
     {
@@ -232,7 +239,7 @@ public class MenuRadialManager : MonoBehaviour
         noueCliquee.GetComponent<Renderer>().material = mat;
 
         int idx = int.Parse(noueCliquee.name.Replace("nbss_area", ""));
-        GameObject fmObj = GameObject.Find("filter_media" +  idx);
+        GameObject fmObj = GameObject.Find("filter_media" + idx);
 
         Vector3 tailleFM = fmObj.GetComponent<Renderer>().bounds.size;
         GameObject paillageObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -347,11 +354,12 @@ public class MenuRadialManager : MonoBehaviour
         int idx = int.Parse(noue.name.Replace("filter_media", ""));
         GameObject grass = GameObject.Find("Grass_NBSS" + idx);
         //Material burntGrassMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
+        Material yellowGrassMat = Resources.Load<Material>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Materials/Grass_1");
         foreach (Transform enfant in grass.transform)
         {
             // Random.Range(0f, 100f) génère un nombre aléatoire entre 0 et 100
             // Si ce nombre est inférieur à ton pourcentage, on éteint l'objet
-            if (Random.Range(0f, 100f) < 30f)
+            if (Random.Range(0f, 100f) < 50f)
             {
                 enfant.gameObject.SetActive(false);
             }
@@ -360,7 +368,8 @@ public class MenuRadialManager : MonoBehaviour
                 Renderer rend = enfant.GetComponent<Renderer>();
                 if (rend != null)
                 {
-                    rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
+                    //rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
+                    rend.material = yellowGrassMat;
                 }
             }
         }
@@ -375,7 +384,7 @@ public class MenuRadialManager : MonoBehaviour
         int idx = int.Parse(fm.name.Replace("filter_media", ""));
         GameObject nbss_area = GameObject.Find("nbss_area" + idx);
         GameObject grass = GameObject.Find("Grass_NBSS" + idx);
-        
+
         fm.GetComponent<Renderer>().material = burntGrassMat;
         nbss_area.GetComponent<Renderer>().material = burntGrassMat;
         Renderer[] tousLesRenderers = grass.GetComponentsInChildren<Renderer>();
@@ -436,5 +445,52 @@ public class MenuRadialManager : MonoBehaviour
 
         // On referme le menu après avoir cliqué
         FermerMenu();
+    }
+
+
+    // J'ai retiré le paramètre "recul" de la fonction, on n'en a plus besoin !
+    private void PlacerMenuProcheDuJoueur(GameObject menu, Transform objetCible, Vector3 offset)
+    {
+        // On récupère la position du joueur pour savoir d'où il regarde
+        Vector3 positionJoueur = Camera.main.transform.position;
+        Collider colObjet = objetCible.GetComponentInChildren<Collider>();
+
+        Vector3 positionFinale = objetCible.position;
+
+        if (colObjet != null)
+        {
+            // 1. Calcul du point du collider le plus proche du joueur sur la longueur
+            Vector3 pointPlusProche = colObjet.ClosestPoint(positionJoueur);
+
+            // --- CENTRER DANS LA LARGEUR ---
+            // On traduit ce point par rapport au centre de l'objet visé
+            Vector3 pointLocal = objetCible.InverseTransformPoint(pointPlusProche);
+
+            // On force la largeur à être au centre (0)
+            if (objetCible.name == "filter_media0" || objetCible.name == "filter_media1" || objetCible.name == "filter_media2" || objetCible.name == "filter_media3")
+            {
+                pointLocal.z = 0;
+            }
+            else pointLocal.x = 0;
+
+            // On re-transforme ce point modifié en coordonnées mondiales
+            pointPlusProche = objetCible.TransformPoint(pointLocal);
+            // -----------------------------------------
+
+            // 2. Position finale : on ajoute simplement l'offset (la hauteur)
+            positionFinale = pointPlusProche + offset;
+        }
+        else
+        {
+            // Sécurité si pas de collider
+            positionFinale = objetCible.position + offset;
+        }
+
+        // 3. Appliquer la position
+        Debug.Log(positionFinale);
+        Debug.Log(menu.transform.position);
+        menu.transform.position = positionFinale;
+
+        // La rotation est maintenant entièrement gérée par ton script Billboard !
     }
 }

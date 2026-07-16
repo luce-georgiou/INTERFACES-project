@@ -39,6 +39,8 @@ public class SimulationManagerInteraction : SimulationManager
 
     private Dictionary<string, GameObject> sedimentMap = new Dictionary<string, GameObject>();
 
+    private int totalWeedsTrashInitial = -1;
+
     // Message manager
     //private string lastFailureMessage = "";
     //public IEnumerator ShowForDuration(string msg, float duration)
@@ -150,12 +152,19 @@ public class SimulationManagerInteraction : SimulationManager
     {
         if (!interactionsAutorisees) return;
 
+        if (totalWeedsTrashInitial == -1)
+        {
+            totalWeedsTrashInitial = GameObject.FindGameObjectsWithTag("weeds").Length +
+                                 GameObject.FindGameObjectsWithTag("trash").Length;
+        }
+
         if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             Debug.Log("grabbed: " + grabbedObject.name + " tag: " + grabbedObject.tag);
             //Debug.Log("grabbedObject : " + grabbedObject);
             int count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
+            
             float weight = 45f;
             if (grabbedObject.tag.Equals("weeds") || grabbedObject.tag.Equals("trash"))
             {
@@ -165,10 +174,35 @@ public class SimulationManagerInteraction : SimulationManager
                 //count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
                 if (count > 0)
                 {
+                    Debug.Log("count : " + count);
+                    //count -= 1;
                     ConnectionManager.Instance.SendExecutableAsk("maintenance_remove", args);
-                    progressBar.BarValue = progressBar.BarValue + (weight / count);
+                    progressBar.BarValue = progressBar.BarValue + (weight / totalWeedsTrashInitial);
                     SendMessageToGama(progressBar.BarValue.ToString());
+                    if (count == 1 && scenario == 1)
+                    {
+                        GameObject pond2 = GameObject.Find("ponding_area2");
+                        Renderer rend = pond2.GetComponent<Renderer>();
+                        Debug.Log(rend.material.GetVector("_Direction_1"));
+                        rend.material.SetVector("_Direction_1", new Vector2(0f, 0.5f));
+                        Debug.Log(rend.material.GetVector("_Direction_1"));
+                        //List<GameObject> ponds = new List<GameObject>
+                        //{
+
+                        //    GameObject.Find("ponding_area4"),
+                        //    GameObject.Find("ponding_area5"),
+                        //    GameObject.Find("ponding_area6")
+                        //};
+                        //foreach (GameObject pond in ponds)
+                        //{
+                        //    Renderer rend = pond.GetComponent<Renderer>();
+                        //    rend.material.SetVector("_Direction_1", new Vector2(0.5f, 0f));
+                        //}
+
+                        StartCoroutine(ShowForDuration("Moins de déchets = moins de pollution pour l’eau et le sol.", 5f));
+                    }
                 }
+                
             }
             //GameObject obj = ev.interactableObject.transform.gameObject;
             //if (obj.tag.Equals("road"))
@@ -384,32 +418,32 @@ public class SimulationManagerInteraction : SimulationManager
                 var ma = ps.main;
 
                 rainScript.RainIntensity = intensity / 3f;
-                if (season == "winter") // hiver
-                {
-                    ma.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
-                    ma.gravityModifier = 0.2f; // presque pas de gravit�
-                    //ma.maxParticles = 6000;
-                    rainScript.EnableWind = false;
-                    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
-                    renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                //if (season == "winter") // hiver
+                //{
+                //    ma.startSize = new ParticleSystem.MinMaxCurve(0.15f, 0.25f);
+                //    ma.gravityModifier = 0.2f; // presque pas de gravit�
+                //    //ma.maxParticles = 6000;
+                //    rainScript.EnableWind = false;
+                //    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
+                //    renderer.renderMode = ParticleSystemRenderMode.Billboard;
 
-                    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
-                    vol.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
-                    vol.y = new ParticleSystem.MinMaxCurve(-0.5f, -0.1f);  // descente
-                    vol.z = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
-                }
-                else
-                {
-                    ma.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.15f);
-                    ma.gravityModifier = 1f;
-                    rainScript.EnableWind = true;
-                    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
-                    renderer.renderMode = ParticleSystemRenderMode.Stretch;
-                    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
-                    vol.x = new ParticleSystem.MinMaxCurve(0f, 0f);
-                    vol.y = new ParticleSystem.MinMaxCurve(-55f, -50f);
-                    vol.z = new ParticleSystem.MinMaxCurve(0f, 0f);
-                }
+                //    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
+                //    vol.x = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
+                //    vol.y = new ParticleSystem.MinMaxCurve(-0.5f, -0.1f);  // descente
+                //    vol.z = new ParticleSystem.MinMaxCurve(-0.05f, 0.05f); // quasi rien
+                //}
+                //else
+                //{
+                //    ma.startSize = new ParticleSystem.MinMaxCurve(0.05f, 0.15f);
+                //    ma.gravityModifier = 1f;
+                //    rainScript.EnableWind = true;
+                //    var renderer = rainScript.RainFallParticleSystem.GetComponent<ParticleSystemRenderer>();
+                //    renderer.renderMode = ParticleSystemRenderMode.Stretch;
+                //    var vol = rainScript.RainFallParticleSystem.velocityOverLifetime;
+                //    vol.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+                //    vol.y = new ParticleSystem.MinMaxCurve(-55f, -50f);
+                //    vol.z = new ParticleSystem.MinMaxCurve(0f, 0f);
+                //}
 
 
                 //// Change rain intensity according to rain data -> marche
@@ -838,20 +872,22 @@ public class SimulationManagerInteraction : SimulationManager
         //timerText.text = "";
         if (message != null)
         {
-            if (message.init_ != "")
+            if (!string.IsNullOrWhiteSpace(message.init_))
             {
-                GameObject[] inletObjs = GameObject.FindGameObjectsWithTag("inlet");
-                Material sourceMat = Resources.Load<Material>("Pipe constructor/Materials/Pipe_D");
-                Color c = sourceMat.GetColor("_BaseColor");
-                foreach (GameObject inletObj in inletObjs)
+                Debug.Log(message.init_);
+                GameObject pipes = GameObject.Find("PipeSystem");
+                //Material sourceMat = Resources.Load<Material>("Pipe constructor/Materials/Pipe_D");
+                //Color c = sourceMat.GetColor("_BaseColor");
+                foreach (Transform obj in pipes.transform)
                 {
-                    Debug.Log(inletObj.name);
-                    ChangeColor(inletObj, Color.blue);
+                    //Debug.Log(obj.name);
+                    ChangeColor(obj.gameObject, Color.blue);
                 }
                 if (message.init_ != "regular_state")
                 {
+                    
                     GameObject blockedInletObj = GameObject.Find(message.init_);
-                    //Debug.Log("looking for: " + message.init_ + " -> found: " + blockedInletObj);
+                    Debug.Log("looking for: " + message.init_ + " -> found: " + blockedInletObj);
                     if (blockedInletObj != null)
                         ChangeColor(blockedInletObj, Color.white);
                 }

@@ -191,9 +191,9 @@ global control: fsm {
 			//location <- any_location_in(rect - free_space);
 			location <- any_location_in(free_space);
 		}
-		create weeds number: rnd(0,10) {
-			location <- any_location_in(free_space);
-		}	
+//		create weeds number: rnd(0,10) {
+//			location <- any_location_in(free_space);
+//		}	
 		
 		// Initialization of NBSS and all its components :
 		create NBSS number: 8 {
