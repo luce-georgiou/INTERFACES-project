@@ -19,6 +19,8 @@ using UnityEngine.ProBuilder.Shapes;
 
 public class SimulationManagerInteraction : SimulationManager
 {
+    //public static new SimulationManagerInteraction Instance;
+
     public static bool interactionsAutorisees = true;
     public static int scenario;
     public GameObject Scenario1;
@@ -28,6 +30,7 @@ public class SimulationManagerInteraction : SimulationManager
     public GameObject DisplayCanvas;
     public GameObject menuPanel;
     public TMP_Text timerText;
+    public TMP_Text dateTimeText;
     private Coroutine timerCoroutine;
     public ProgressBar progressBar;
     //public GameObject exclamationCanvas;
@@ -38,6 +41,8 @@ public class SimulationManagerInteraction : SimulationManager
     private List<string> tagsToIgnore = new List<string> { "swale", "gravel", "grass", "flower", "NBSS", "road", "building", "park" };//, "grass", "trees", "trash", "weeds", "shrubs_plants", "vegetal_waste"};
 
     private Dictionary<string, GameObject> sedimentMap = new Dictionary<string, GameObject>();
+
+    
 
     private int totalWeedsTrashInitial = -1;
     
@@ -83,13 +88,7 @@ public class SimulationManagerInteraction : SimulationManager
         //SendMessageToGama(progressBar.BarValue.ToString());
     }
 
-    public void SendMessageToGama(string mes)
-    {
-        Dictionary<string, string> args = new Dictionary<string, string> {
-                 {"id",ConnectionManager.Instance.GetConnectionId() },
-                 {"mes",  mes }};
-        ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
-    }
+    
 
 
 
@@ -110,6 +109,7 @@ public class SimulationManagerInteraction : SimulationManager
         if (obj.tag.Equals("filter_media"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            if (scenario == 2) SendingMessages.Show("Sans eau et avec le piétinement, ces plantes n’ont aucune chance.");
         }
         //if (obj.tag.Equals("ponding_area"))
         //{
@@ -126,11 +126,12 @@ public class SimulationManagerInteraction : SimulationManager
         if (obj.tag.Equals("nbss_area"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
+            if (scenario == 2) SendingMessages.Show("Le sol est si sec qu’il ne peut plus retenir l’eau. Sans pluie, la noue va disparaître.");
         }
-        if (obj.tag.Equals("NBSS"))
-        {
-            Debug.Log("NBSS détecté");
-        }
+        //if (obj.tag.Equals("NBSS"))
+        //{
+        //    Debug.Log("NBSS détecté");
+        //}
     }
 
 
@@ -725,7 +726,17 @@ public class SimulationManagerInteraction : SimulationManager
                         obj.transform.localScale = new Vector3(0.9f, 1.2f, 1.05f);
                         break;
                 }
-
+                float health = attributes[i].health;
+                if (healthDic.ContainsKey(obj.name))
+                {
+                    healthDic[obj.name] = health;
+                    //Debug.Log(obj.name);
+                }
+                else
+                {
+                    healthDic.Add(obj.name, health);
+                    Debug.Log(obj.name + " with : " + health);
+                }
             }
             else if (name.StartsWith("ponding_area"))
             {
@@ -880,7 +891,7 @@ public class SimulationManagerInteraction : SimulationManager
                 }
                 if (message.init_ != "regular_state")
                 {
-                    
+
                     GameObject blockedInletObj = GameObject.Find(message.init_);
                     Debug.Log("looking for: " + message.init_ + " -> found: " + blockedInletObj);
                     if (blockedInletObj != null)
@@ -894,7 +905,7 @@ public class SimulationManagerInteraction : SimulationManager
                 SendingMessages.Show(message.message_);
                 //StartCoroutine(ShowForDuration(message.message_, 10f));
                 Debug.Log("received from GAMA: " + message.message_);
-                
+
             }
             if (!string.IsNullOrWhiteSpace(message.timer_start))
             {
@@ -940,6 +951,8 @@ public class SimulationManagerInteraction : SimulationManager
                 Scenario1.SetActive(true);
                 Scenario2.SetActive(false);
 
+                dateTimeText.text = "12 avril\n11:37";
+
                 // Assigning spring materials to vegetal components
                 Material matNBSS = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass05");
                 Material matLawn = Resources.Load<Material>("Materials/Lawn_Opaque");
@@ -960,7 +973,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             if (message.scenario == "2")
             {
-                
+
                 Debug.Log("Scenario2 enclenché");
                 scenario = 2;
                 // changer matériau fm en sol sec
@@ -968,13 +981,16 @@ public class SimulationManagerInteraction : SimulationManager
                 // enable gameobject scenario 2
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(true);
+
+                dateTimeText.text = "3 août\n13:04";
+
                 //reset paillage et elem changés par sc1
                 GameObject[] paillageObjs = GameObject.FindGameObjectsWithTag("paillage");
                 foreach (GameObject obj in paillageObjs)
                 {
                     if (obj != null)
                     {
-                        obj.SetActive(false); 
+                        obj.SetActive(false);
                     }
                 }
 
@@ -996,7 +1012,7 @@ public class SimulationManagerInteraction : SimulationManager
                 // Update sky box to summer sky
                 RenderSettings.skybox = summerSky;
                 DynamicGI.UpdateEnvironment();
-                
+
             }
             if (message.scenario == "menu") {
                 Debug.Log("Afficher menu");
@@ -1017,31 +1033,9 @@ public class SimulationManagerInteraction : SimulationManager
             }
             message = null;
         }
-
-
-    }
-    private IEnumerator Wait()
-    {
-        yield return new WaitForSeconds(5f);
     }
 
-    // à modifier pour chaque sortie d'eau vers nappe phréatique
-    //public GameObject Arrow;
-
-    //void Start()
-    //{
-    //    CreateArrow(new Vector3(0, 0, 0), new Vector3(5, 0, 0));
-    //    CreateArrow(new Vector3(10, 0, 0), new Vector3(15, 0, 5));
-    //    CreateArrow(new Vector3(20, 0, 0), new Vector3(25, 0, -5));
-    //}
-
-    //void CreateArrow(Vector3 start, Vector3 end)
-    //{
-    //    GameObject arrow = Instantiate(Arrow);
-    //    FlowArrow fa = arrow.GetComponent<FlowArrow>();
-    //    fa.startPoint = start;
-    //    fa.endPoint = end;
-    //}
+    
 }
 
 

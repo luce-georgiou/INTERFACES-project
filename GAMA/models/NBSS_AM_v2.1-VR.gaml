@@ -31,7 +31,7 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_local_flora;
 
 	bool do_send_world <- true;
-	list<point> init_locations <- [{100.0, 0.0}]; //[any_location_in(init_free_space)];
+	list<point> init_locations <- [{100.0, 10.0, 1.0}]; //[any_location_in(init_free_space)];
 
 	init {
 		do define_properties;
@@ -175,6 +175,8 @@ species unity_linker parent: abstract_unity_linker {
 //		write failures_aff_component;
 
 		list<float> water_level_pond <- ponding_area collect (each.water_level);
+		list<float> health <- nbss_area collect (each.health);
+		
 		//write water_level_pond;
 		
 //		map<string,list<unknown>> atts_inlet <-  [
@@ -211,6 +213,7 @@ species unity_linker parent: abstract_unity_linker {
 //		}
 		
 		map<string,list<unknown>> atts_ponding_area <- ["water_level":: water_level_pond];
+		map<string,list<unknown>> atts_nbss_area <- ["health":: health];
 		//at every step, we send the dynamic_punctual_agent agents with the up_car properties and the attributes "atts" 
 //		do add_geometries_to_send(inlet,up_inlet,atts_inlet);
 //		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
@@ -220,26 +223,13 @@ species unity_linker parent: abstract_unity_linker {
 		//do add_geometries_to_send(lawn, up_lawn, atts_lawn);
 		do add_geometries_to_send(ponding_area, up_ponding_area, atts_ponding_area);
 		do add_geometries_to_send(filter_media, up_filter_media, atts_fm);
+		do add_geometries_to_send(nbss_area, up_nbss_area, atts_nbss_area);
 		//do add_geometries_to_send(failure_event, up_failure_event, atts_failures);
 		
 	}
 	
 	// Maintenance practices and their impact on biodiv/costs/vegetation health
-	action maintenance_remove(string id) {
-		agent ag <- (trash + weeds + vegetal_waste) first_with (each.name = id) ;
-		if (ag != nil) {
-			ask (trash + weeds + vegetal_waste) {
-	            remove key: self from: myself.geometries_to_send;
-	            do die;
-	        }
-			messages <- messages + ["message_":: "Moins de déchets = moins de pollution pour l’eau et le sol."];
-			send_message <- true;
-//			ask ag {
-//				remove key: self from: myself.geometries_to_send;
-//				do die;
-//			} // ask all weeds and trash to die -> faster
-		}
-	}
+	
 //	action maintenance_repair(string id) {
 //		component ag <- (engineered_component + vegetal_component) first_with (each.name = id) ;
 //		if (ag != nil) {
@@ -348,6 +338,10 @@ species unity_linker parent: abstract_unity_linker {
 	reflex sediment_acc {
 		//quand valeur dans tableau potpall_acc augmente, ajouter une couche de sédiments (et transformer vegetal waste en sediments)
 	}
+	
+	
+	
+	// Sim functions
 	reflex send_message when: send_message {
 		//write "Send message: ";
 		//do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
@@ -365,6 +359,14 @@ species unity_linker parent: abstract_unity_linker {
 		}
 		else if (mes = "scenario2") {
 			launch_sc2 <- true;
+		}
+		else if (mes contains ":") {
+			list<string> name_health <- mes split_with ":";
+            nbss_area nbs <- nbss_area first_with (each.name = name_health at 0);
+            ask nbs {
+            	health <- health + float(name_health at 1);
+            }
+            write name_health;
 		}
 		else { //On traite le score en fin de phase
 			score <- float(mes);
@@ -386,6 +388,25 @@ species unity_linker parent: abstract_unity_linker {
 	}
 	
 	// scénario 1 actions
+	action maintenance_remove(string id) {
+		agent ag <- (trash + weeds + vegetal_waste) first_with (each.name = id) ;
+		if (ag != nil) {
+			ask (trash + weeds + vegetal_waste) {
+	            remove key: self from: myself.geometries_to_send;
+	            do die;
+	        }
+	        ask nbss_area where (each.my_name = "nbss_area2") {
+				health <- health + 45.0;
+			}
+			messages <- messages + ["message_":: "Moins de déchets = moins de pollution pour l’eau et le sol."];
+			send_message <- true;
+//			ask ag {
+//				remove key: self from: myself.geometries_to_send;
+//				do die;
+//			} // ask all weeds and trash to die -> faster
+		}
+	}
+	
 	action curage(string id) {
 		filter_media fm <- (filter_media first_with (each.name = id));
 		if (fm != nil) {
@@ -396,6 +417,12 @@ species unity_linker parent: abstract_unity_linker {
 					ask ponding_area where (each.is_obstructed) { // condition à modif selon si transit ou non, et chemin de l'eau
 						is_obstructed <- false;
 						water_level <- 0.0;
+					}
+					ask nbss_area where (each.my_name = "nbss_area2") {
+						health <- health + 45.0;
+					}
+					ask nbss_area where (each.my_name = "nbss_area4" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
+						health <- health + 40.0;
 					}
 					//score <- score + 30.0;
 					//weight_score <- 30;
@@ -418,6 +445,9 @@ species unity_linker parent: abstract_unity_linker {
 		if (fm != nil) {
 			ask ponding_area where (each.my_NBSS = fm.my_NBSS) {
 				water_level <- water_level + 0.2;
+			}
+			ask nbss_area where (each.my_NBSS = fm.my_NBSS) {
+				health <- health + 5.0;
 			}
 			//weight_score <- 15;
 			messages <- messages + ["add_to_score":: string(15)];
@@ -444,6 +474,9 @@ species unity_linker parent: abstract_unity_linker {
 	            }
 	            //write "local_flora created";
 	        }
+	        ask nbss_area where (each.my_NBSS = target_nbss) {
+	        	health <- health + 3.0;
+	        }
 	        //weight_score <- 25;
 			messages <- messages + ["add_to_score":: string(25)];
 			messages <- messages + ["message_":: "Ces plantes supportent la sécheresse et aident la noue à survivre grâce à leurs racines profondes."];
@@ -451,11 +484,12 @@ species unity_linker parent: abstract_unity_linker {
 	    }	
 	}
 	action plant_flowers(string id) {
-		filter_media ag_fm <- filter_media first_with (each.name = id);
+		nbss_area ag <- nbss_area first_with (each.name = id);
 	    
 	    NBSS target_nbss <- nil;
-	    if (ag_fm != nil) {
-	        target_nbss <- ag_fm.my_NBSS;
+	    if (ag != nil) {
+	        target_nbss <- ag.my_NBSS;
+	        //write ag.my_NBSS;
 	    }
 	    if (target_nbss != "") {
 	    	point loc <- target_nbss.location;
@@ -466,6 +500,9 @@ species unity_linker parent: abstract_unity_linker {
 								loc.y + (index < 5 ? 2.5 : -2.5)
 				};
 			}
+			ask nbss_area where (each.my_NBSS = target_nbss) {
+	        	health <- health - 3.0;
+	        }
 			messages <- messages + ["add_to_score":: string(-5)];
 			messages <- messages + ["message_":: "Jolies ! Mais... Est-ce vraiment utile ?"];
 			send_message <- true;

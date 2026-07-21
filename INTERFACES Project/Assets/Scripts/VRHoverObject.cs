@@ -34,6 +34,19 @@ public class VRHoverObjet : MonoBehaviour
 
     private void OnHoverEnter(HoverEnterEventArgs args)
     {
+        //string nameObject = gameObject.name;
+        //Debug.Log(gameObject.name);
+        int idx = int.Parse(gameObject.name.Replace("Empty", ""));
+        string nameObject = "nbss_area" + idx;
+        //Debug.Log(nameObject);
+        // recup idx avec parse puis créer nouveau string avec "nbss_area" + idx
+        if (SimulationManager.Instance == null)
+        {
+            Debug.LogError("ERREUR : SimulationManagerInteraction.Instance est NULL ! Vérifie qu'il est bien dans la scène.");
+            return;
+        }
+        float health = SimulationManager.Instance.GetHealth(nameObject);
+
         // On appelle le Manager unique pour lui dire quoi afficher et où
         if (TooltipManager.Instance != null)
         {

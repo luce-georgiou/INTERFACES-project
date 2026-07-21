@@ -7,7 +7,7 @@ using NativeWebSocket;
 public abstract class WebSocketConnector : MonoBehaviour
 {
 
-    protected string DefaultIP = "localhost";// //"10.103.67.11";//
+    protected string DefaultIP = "localhost";//"10.67.180.11";//"localhost";// 
     protected string DefaultPort = "8080";
 
 

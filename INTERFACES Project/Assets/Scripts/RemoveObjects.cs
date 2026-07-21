@@ -19,7 +19,7 @@ public class RemoveObjects : MonoBehaviour
         count = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None)
                     .Count(go => go.name.StartsWith("Cylinder"));
 
-        Debug.Log("Nombre de cylindres trouvés : " + count);
+        //Debug.Log("Nombre de cylindres trouvés : " + count);
     }
 
     void OnEnable()

@@ -20,4 +20,5 @@ public class Attributes
     public float water_level;
     public int fqt_fm;
     public float sediments_fm;
+    public float health;
 }

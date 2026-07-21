@@ -254,6 +254,7 @@ public class MenuRadialManager : MonoBehaviour
         int idx = int.Parse(swale.name.Replace("nbss_area", ""));
         GameObject grassObj = GameObject.Find("Grass_NBSS" + idx);
         grassObj.SetActive(false);
+        
     }
 
     // --- LES BOUTONS DE TON MENU RADIAL ---
@@ -262,7 +263,7 @@ public class MenuRadialManager : MonoBehaviour
     public void BoutonActionCurage()
     {
         EnvoyerCommandeGama("curage");
-        SimulationManagerInteraction.unclogged = true;
+        //SimulationManagerInteraction.unclogged = true; //à modif car valable partout là ou enlever
     }
 
     public void BoutonActionFlowers()
@@ -277,6 +278,7 @@ public class MenuRadialManager : MonoBehaviour
         conteneurArrosage.SetActive(true);
         SC1_Buttons.SetActive(false);
         SC2_Buttons.SetActive(false);
+        
     }
 
     public void BoutonActionReplanter()
@@ -291,6 +293,8 @@ public class MenuRadialManager : MonoBehaviour
 
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 15f;
+        SendingMessages.Show("Tondre à ras détruit l'ombre naturelle du sol ! L'humidité s'évapore et la biodiversité fuit.", 7f, Color.red);
+        SimulationManager.Instance.SendMessageToGama(swale.name + ":" + "-15");
     }
 
     public void BoutonActionPaillage()
@@ -307,6 +311,8 @@ public class MenuRadialManager : MonoBehaviour
         FermerMenu();
         //EnvoyerCommandeGama("point_gain");
         progressBarObj.BarValue = progressBarObj.BarValue + 20f;
+        SendingMessages.Show("Le paillage protège le sol de la chaleur et garde l’humidité.", 7f, new Color(119f / 255f, 178f / 255f, 107f / 255f));
+        SimulationManager.Instance.SendMessageToGama(zoneAPailler.name + ":" + "15");
     }
 
     public void BoutonActionBarriereVeg()
@@ -326,6 +332,8 @@ public class MenuRadialManager : MonoBehaviour
         // 3. On ferme le menu
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue + 20f;
+        SendingMessages.Show("Les plantes locales protègent la noue du piétinement naturellement, et ralentissent le tassement de la terre.", 7f, new Color(119f / 255f, 178f / 255f, 107f / 255f));
+        SimulationManager.Instance.SendMessageToGama(zoneAAmemenager.name + ":" + "3");
     }
 
     public void BoutonActionMetalFence()
@@ -345,6 +353,8 @@ public class MenuRadialManager : MonoBehaviour
         // 3. On ferme le menu
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 5f;
+        SendingMessages.Show("Le grillage bloque les piétons, mais aussi la faune locale ! Privilégiez une barrière végétale (haie).", 7f, Color.yellow);
+        SimulationManager.Instance.SendMessageToGama(zoneAAmemenager.name + ":" + "+10");
     }
 
     public void BoutonActionGazon()
@@ -374,7 +384,8 @@ public class MenuRadialManager : MonoBehaviour
         }
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 20f;
-        SendingMessages.Show("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !");
+        SendingMessages.Show("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 7f, Color.red);
+        SimulationManager.Instance.SendMessageToGama("nbss_area" + idx + ":" + "-10");
         //SimulationManager.Instance.StartCoroutine(SimulationManager.Instance.ShowForDuration("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 5f));
     }
 
@@ -397,7 +408,9 @@ public class MenuRadialManager : MonoBehaviour
         }
 
         conteneurArrosage.SetActive(false);
-        progressBarObj.BarValue = progressBarObj.BarValue - 10f;
+        progressBarObj.BarValue = progressBarObj.BarValue - 5f;
+        SendingMessages.Show("Arroser en pleine canicule est un gaspillage : 60% de l'eau s'évapore avant de toucher les racines !", 7f, Color.red);
+        SimulationManager.Instance.SendMessageToGama(nbss_area.name + ":" + "-10");
     }
 
     public void BoutonArroserPlusTardOuTot()

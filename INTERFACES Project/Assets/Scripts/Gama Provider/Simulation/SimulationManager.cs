@@ -111,6 +111,24 @@ public class SimulationManager : MonoBehaviour
     //    SendingMessages.Show("");
     //}
 
+    public Dictionary<string, float> healthDic = new Dictionary<string, float>();
+    public float GetHealth(string idObjet)
+    {
+        if (healthDic.TryGetValue(idObjet, out float sante))
+        {
+            return sante;
+        }
+        return 0f; // Retourne 0 si aucune santé n'est enregistrée pour cet ID
+    }
+
+    public void SendMessageToGama(string mes)
+    {
+        Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  mes }};
+        ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+    }
+
     // ############################################ UNITY FUNCTIONS ############################################
     void Awake()
     { 

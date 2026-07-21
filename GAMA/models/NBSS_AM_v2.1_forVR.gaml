@@ -221,6 +221,8 @@ global control: fsm {
 				shape <- list_of_geoms[index] + 3.0;
 				location <- list_of_locs[index];
 				my_NBSS<- myself;
+				my_name <- "nbss_area" + index;
+				health <- 100.0;
 			}
 			
 			create inlet {
@@ -514,6 +516,12 @@ global control: fsm {
 			}
 			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
 			    is_obstructed <- true;
+			}
+			ask nbss_area where (each.my_name = "nbss_area2") {
+				health <- 10.0;
+			}
+			ask nbss_area where (each.my_name = "nbss_area4" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
+				health <- 50.0;
 			}
 			//set date to rainy day
 			//starting_date <- date(string(int(20070429)));
@@ -861,6 +869,7 @@ species park parent: urban_environment {
 
 species nbss_area parent: NBSS {
 	NBSS my_NBSS;
+	float health;
 	aspect default {
 		draw shape border:#black color:#yellow; 
 	}
