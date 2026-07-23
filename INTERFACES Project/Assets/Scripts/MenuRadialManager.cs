@@ -23,7 +23,7 @@ public class MenuRadialManager : MonoBehaviour
     [SerializeField] private Material healthyGrassMat;
 
     [Header("Paramètres des barrières")]
-    public GameObject prefabShrub;
+    public GameObject prefabSprout;
     public GameObject prefabMetalFence;
     public float decalageVersRoute = 2.5f;
     public float espacementEntreShrubs = 1.0f; // Distance (en mètres) entre chaque buisson
@@ -202,7 +202,7 @@ public class MenuRadialManager : MonoBehaviour
         float moitie = (longueurNoue - 9f) / 2f;
         int compteur = 0;
         Debug.LogWarning(fenceType.name);
-        bool isShrub = fenceType.name.Contains("Bush");
+        bool isShrub = fenceType.name.Contains("Plant");
         Debug.LogWarning(isShrub);
         float spaceBetweenObjs = isShrub ? espacementEntreShrubs : spaceBetweenFences;
 
@@ -224,7 +224,8 @@ public class MenuRadialManager : MonoBehaviour
                 fenceType.transform.localScale = new Vector3(fenceType.transform.localScale.x, 0.3f, fenceType.transform.localScale.z);
             }
 
-            Instantiate(fenceType, positionFinale, rotationAlignee, Scenario2.transform);
+            GameObject newFence = Instantiate(fenceType, positionFinale, rotationAlignee, Scenario2.transform);
+            newFence.tag = "shrubs_plants";
             compteur++;
         }
 
@@ -310,9 +311,9 @@ public class MenuRadialManager : MonoBehaviour
         }
         FermerMenu();
         //EnvoyerCommandeGama("point_gain");
-        progressBarObj.BarValue = progressBarObj.BarValue + 20f;
+        progressBarObj.BarValue = progressBarObj.BarValue + 15f;
         SendingMessages.Show("Le paillage protège le sol de la chaleur et garde l’humidité.", 7f, new Color(119f / 255f, 178f / 255f, 107f / 255f));
-        SimulationManager.Instance.SendMessageToGama(zoneAPailler.name + ":" + "15");
+        SimulationManager.Instance.SendMessageToGama(zoneAPailler.name + ":" + "5");
     }
 
     public void BoutonActionBarriereVeg()
@@ -321,7 +322,7 @@ public class MenuRadialManager : MonoBehaviour
 
         if (zoneAAmemenager != null)
         {
-            CreerBarriere(zoneAAmemenager, prefabShrub);
+            CreerBarriere(zoneAAmemenager, prefabSprout);
             Debug.Log("barrière créée");
         }
         else
@@ -378,7 +379,7 @@ public class MenuRadialManager : MonoBehaviour
                 if (rend != null)
                 {
                     //rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
-                    rend.material = yellowGrassMat;
+                    rend.sharedMaterial = yellowGrassMat;
                 }
             }
         }

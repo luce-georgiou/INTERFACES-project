@@ -96,15 +96,20 @@ public class SimulationManagerInteraction : SimulationManager
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
     {
          GameObject obj = ev.interactableObject.transform.gameObject;
-        if (obj.tag.Equals("weeds"))
+        //if (obj.tag.Equals("weeds"))
+        //{
+        //    SimulationManagerSolo.ChangeColor(obj, Color.blue);
+        //    SendingMessages.Show("Nettoyer ?");
+        //}
+        //if (obj.tag.Equals("trash"))
+        //{
+        //    SimulationManagerSolo.ChangeColor(obj, Color.blue);
+        //    SendingMessages.Show("Ces déchets empoisonnent l’eau et écrasent les plantes. Un mégot = 500L d’eau polluée !\nNettoyer ?");
+        //}
+        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
         {
             SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            SendingMessages.Show("Nettoyer ?");
-        }
-        if (obj.tag.Equals("trash"))
-        {
-            SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            SendingMessages.Show("Ces déchets empoisonnent l’eau et écrasent les plantes. Un mégot = 500L d’eau polluée !\nNettoyer ?");
+            SendingMessages.Show("Ces déchets et végétaux semblent obstruer la canalisation...\nNettoyer ?");
         }
         if (obj.tag.Equals("filter_media"))
         {
@@ -1012,10 +1017,150 @@ public class SimulationManagerInteraction : SimulationManager
                 // Update sky box to summer sky
                 RenderSettings.skybox = summerSky;
                 DynamicGI.UpdateEnvironment();
+                
 
+            }
+            if (message.scenario == "2b" || message.scenario == "2c")
+            {
+                GameObject[] sprouts = GameObject.FindGameObjectsWithTag("shrubs_plants");
+                if (sprouts.Length == 0)
+                {
+                    Debug.LogWarning("Aucun objet trouvé avec le tag 'shrubs_plants'.");
+                    return;
+                }
+                GameObject shrubPrefab = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Bush_1_1");
+                foreach (GameObject sprout in sprouts)
+                {
+                    if (sprout == null) continue;
+                    GameObject shrub = Instantiate(shrubPrefab, sprout.transform.position, sprout.transform.rotation);
+                    if (sprout.transform.parent != null)
+                    {
+                        shrub.transform.SetParent(sprout.transform.parent);
+                    }
+                    //shrub.transform.localScale = sprout.transform.localScale;
+                    shrub.tag = "shrubs_plants";
+                    Destroy(sprout);
+                }
+                // grow local flora
+                GameObject[] localFlora = GameObject.FindGameObjectsWithTag("local_flora");
+                if (localFlora.Length == 0)
+                {
+                    Debug.LogWarning("Aucun objet trouvé avec le tag 'local_flora'.");
+                    return;
+                }
+                GameObject grownFlora = Resources.Load<GameObject>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_2");
+                foreach (GameObject obj in localFlora)
+                {
+                    if (obj == null) continue;
+                    GameObject newFlora = Instantiate(grownFlora, obj.transform.position, obj.transform.rotation);
+                    if (obj.transform.parent != null)
+                    {
+                        newFlora.transform.SetParent(obj.transform.parent);
+                    }
+                    //shrub.transform.localScale = sprout.transform.localScale;
+                    newFlora.tag = "local_flora";
+                    Destroy(obj);
+                }
+            }
+            if (message.scenario == "2a" || message.scenario == "2b" || message.scenario == "2c")
+            {
+                dateTimeText.text = "23 septembre\n9h40";
+                RenderSettings.skybox = defaultSky;
+                DynamicGI.UpdateEnvironment();
+            }
+            if (message.scenario == "2a")
+            {
+                // fail
+                // terre, toute la veg morte, arbres sans feuillage
+                // changer la date
+                GameObject treeNoLeaf = Resources.Load<GameObject>("Prefabs/Pine Forest Pack/Prefabs/PineNoLeaf");
+                GameObject[] trees = GameObject.FindGameObjectsWithTag("tree");
+                foreach (GameObject tree in trees)
+                {
+                    if (tree == null) continue;
+                    GameObject newTree = Instantiate(treeNoLeaf, tree.transform.position, tree.transform.rotation);
+                    if (tree.transform.parent != null)
+                    {
+                        newTree.transform.SetParent(tree.transform.parent);
+                    }
+                    //shrub.transform.localScale = sprout.transform.localScale;
+                    newTree.tag = "tree";
+                    Destroy(tree);
+                }
+                GameObject[] grass = GameObject.FindGameObjectsWithTag("grass");
+                foreach (GameObject obj in grass)
+                {
+                    if (UnityEngine.Random.Range(0f, 100f) < 70f)
+                    {
+                        obj.gameObject.SetActive(false);
+                    }
+                    else continue;
+                }
+            }
+            if (message.scenario == "2b")
+            {
+                // partial success
+                // des endroits avec de la végétation verte, de l'eau dans les noues (polluées)
+                Material greenMat = Resources.Load<Material>("Prefabs/Pine Forest Pack/Materials/PineForest");
+                GameObject[] grass = GameObject.FindGameObjectsWithTag("grass");
+                foreach (GameObject obj in grass)
+                {
+                    if (UnityEngine.Random.Range(0f, 100f) < 30f)
+                    {
+                        obj.transform.localScale = new Vector3(7f, 7f, 7f);
+                        //enfant.gameObject.SetActive(false);
+                    }
+                    else if (UnityEngine.Random.Range(0f, 100f) < 50f)
+                    {
+                        Renderer rend = obj.GetComponent<Renderer>();
+                        if (rend != null)
+                        {
+                            //rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
+                            rend.sharedMaterial = greenMat;
+                        }
+                    }
+                    else continue;
+                }
+            }
+            if (message.scenario == "2c")
+            {
+                // success
+                // végétation verte, biodiv, bcp d'herbes
+
+                // végétation verte
+                Material matNBSS = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass05");
+                Material matLawn = Resources.Load<Material>("Materials/Lawn_Opaque");
+                Material matPark = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass06");
+                foreach (GameObject obj in nbssAreaObjs.Concat(fmObjs))
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matNBSS;
+                }
+                lawnObj.GetComponent<Renderer>().sharedMaterial = matLawn;
+                foreach (GameObject obj in parkObjs)
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = matPark;
+                }
+                // herbe abondante et verte
+                Material greenMat = Resources.Load<Material>("Prefabs/Pine Forest Pack/Materials/PineForest");
+                GameObject[] grass = GameObject.FindGameObjectsWithTag("grass");
+                foreach (GameObject obj in grass)
+                {
+                    obj.GetComponent<Renderer>().sharedMaterial = greenMat;
+                    obj.transform.localScale = new Vector3(10f, 10f, 10f);
+                }
+                
             }
             if (message.scenario == "menu") {
                 Debug.Log("Afficher menu");
+                if (ResetScenarioObjects.Instance != null)
+                {
+                    Debug.Log("Instance trouvée, lancement du reset...");
+                    ResetScenarioObjects.Instance.ResetToDefaultState();
+                }
+                else
+                {
+                    Debug.LogError("ERREUR : ResetScenarioObjects.Instance est NULL ! Le script n'est pas dans la scène ou n'a pas pu s'initialiser dans Awake.");
+                }
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(false);
                 DisplayCanvas.SetActive(false);

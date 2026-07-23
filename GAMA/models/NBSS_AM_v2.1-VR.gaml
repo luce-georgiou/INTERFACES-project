@@ -84,9 +84,9 @@ species unity_linker parent: abstract_unity_linker {
 		
 
 		/* Vegetation */
-		unity_aspect trees_aspect <- prefab_aspect("Prefabs/Snowy_Low_Poly_Trees/Pine_NoSnow1",1.0,0.0,1.0,0.0,precision);
-		up_trees <- geometry_properties("trees","trees",trees_aspect,#ray_interactable,false);
-		unity_properties << up_trees;
+//		unity_aspect trees_aspect <- prefab_aspect("Prefabs/Snowy_Low_Poly_Trees/Pine_NoSnow1",1.0,0.0,1.0,0.0,precision);
+//		up_trees <- geometry_properties("trees","trees",trees_aspect,#ray_interactable,false);
+//		unity_properties << up_trees;
 		
 		unity_aspect shrubs_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Bush_1_1",1.0,0.0,1.0,0.0,precision);
 		up_shrubs_plants <- geometry_properties("shrubs_plants","shrubs_plants",shrubs_aspect,#ray_interactable,false);
@@ -100,7 +100,7 @@ species unity_linker parent: abstract_unity_linker {
 		up_flower <- geometry_properties("flower","flower",flower_aspect,#no_interaction,false);
 		unity_properties << up_flower;
 		
-		unity_aspect local_flora_aspect <- prefab_aspect("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Prefabs/Grass_1_2",1.0,0.0,1.0,0.0,precision);
+		unity_aspect local_flora_aspect <- prefab_aspect("Cartoon_Farm_Crops/Prefabs/Standard/Eggplant_Plant",1.0,0.0,1.0,0.0,precision);
 		up_local_flora <- geometry_properties("local_flora","local_flora",local_flora_aspect,#no_interaction,false);
 		unity_properties << up_local_flora;
 		
@@ -120,9 +120,9 @@ species unity_linker parent: abstract_unity_linker {
 		unity_properties << up_weeds;
 		
 		/* Interaction tools */
-		unity_aspect lawn_mower_aspect <- prefab_aspect("Prefabs/Power Garden Tools/Prefabs/LawnMower",1.0,0.0,1.0,0.0,precision);
-		up_lawn_mower <- geometry_properties("lawn_mower","lawn_mower",lawn_mower_aspect,#ray_interactable,false);
-		unity_properties << up_lawn_mower;
+//		unity_aspect lawn_mower_aspect <- prefab_aspect("Prefabs/Power Garden Tools/Prefabs/LawnMower",1.0,0.0,1.0,0.0,precision);
+//		up_lawn_mower <- geometry_properties("lawn_mower","lawn_mower",lawn_mower_aspect,#ray_interactable,false);
+//		unity_properties << up_lawn_mower;
 		
 		/* Urban environment */
 		unity_aspect road_aspect <- geometry_aspect(0.2,#gray,precision);
@@ -146,7 +146,7 @@ species unity_linker parent: abstract_unity_linker {
 		do add_geometries_to_send(weeds, up_weeds);
 		do add_geometries_to_send(flower, up_flower);
 		//do add_geometries_to_send(lawn, up_lawn);
-		do add_geometries_to_send(lawn_mower, up_lawn_mower);
+		//do add_geometries_to_send(lawn_mower, up_lawn_mower);
 		do add_geometries_to_send(nbss_area, up_nbss_area);
 		do add_geometries_to_send(local_flora, up_local_flora);
 	}
@@ -163,7 +163,7 @@ species unity_linker parent: abstract_unity_linker {
 		//list<int> biodiv_inlet <- inlet collect (each.function_attributes["my_biodiv"]);
 		//list<int> fqt_outlet <- outlet collect (each.function_attributes["my_fqt"]);
 		list<float> rain_intensity <- rain collect float(each.runoff.my_flow);
-		list<string> tree_seasons <- trees collect current_season; 
+		//list<string> tree_seasons <- trees collect current_season; 
 		list<string> rain_seasons <- rain collect current_season;
 		list<int> fqt_fm <- filter_media collect (each.function_attributes["my_fqt"]);
 		list<float> fm_sediments <- filter_media collect (each.partpoll_acc);
@@ -196,7 +196,7 @@ species unity_linker parent: abstract_unity_linker {
 //			"lawn_seasons":: lawn_seasons
 //		];
 		//map<string, list<string>> atts_rain_seasons <- ["rain_seasons"::rain_seasons];
-		map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
+		//map<string, list<string>> atts_trees <- ["tree_seasons"::tree_seasons];
 //		map<string,list<string>> atts_failures <- [
 //			"failure_name":: failures_name,
 //			"impacted_component":: failures_aff_component
@@ -219,7 +219,7 @@ species unity_linker parent: abstract_unity_linker {
 //		do add_geometries_to_send(outlet,up_outlet,atts_outlet);	
 		do add_geometries_to_send(rain,up_rain,atts_rain);
 		//do add_geometries_to_send(rain,up_rain,atts_rain_seasons);
-		do add_geometries_to_send(trees,up_trees,atts_trees);
+		//do add_geometries_to_send(trees,up_trees,atts_trees);
 		//do add_geometries_to_send(lawn, up_lawn, atts_lawn);
 		do add_geometries_to_send(ponding_area, up_ponding_area, atts_ponding_area);
 		do add_geometries_to_send(filter_media, up_filter_media, atts_fm);
@@ -244,43 +244,43 @@ species unity_linker parent: abstract_unity_linker {
 //			}
 //		}
 //	}
-	action add_veg(string id) {
-		agent ag <- (shrubs_plants + grass + trees) first_with (each.name = id) ;
-		if (ag != nil) {
-			ask ag {
-				create ag;
-				//add ag to: myself.geometries_to_send; //pas sûre
-			}
-		}
-	}
-	action water_plants(string id) {
-		//if (current_season = "summer" and time_since_last_water >= 2) {
-			// si trop arrosée, perds de la santé, sinon en gagne (et affecte apparence plantes) aussi dépend des saisons
-		//}
-	}
-	action mow_grass_trees(string id) {
-		agent ag <- (trees + grass) first_with(each.name = id);
-		if ag != nil {
-			create vegetal_waste {
-				location <- rnd({1.0, 0.0, 0.0}); //à déterminer mais dans ponding area
-			}
-			// supprimer une partie des feuilles/de l'herbe au niveau du sol/des arbres
-		}
-	}
-	
-	action vegetal_waste_spawner(int veg_waste_amnt) {
-		create weeds number: veg_waste_amnt {location <- any_location_in(one_of(ponding_area).shape);}
-	}
-	
-	action mow_lawn(string id) {
-		lawn_mower tool <- lawn_mower first_with(each.name = id); 
-		if tool != nil {
-			ask lawn {
-				height <- height - 0.5;
-			}
-			do vegetal_waste_spawner(10);
-		}
-	}
+//	action add_veg(string id) {
+//		agent ag <- (shrubs_plants + grass + trees) first_with (each.name = id) ;
+//		if (ag != nil) {
+//			ask ag {
+//				create ag;
+//				//add ag to: myself.geometries_to_send; //pas sûre
+//			}
+//		}
+//	}
+//	action water_plants(string id) {
+//		//if (current_season = "summer" and time_since_last_water >= 2) {
+//			// si trop arrosée, perds de la santé, sinon en gagne (et affecte apparence plantes) aussi dépend des saisons
+//		//}
+//	}
+//	action mow_grass_trees(string id) {
+//		agent ag <- (trees + grass) first_with(each.name = id);
+//		if ag != nil {
+//			create vegetal_waste {
+//				location <- rnd({1.0, 0.0, 0.0}); //à déterminer mais dans ponding area
+//			}
+//			// supprimer une partie des feuilles/de l'herbe au niveau du sol/des arbres
+//		}
+//	}
+//	
+//	action vegetal_waste_spawner(int veg_waste_amnt) {
+//		create weeds number: veg_waste_amnt {location <- any_location_in(one_of(ponding_area).shape);}
+//	}
+//	
+//	action mow_lawn(string id) {
+//		lawn_mower tool <- lawn_mower first_with(each.name = id); 
+//		if tool != nil {
+//			ask lawn {
+//				height <- height - 0.5;
+//			}
+//			do vegetal_waste_spawner(10);
+//		}
+//	}
 	
 //	action change_color
 //	//impact décisions sur envir/pluie (si failure_event -> impact aussi)
@@ -328,16 +328,16 @@ species unity_linker parent: abstract_unity_linker {
 	
 	// gestion des saisons
 	
-	// reflex biodiv -> selon état, fleurs apparaissent ou non
-	reflex dying_biodiv {
-		//selon état, réduire le nombre d'espèce dans l'environnement (et réduire fonctionnalité soil par ex) -> enlever agents des listes (uorg par ex)
-	}
-	reflex budget {
-		//coût de maintenance, je sais pas trop pour l'instant
-	}
-	reflex sediment_acc {
-		//quand valeur dans tableau potpall_acc augmente, ajouter une couche de sédiments (et transformer vegetal waste en sediments)
-	}
+//	// reflex biodiv -> selon état, fleurs apparaissent ou non
+//	reflex dying_biodiv {
+//		//selon état, réduire le nombre d'espèce dans l'environnement (et réduire fonctionnalité soil par ex) -> enlever agents des listes (uorg par ex)
+//	}
+//	reflex budget {
+//		//coût de maintenance, je sais pas trop pour l'instant
+//	}
+//	reflex sediment_acc {
+//		//quand valeur dans tableau potpall_acc augmente, ajouter une couche de sédiments (et transformer vegetal waste en sediments)
+//	}
 	
 	
 	
@@ -447,10 +447,10 @@ species unity_linker parent: abstract_unity_linker {
 				water_level <- water_level + 0.2;
 			}
 			ask nbss_area where (each.my_NBSS = fm.my_NBSS) {
-				health <- health + 5.0;
+				health <- health + 15.0;
 			}
 			//weight_score <- 15;
-			messages <- messages + ["add_to_score":: string(15)];
+			messages <- messages + ["add_to_score":: string(5)];
 			messages <- messages + ["message_":: "Arroser aux heures plus fraîches permet de préserver ce qu'il reste de biodiversité... Mais attention à ne pas gaspiller d'eau !"];
 			send_message <- true;
 		}

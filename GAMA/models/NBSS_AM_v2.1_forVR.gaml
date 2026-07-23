@@ -663,6 +663,19 @@ global control: fsm {
 				is_obstructed <- false;
 				water_level <- 0.0;
 			}
+			ask nbss_area where (each.my_name = "nbss_area0" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
+				health <- 55.0;
+			}
+			ask nbss_area where (each.my_name = "nbss_area1" or each.my_name = "nbss_area2" or each.my_name = "nbss_area4") {
+				health <- 40.0;
+			}
+			ask nbss_area where (each.my_name = "nbss_area7") {
+				health <- 80.0;
+			}
+			ask nbss_area where (each.my_name = "nbss_area7") {
+				health <- 70.0;
+			}
+			
 			//starting_date <- date(string(int(20070429))); //mettre en été
 //			
 //			send_message <- true;
@@ -721,6 +734,7 @@ global control: fsm {
     		write "failure ending for scenario 2";
     		scenario <- "2_2a";
     		messages <- messages + ["phase":: "passive"];
+    		messages <- messages + ["scenario"::"2a"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Trop tard… La noue est devenue un désert urbain. Recommencez en agissant plus vite et mieux !"];
@@ -743,6 +757,7 @@ global control: fsm {
     		write "partial success ending for scenario 2";
     		scenario <- "2_2b";
     		messages <- messages + ["phase":: "passive"];
+    		messages <- messages + ["scenario"::"2b"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Bravo ! La noue est sauvée… pour l’instant. Mais sans pluie, elle reste fragile. Continuez à la protéger !"];
@@ -765,6 +780,7 @@ global control: fsm {
     		write "success ending for scenario 2";
     		scenario <- "2_2c";
     		messages <- messages + ["phase":: "passive"];
+    		messages <- messages + ["scenario"::"2c"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Incroyable ! Grâce à vous, ce réseau de noues est paré contre la chaleur. Partagez ces gestes avec votre entourage !"];
