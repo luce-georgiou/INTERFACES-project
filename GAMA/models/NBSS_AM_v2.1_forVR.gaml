@@ -56,26 +56,31 @@ global control: fsm {
 	
 	// Geoms des 8 NBS
 	list<geometry> list_of_geoms <- [
-			rectangle(24.5, 4.8),  //5
-			rectangle(26.1, 4.8), //6
-			rectangle(61.5, 5.86), //7
-			rectangle(63.2, 5.96), //8
-			rectangle(5.3, 24.5), //4
-			rectangle(5.3, 16.7), //3
-			rectangle(5.3, 14.7),  //2
-			rectangle(5.3, 25.1) //1	
+			rectangle(61.5, 5.86), //0
+			rectangle(63.2, 5.96), //1
+			rectangle(5.3, 24.5), //2
+			rectangle(5.3, 16.7) //3
+			
+//			rectangle(24.5, 4.8),  //5
+//			rectangle(26.1, 4.8), //6
+//			//rectangle(61.5, 5.86), //7
+//			//rectangle(63.2, 5.96), //8
+//			rectangle(5.3, 24.5), //4
+//			rectangle(5.3, 16.7) //3
+//			//rectangle(5.3, 14.7),  //2
+//			//rectangle(5.3, 25.1) //1	
 	];
 	
 	// Loc des 8 NBS
 	list<point> list_of_locs <- [
-		{17.25, -7.0}, //0 
-		{69.55, -7.0}, //1
+		//{17.25, -7.0}, //0 
+		//{69.55, -7.0}, //1
 		{140, -7.0}, //2
 		{207, -7.0}, //3
 		{91.5, -45.65}, //4
-		{91.5, -73.25}, //5
-		{91.5, -95.95}, //6
-		{91.5, -122.85} //7
+		{91.5, -73.25} //5
+		//{91.5, -95.95}, //6
+		//{91.5, -122.85} //7
 	];
     
 //    reflex update_timer when: active_start_time > 0 {
@@ -179,7 +184,7 @@ global control: fsm {
 		create lawn {
 			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
 		    init_free_space <- lawn_geom;
-		    loop i from: 0 to: 7 {
+		    loop i from: 0 to: 3 {
 		        geometry nbs <- list_of_geoms[i] at_location list_of_locs[i];
 		        lawn_geom <- lawn_geom - nbs;
 		    }
@@ -196,7 +201,7 @@ global control: fsm {
 //		}	
 		
 		// Initialization of NBSS and all its components :
-		create NBSS number: 8 {
+		create NBSS number: 4 {
 			shape <- list_of_geoms[index];
 			location <- list_of_locs[index];
 			my_name <- "swale" + index;
@@ -333,21 +338,26 @@ global control: fsm {
 			shape <- [rectangle(260, 7), rectangle(7, 150)][index];
 			location <- [{one_of(lawn).location.x, one_of(lawn).location.y + 65}, {one_of(lawn).location.x - 15, one_of(lawn).location.y}][index]; 
 			}
-			create building number: 7 {
-				shape <- [rectangle(11, 25), //1
-					rectangle(11, 35), //2
-					rectangle(18, 12), //3
-					rectangle(20, 22), //4
-					rectangle(28, 11), //5
-					rectangle(28, 11), //6
-					rectangle(28, 11) //7
-				][index];
-				location <- [
-					{last(road).location.x - 20, list_of_locs[7].y}, {last(road).location.x - 20, (list_of_locs[6].y + list_of_locs[5].y)/2}, 
-					{last(road).location.x - 22, list_of_locs[4].y},
-					{last(road).location.x + 16, list_of_locs[7].y}, {last(road).location.x + 20, list_of_locs[6].y}, 
-					{last(road).location.x + 20, list_of_locs[5].y}, {last(road).location.x + 20, list_of_locs[4].y}
-				][index];
+			create building number: 4 {
+				shape <- [rectangle(11, 19), rectangle(18, 12), rectangle(28, 11),
+					rectangle(28, 11)][index];
+				
+//				 //[rectangle(11, 25), //1
+//					//rectangle(11, 35), //2
+//					//rectangle(18, 12), //3
+//					//rectangle(20, 22), //4
+//					//rectangle(28, 11), //5
+//					rectangle(28, 11), //6
+//					rectangle(28, 11) //7
+//				][index];
+				location <- [{last(road).location.x - 21, ({91.5, -95.95}.y + list_of_locs[3].y)/2 + 12}, {last(road).location.x - 24, list_of_locs[2].y}, 
+					{last(road).location.x + 20, list_of_locs[3].y}, {last(road).location.x + 20, list_of_locs[2].y}][index];
+					
+//					{last(road).location.x - 20, list_of_locs[7].y}, {last(road).location.x - 20, (list_of_locs[6].y + list_of_locs[5].y)/2}, 
+//					{last(road).location.x - 22, list_of_locs[4].y},
+//					{last(road).location.x + 16, list_of_locs[7].y}, {last(road).location.x + 20, list_of_locs[6].y}, 
+//					{last(road).location.x + 20, list_of_locs[5].y}, {last(road).location.x + 20, list_of_locs[4].y}
+//				][index];
 			}
 			create park number: 2 {
 				shape <- [rectangle(45, 23), // Pole petite enfance
@@ -493,7 +503,7 @@ global control: fsm {
 //			        location <- any_location_in(s);
 //			    }
 //			}
-			point blocked_inlet <- {list_of_locs[2].x + list_of_geoms[2].width/2, list_of_locs[2].y};
+			point blocked_inlet <- {list_of_locs[0].x + list_of_geoms[0].width/2, list_of_locs[0].y};
 			geometry perimeter <- circle(1.0) at_location blocked_inlet;
 			create weeds number: 8 {
 				location <- any_location_in(perimeter);
@@ -510,17 +520,17 @@ global control: fsm {
 //			        is_obstructed <- true;
 //			    }
 //			}
-			ask filter_media where (each.my_name = "filter_media2") {
+			ask filter_media where (each.my_name = "filter_media0") {
 				function_attributes["my_fqt"] <- 0.0;
 				partpoll_acc <- 2.0;
 			}
-			ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+			ask ponding_area where (each.my_name = "ponding_area2" or each.my_name = "ponding_area3") {
 			    is_obstructed <- true;
 			}
-			ask nbss_area where (each.my_name = "nbss_area2") {
+			ask nbss_area where (each.my_name = "nbss_area0") {
 				health <- 10.0;
 			}
-			ask nbss_area where (each.my_name = "nbss_area4" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
+			ask nbss_area where (each.my_name = "nbss_area2" or each.my_name = "nbss_area3") {
 				health <- 50.0;
 			}
 			//set date to rainy day
@@ -593,7 +603,7 @@ global control: fsm {
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Bien essayé, mais les noues ne s'écoulent toujours pas correctement... Recommencez en agissant mieux !"];
     		send_message <- true;
-    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
+    		ask ponding_area where (each.my_name = "ponding_area2" or each.my_name = "ponding_area3") {
 			    water_level <- 1.2;
 			}
     	}
@@ -663,17 +673,9 @@ global control: fsm {
 				is_obstructed <- false;
 				water_level <- 0.0;
 			}
-			ask nbss_area where (each.my_name = "nbss_area0" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
-				health <- 55.0;
-			}
-			ask nbss_area where (each.my_name = "nbss_area1" or each.my_name = "nbss_area2" or each.my_name = "nbss_area4") {
-				health <- 40.0;
-			}
-			ask nbss_area where (each.my_name = "nbss_area7") {
-				health <- 80.0;
-			}
-			ask nbss_area where (each.my_name = "nbss_area7") {
-				health <- 70.0;
+			list<float> health_init <- [40.0, 70.0, 80.0, 55.0];
+			ask nbss_area {
+				health <- health_init[index];
 			}
 			
 			//starting_date <- date(string(int(20070429))); //mettre en été

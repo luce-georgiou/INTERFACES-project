@@ -49,11 +49,16 @@ public class InterfaceButton : MonoBehaviour
         DisplayCanvas.SetActive(true);
     }
 
-    public void QuitGame()
+    public void LaunchSc0()
     {
-        Debug.Log("Fermeture de l'application...");
-        // Quitte le jeu (ne se voit qu'une fois le jeu exporté, pas dans l'éditeur)
-        Application.Quit();
+        Debug.Log("Le scénario 0 commence");
+        string mes = "scenario0";
+        Dictionary<string, string> args = new Dictionary<string, string> {
+                 {"id",ConnectionManager.Instance.GetConnectionId() },
+                 {"mes",  mes }};
+        ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+
+        DisplayCanvas.SetActive(true);
     }
 
     public void SkipPhase()

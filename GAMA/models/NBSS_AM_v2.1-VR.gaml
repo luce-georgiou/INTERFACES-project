@@ -31,15 +31,15 @@ species unity_linker parent: abstract_unity_linker {
 	unity_property up_local_flora;
 
 	bool do_send_world <- true;
-	list<point> init_locations <- [{100.0, 10.0, 1.0}]; //[any_location_in(init_free_space)];
+	list<point> init_locations <- [{100.0, 10.0, 0.0}]; //[any_location_in(init_free_space)];
 
 	init {
 		do define_properties;
 		player_unity_properties <- [up_default];
 		
 		do add_background_geometries(building, up_building);
-		do add_background_geometries(road, up_road);
-		do add_background_geometries(park, up_park);
+		//do add_background_geometries(road, up_road);
+		//do add_background_geometries(park, up_park);
 	}
 	
 	action define_properties {
@@ -389,13 +389,13 @@ species unity_linker parent: abstract_unity_linker {
 	
 	// scénario 1 actions
 	action maintenance_remove(string id) {
-		agent ag <- (trash + weeds + vegetal_waste) first_with (each.name = id) ;
+		agent ag <- (trash + weeds) first_with (each.name = id) ;
 		if (ag != nil) {
-			ask (trash + weeds + vegetal_waste) {
+			ask (trash + weeds) {
 	            remove key: self from: myself.geometries_to_send;
 	            do die;
 	        }
-	        ask nbss_area where (each.my_name = "nbss_area2") {
+	        ask nbss_area where (each.my_name = "nbss_area0") {
 				health <- health + 45.0;
 			}
 			messages <- messages + ["message_":: "Moins de déchets = moins de pollution pour l’eau et le sol."];
@@ -418,10 +418,10 @@ species unity_linker parent: abstract_unity_linker {
 						is_obstructed <- false;
 						water_level <- 0.0;
 					}
-					ask nbss_area where (each.my_name = "nbss_area2") {
+					ask nbss_area where (each.my_name = "nbss_area0") {
 						health <- health + 45.0;
 					}
-					ask nbss_area where (each.my_name = "nbss_area4" or each.my_name = "nbss_area5" or each.my_name = "nbss_area6") {
+					ask nbss_area where (each.my_name = "nbss_area2" or each.my_name = "nbss_area3") {
 						health <- health + 40.0;
 					}
 					//score <- score + 30.0;
@@ -563,11 +563,11 @@ experiment vr_xp parent:"Interface (EN)" autorun: true type: unity {
 		ask unity_linker {
 			do create_player(id);
 			
-			do build_invisible_walls(player: last(unity_player), //player to send the information to
-			id: "wall_for_free_area", //id of the walls
-			height: 40.0, //height of the walls
-			wall_width: 1.0, //width of the walls
-			geoms: [init_free_space]);
+//			do build_invisible_walls(player: last(unity_player), //player to send the information to
+//			id: "wall_for_free_area", //id of the walls
+//			height: 40.0, //height of the walls
+//			wall_width: 1.0, //width of the walls
+//			geoms: [init_free_space]);
 		}
 	}
 
