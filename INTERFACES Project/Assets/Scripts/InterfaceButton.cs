@@ -7,6 +7,7 @@ public class InterfaceButton : MonoBehaviour
     public GameObject menuPanel;
     public GameObject DisplayCanvas;
     public GameObject commandsPanel;
+    public ProgressBar progressBar;
 
     void Start()
     {
@@ -58,6 +59,8 @@ public class InterfaceButton : MonoBehaviour
     public void SkipPhase()
     {
         Debug.Log("Skip to next phase");
+
+        SimulationManager.Instance.SendMessageToGama(progressBar.BarValue.ToString());
 
         string mes = "skip";
         Dictionary<string, string> args = new Dictionary<string, string> {

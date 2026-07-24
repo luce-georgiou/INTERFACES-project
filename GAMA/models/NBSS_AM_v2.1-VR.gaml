@@ -371,7 +371,7 @@ species unity_linker parent: abstract_unity_linker {
 		else { //On traite le score en fin de phase
 			score <- float(mes);
 			score <- float(mes replace (",", "."));
-			//write "score : " + score;
+			write "score : " + score;
 		}
 	}
 	

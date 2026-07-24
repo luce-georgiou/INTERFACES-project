@@ -29,6 +29,10 @@ public class MenuRadialManager : MonoBehaviour
     public float espacementEntreShrubs = 1.0f; // Distance (en mètres) entre chaque buisson
     public float spaceBetweenFences = 3.0f;
 
+    [Header("Object spawner")]
+    public GameObject prefabSign;
+    public GameObject prefabTree;
+
     // Cette variable va mémoriser l'ID du filter_media sur lequel on a cliqué
     private string idObjetActuel = "";
     private float weight_score = 0.0f;
@@ -258,8 +262,77 @@ public class MenuRadialManager : MonoBehaviour
         
     }
 
+    public void ObjectSpawner(GameObject obj, Vector3 location, GameObject prefab)
+    {
+        Vector3 spawnLoc = obj.transform.position + location;
+        if (prefab.name.Contains("Plant"))
+        {
+            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 180f, 0f), Scenario2);
+            newObject.tag = "sprout";
+        }
+        else
+        {
+            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 90f, 0f), Scenario2);
+        }
+
+    }
+
     // --- LES BOUTONS DE TON MENU RADIAL ---
     // Associe ces fonctions à l'événement "On Click" des boutons de ton Canvas
+
+    public void BoutonActionSensibilisation()
+    {
+        GameObject obj = GameObject.Find(idObjetActuel);
+        Collider col = obj.GetComponent<Collider>();
+        Vector3 loc = new Vector3(1.0f, 1.0f, 0f);
+        if (col != null)
+        {
+            if (col.bounds.size.x > col.bounds.size.z)
+            {
+                // L'objet est plus large que long (Horizontal)
+                loc = new Vector3(-1f, 0f, -3f);
+                Debug.Log("Objet détecté comme Horizontal");
+            }
+            else
+            {
+                // L'objet est plus long que large (Vertical)
+                loc = new Vector3(3f, 0f, 4f);
+                Debug.Log("Objet détecté comme Vertical");
+            }
+        }
+        ObjectSpawner(obj, loc, prefabSign);
+        FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue + 5f;
+        SendingMessages.Show("La sensibilisation est la première ligne de défense de la noue.", 7f, Color.green);
+        SimulationManager.Instance.SendMessageToGama(obj.name + ":" + "0");
+    }
+
+    public void BoutonActionPlanterArbre()
+    {
+        GameObject obj = GameObject.Find(idObjetActuel);
+        Collider col = obj.GetComponent<Collider>();
+        Vector3 loc = new Vector3(1.0f, 1.0f, 0f);
+        if (col != null)
+        {
+            if (col.bounds.size.x > col.bounds.size.z)
+            {
+                // L'objet est plus large que long (Horizontal)
+                loc = new Vector3(2f, 0f, 3f);
+                Debug.Log("Objet détecté comme Horizontal");
+            }
+            else
+            {
+                // L'objet est plus long que large (Vertical)
+                loc = new Vector3(-0.5f, 0f, col.bounds.size.z/2 -0.5f);
+                Debug.Log("Objet détecté comme Vertical");
+            }
+        }
+        ObjectSpawner(obj, loc, prefabTree);
+        FermerMenu();
+        progressBarObj.BarValue = progressBarObj.BarValue + 15f;
+        SendingMessages.Show("Planter des arbres permet de diversifier les strates de cet espace, et apporter un peu d'ombre et de fraîcheur à la noue.", 7f, Color.green);
+        SimulationManager.Instance.SendMessageToGama(obj.name + ":" + "3");
+    }
 
     public void BoutonActionCurage()
     {

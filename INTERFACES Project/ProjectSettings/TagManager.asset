@@ -23,7 +23,6 @@ TagManager:
   - shrubs_plants
   - ponding_area
   - urban_environment
-  - trees
   - vegetation_cover
   - filter_media
   - gravel
@@ -39,6 +38,7 @@ TagManager:
   - nbss_area
   - local_flora
   - paillage
+  - sprout
   layers:
   - Default
   - TransparentFX

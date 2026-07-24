@@ -491,6 +491,22 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("filter_media"))
             {
+                InteractionLayerMask layerMask = InteractionLayerMask.GetMask("UndergroundObjects");
+
+                // 2. Chercher le composant interactif XR sur cet objet (ou ses enfants)
+                UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable interactable = obj.GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable>();
+
+                if (interactable != null)
+                {
+                    // 3. Assigner le mask d'interaction dynamiquement
+                    interactable.interactionLayers = layerMask;
+                    //Debug.Log($"Layer d'interaction appliqué avec succès sur l'objet généré par GAMA : {obj.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"Aucun composant XRBaseInteractable trouvé sur l'objet GAMA : {obj.name}");
+                }
+
                 obj.transform.position = new Vector3(obj.transform.position.x, -3f, obj.transform.position.z);
                 Material sourceMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
                 
@@ -1039,7 +1055,27 @@ public class SimulationManagerInteraction : SimulationManager
                     }
                     //shrub.transform.localScale = sprout.transform.localScale;
                     shrub.tag = "shrubs_plants";
-                    Destroy(sprout);
+                    sprout.SetActive(false);
+                }
+                // grow trees
+                GameObject[] treeSprouts = GameObject.FindGameObjectsWithTag("sprout");
+                if (treeSprouts.Length == 0)
+                {
+                    Debug.LogWarning("Aucun objet trouvé avec le tag 'sprout'.");
+                    return;
+                }
+                GameObject treePrefab = Resources.Load<GameObject>("Prefabs/Nature Biomes Pack - Low Poly/Prefabs/Tree 3 G1");
+                foreach (GameObject sprout in treeSprouts)
+                {
+                    if (sprout == null) continue;
+                    GameObject tree = Instantiate(treePrefab, sprout.transform.position, sprout.transform.rotation);
+                    if (sprout.transform.parent != null)
+                    {
+                        tree.transform.SetParent(sprout.transform.parent);
+                    }
+                    //shrub.transform.localScale = sprout.transform.localScale;
+                    tree.tag = "tree";
+                    sprout.SetActive(false);
                 }
                 // grow local flora
                 GameObject[] localFlora = GameObject.FindGameObjectsWithTag("local_flora");
@@ -1059,7 +1095,7 @@ public class SimulationManagerInteraction : SimulationManager
                     }
                     //shrub.transform.localScale = sprout.transform.localScale;
                     newFlora.tag = "local_flora";
-                    Destroy(obj);
+                    obj.SetActive(false);
                 }
             }
             if (message.scenario == "2a" || message.scenario == "2b" || message.scenario == "2c")
@@ -1085,7 +1121,7 @@ public class SimulationManagerInteraction : SimulationManager
                     }
                     //shrub.transform.localScale = sprout.transform.localScale;
                     newTree.tag = "tree";
-                    Destroy(tree);
+                    tree.SetActive(false);
                 }
                 GameObject[] grass = GameObject.FindGameObjectsWithTag("grass");
                 foreach (GameObject obj in grass)

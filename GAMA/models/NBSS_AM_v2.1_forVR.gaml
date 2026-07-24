@@ -472,7 +472,7 @@ global control: fsm {
 	    	messages <- messages + ["scenario":: "1"];
 	    	messages <- messages + ["init_":: "pipe2_3"];
 	    	messages <- messages + ["phase":: "passive"];
-	    	messages <- messages + ["timer_start":: "60"];
+	    	messages <- messages + ["timer_start":: "600"];
 	    	send_message <- true;
 			score <- 0.0;
 //			loop s over: NBSS where (each.my_name = "swale1") {
@@ -544,7 +544,7 @@ global control: fsm {
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
@@ -562,14 +562,14 @@ global control: fsm {
     		active_start_time <- gama.machine_time;
     		
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
-    		messages <- messages + ["timer_start":: "180"];
+    		messages <- messages + ["timer_start":: "600"];
     		send_message <- true;
     		//set day to day after rainday (no rain)
     	}
     	//write "elapsed: " + (gama.machine_time - active_start_time);
-    	transition to: situation1_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)
+    	transition to: situation1_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
     		or (do_skip and scenario = "1_1" and score < 50.0); //180000; // 3min en ms
-		transition to: situation1_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 50.0)
+		transition to: situation1_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 50.0)
     		or (do_skip and scenario = "1_1" and score >= 50.0);
     	exit {
     		do_skip <- false;
@@ -597,7 +597,7 @@ global control: fsm {
 			    water_level <- 1.2;
 			}
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "1_2a");
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "1_2a");
     	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
@@ -620,7 +620,7 @@ global control: fsm {
 //			    water_level <- 0.0;
 //			}
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "1_2b");
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "1_2b");
     	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
@@ -645,7 +645,7 @@ global control: fsm {
     		messages <- messages + ["scenario":: "2"];
     		messages <- messages + ["phase":: "passive"];
     		messages <- messages + ["message_":: "C'est la canicule, et les plus à plaindre sont les plantes!"];
-    		messages <- messages + ["timer_start":: "60"];
+    		messages <- messages + ["timer_start":: "300"];
     		//write messages;
     		send_message <- true;
     		score <- 0.0;
@@ -680,7 +680,7 @@ global control: fsm {
 //			
 //			send_message <- true;
     	}
-    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 60000 or (do_skip and scenario = "2_0");
+    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000 or (do_skip and scenario = "2_0");
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
@@ -710,15 +710,17 @@ global control: fsm {
     		scenario <- "2_1";
     		messages <- messages + ["phase":: "active"];
     		active_start_time <- gama.machine_time;
-    		messages <- messages + ["timer_start":: "180"];
+    		messages <- messages + ["timer_start":: "600"];
     		messages <- messages + ["message_":: "A toi de jouer ! Essaie de rétablir la bonne santé de cet espace en cette chaleur brûlante..."];
     		send_message <- true;
     	}
-    	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 180000) and score < 50.0)
+    	write score;
+    	write (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
+    	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
     		or (do_skip and scenario = "2_1" and score < 50.0); //180000; // 3min en ms
-		transition to: situation2_partial_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 50.0 and score < 75.0)
+		transition to: situation2_partial_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 50.0 and score < 75.0)
     		or (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
-		transition to: situation2_success when: (((gama.machine_time - active_start_time) >= 180000) and score >= 75.0)
+		transition to: situation2_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 75.0)
     		or (do_skip and scenario = "2_1" and score >= 75.0);
     	exit {
     		do_skip <- false;
@@ -744,7 +746,7 @@ global control: fsm {
 //			    water_level <- 0.0;
 //			}
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2a");
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2a");
     	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
@@ -767,7 +769,7 @@ global control: fsm {
 //			    water_level <- 0.0;
 //			}
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2b");
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2b");
     	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
@@ -790,7 +792,7 @@ global control: fsm {
 //			    water_level <- 0.0;
 //			}
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 30000) or (do_skip and scenario = "2_2c");
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2c");
     	exit {
     		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
