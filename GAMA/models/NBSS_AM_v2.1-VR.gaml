@@ -354,6 +354,9 @@ species unity_linker parent: abstract_unity_linker {
 		if (mes = "skip") {
 			do_skip <- true; 
 		}
+		else if (mes = "scenario0") {
+			launch_sc0 <- true;
+		}
 		else if (mes = "scenario1") {
 			launch_sc1 <- true;
 		}

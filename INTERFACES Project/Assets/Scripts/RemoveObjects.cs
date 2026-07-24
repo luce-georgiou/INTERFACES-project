@@ -11,7 +11,12 @@ public class RemoveObjects : MonoBehaviour
 
     [SerializeField] private ProgressBar progressBarObj;
 
-    public int count;
+    public string messageAfterSelect = "Les cendres acidifient le sol et tuent les micro-organismes.";
+    public string messageHover = "";
+
+    private int count;
+
+    private Renderer objectRenderer;
 
     void Awake()
     {
@@ -20,16 +25,45 @@ public class RemoveObjects : MonoBehaviour
                     .Count(go => go.name.StartsWith("Cylinder"));
 
         //Debug.Log("Nombre de cylindres trouvés : " + count);
+        objectRenderer = GetComponent<Renderer>();
     }
 
     void OnEnable()
     {
         interactable.selectEntered.AddListener(DesactiverObjet);
+
+        // On écoute le survol (Hover)
+        interactable.hoverEntered.AddListener(OnHoverEnter);
+        interactable.hoverExited.AddListener(OnHoverExit);
     }
 
     void OnDisable()
     {
         interactable.selectEntered.RemoveListener(DesactiverObjet);
+        interactable.hoverEntered.RemoveListener(OnHoverEnter);
+        interactable.hoverExited.RemoveListener(OnHoverExit);
+    }
+
+    private void OnHoverEnter(HoverEnterEventArgs args)
+    {
+        // Si les interactions sont bloquées, on ne fait rien
+        if (!SimulationManagerInteraction.interactionsAutorisees && SimulationManagerInteraction.scenario != 0) return;
+
+        // On change la couleur en bleu
+        if (objectRenderer != null && objectRenderer.material != null)
+        {
+            objectRenderer.material.color = Color.blue;
+        }
+        SendingMessages.Show(messageHover);
+    }
+
+    private void OnHoverExit(HoverExitEventArgs args)
+    {
+        // Le pointeur quitte l'objet, on remet la couleur d'origine
+        if (objectRenderer != null && objectRenderer.material != null)
+        {
+            objectRenderer.material.color = Color.white;
+        }
     }
 
     private void DesactiverObjet(SelectEnterEventArgs args)
@@ -48,15 +82,22 @@ public class RemoveObjects : MonoBehaviour
         //Renderer rend = GetComponent<Renderer>();
         //if (rend != null) rend.enabled = false;
 
-        progressBarObj.BarValue = progressBarObj.BarValue + 10f / count;
+        if (SimulationManagerInteraction.scenario == 0) progressBarObj.BarValue = 100f;
+        if (SimulationManagerInteraction.scenario == 2) progressBarObj.BarValue = progressBarObj.BarValue + 10f / count;
 
         Dictionary<string, string> args = new Dictionary<string, string> {
                  {"id",ConnectionManager.Instance.GetConnectionId() },
                  {"mes",  progressBarObj.BarValue.ToString() }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
 
-        SendingMessages.Show("Les cendres acidifient le sol et tuent les micro-organismes.\n+10");
-        yield return new WaitForSeconds(3f);
+        if (!string.IsNullOrEmpty(messageAfterSelect))
+        {
+            SendingMessages.Show(messageAfterSelect);
+        }
+        yield return null;
+
+        //SendingMessages.Show("Les cendres acidifient le sol et tuent les micro-organismes.\n+10");
+        //yield return new WaitForSeconds(3f);
         //SendingMessages.Show("");
 
         Destroy(gameObject);

@@ -22,6 +22,7 @@ public class SimulationManagerInteraction : SimulationManager
 
     public static bool interactionsAutorisees = true;
     public static int scenario;
+    public GameObject Scenario0;
     public GameObject Scenario1;
     public GameObject Scenario2;
     public Material defaultSky;
@@ -78,21 +79,24 @@ public class SimulationManagerInteraction : SimulationManager
     protected override void HoverEnterInteraction(HoverEnterEventArgs ev)
     {
          GameObject obj = ev.interactableObject.transform.gameObject;
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
+        if (scenario == 1 || scenario == 2)
         {
-            SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            SendingMessages.Show("Ces déchets et végétaux semblent obstruer la canalisation...\nNettoyer ?");
-        }
-        if (obj.tag.Equals("filter_media"))
-        {
-            SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            if (scenario == 1) SendingMessages.Show("Parfois, les sédiments s'accumulent au fond des noues, la bouchant. Veux-tu essayer de curer ?");
-            if (scenario == 2) SendingMessages.Show("Sans eau et avec le piétinement, ces plantes n’ont aucune chance.");
-        }
-        if (obj.tag.Equals("nbss_area"))
-        {
-            SimulationManagerSolo.ChangeColor(obj, Color.blue);
-            if (scenario == 2) SendingMessages.Show("Le sol est si sec qu’il ne peut plus retenir l’eau. Sans pluie, la noue va disparaître.");
+            if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
+            {
+                SimulationManagerSolo.ChangeColor(obj, Color.blue);
+                SendingMessages.Show("Ces déchets et végétaux semblent obstruer la canalisation...\nNettoyer ?");
+            }
+            if (obj.tag.Equals("filter_media"))
+            {
+                SimulationManagerSolo.ChangeColor(obj, Color.blue);
+                if (scenario == 1) SendingMessages.Show("Parfois, les sédiments s'accumulent au fond des noues, la bouchant. Veux-tu essayer de curer ?");
+                if (scenario == 2) SendingMessages.Show("Sans eau et avec le piétinement, ces plantes n’ont aucune chance.");
+            }
+            if (obj.tag.Equals("nbss_area"))
+            {
+                SimulationManagerSolo.ChangeColor(obj, Color.blue);
+                if (scenario == 2) SendingMessages.Show("Le sol est si sec qu’il ne peut plus retenir l’eau. Sans pluie, la noue va disparaître.");
+            }
         }
     }
 
@@ -520,6 +524,19 @@ public class SimulationManagerInteraction : SimulationManager
                     timerCoroutine = StartCoroutine(CountDown(int.Parse(message.timer_start)));
                 }
             }
+            if (message.scenario == "0")
+            {
+                Debug.Log("TUTO");
+                scenario = 0;
+                Scenario0.SetActive(true);
+                Scenario1.SetActive(false);
+                Scenario2.SetActive(false);
+
+                dateTimeText.text = "5 mai\n16:08";
+
+                interactionsAutorisees = false;
+                MenuRadialManager.Instance.FermerMenu();
+            }
             GameObject[] nbssAreaObjs = GameObject.FindGameObjectsWithTag("nbss_area");
             GameObject[] fmObjs = GameObject.FindGameObjectsWithTag("filter_media");
             GameObject[] parkObjs = GameObject.FindGameObjectsWithTag("park");
@@ -528,6 +545,7 @@ public class SimulationManagerInteraction : SimulationManager
             {
                 Debug.Log("Scenario1 enclenché");
                 scenario = 1;
+                Scenario0.SetActive(false);
                 Scenario1.SetActive(true);
                 Scenario2.SetActive(false);
 

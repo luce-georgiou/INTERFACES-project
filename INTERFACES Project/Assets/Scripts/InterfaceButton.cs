@@ -51,6 +51,7 @@ public class InterfaceButton : MonoBehaviour
 
     public void LaunchSc0()
     {
+        menuPanel.SetActive(false);
         Debug.Log("Le scénario 0 commence");
         string mes = "scenario0";
         Dictionary<string, string> args = new Dictionary<string, string> {

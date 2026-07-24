@@ -40,6 +40,7 @@ global control: fsm {
 	bool send_message <- false;
 	map messages <- [];
 	bool do_skip <- false;
+	bool launch_sc0 <- false;
 	bool launch_sc1 <- false;
 	bool launch_sc2 <- false;
 	int init_wait <- 0;
@@ -456,12 +457,39 @@ global control: fsm {
     		scenario <- "menu";
     		write scenario;
     	}
+    	transition to: situation0 when: launch_sc0;
     	transition to: situation1_passive when: launch_sc1;
     	transition to: situation2_passive when: launch_sc2;
     	exit {
+    		launch_sc0 <- false;
     		launch_sc1 <- false;
     		launch_sc2 <- false;
     	}
+    }
+    
+    state situation0 {
+    	enter {
+    		write "entering situation0";
+	    	scenario <- "0";
+	    	active_start_time <- gama.machine_time;
+	    	messages <- messages + ["scenario":: "0"];
+	    	messages <- messages + ["phase":: "active"];
+	    	messages <- messages + ["timer_start":: "600"];
+	    	messages <- messages + ["message_"::"Bienvenue ! L'entretien régulier est crucial pour le bon fonctionnement des noues. Dirige-toi à droite et regarde au fond de la noue."];
+	    	send_message <- true;
+			score <- 0.0;
+    	}
+    	if (cycle mod 300 = 0) {
+    		messages <- messages + ["message_"::"Dirige-toi à droite et regarde au fond de la noue."];
+    		send_message <- true;
+    	}
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	exit {
+    		do_skip <- false;
+    		messages <- messages + ["timer_start":: "0"];
+    		send_message <- true;
+    	}
+    	
     }
     
     state situation1_passive {
@@ -917,7 +945,10 @@ species rain {
 	    date date_donnee <- date(string(int(weather_data[0, index_meteo])));
 	    if (current_date >= date_donnee) {
 	        //rainfall <- - float(weather_data[1, index_meteo]);
-	        if (scenario = "1_0") {
+	        if (scenario = "0") {
+	        	do change_runoff(0.0);
+	        }
+	        else if (scenario = "1_0") {
 	        	do change_runoff(1.0);
         	}
 	        else if (scenario = "2_0") {
