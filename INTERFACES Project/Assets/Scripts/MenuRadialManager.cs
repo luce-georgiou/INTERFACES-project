@@ -91,6 +91,8 @@ public class MenuRadialManager : MonoBehaviour
     {
         if (!SimulationManagerInteraction.interactionsAutorisees) return;
 
+        Debug.Log(SimulationManagerInteraction.interactionsAutorisees);
+
         Debug.Log("Le menu essaie de s'ouvrir pour l'objet : " + objectId);
         idObjetActuel = objectId; // On sauvegarde l'ID pour l'utiliser plus tard
 

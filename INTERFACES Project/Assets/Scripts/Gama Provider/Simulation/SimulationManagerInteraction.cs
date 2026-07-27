@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.XR.Interaction.Toolkit; 
 using UnityEngine.InputSystem;
 using System.Linq;
+using Unity.XR.CoreUtils;
 
 using DigitalRuby.RainMaker;
 
@@ -22,6 +23,8 @@ public class SimulationManagerInteraction : SimulationManager
 
     public static bool interactionsAutorisees = true;
     public static int scenario;
+    public XROrigin xrOrigin;
+    public Vector3 initPosition = new Vector3(100f, 1.8f, 0f);
     public GameObject Scenario0;
     public GameObject Scenario1;
     public GameObject Scenario2;
@@ -84,18 +87,27 @@ public class SimulationManagerInteraction : SimulationManager
             if (obj.tag.Equals("trash") || obj.tag.Equals("weeds"))
             {
                 SimulationManagerSolo.ChangeColor(obj, Color.blue);
-                SendingMessages.Show("Ces déchets et végétaux semblent obstruer la canalisation...\nNettoyer ?");
+                SendingMessages.Show("Ces déchets et végétaux semblent obstruer la canalisation...\nNettoyer ?", priorite: -1);
             }
             if (obj.tag.Equals("filter_media"))
             {
                 SimulationManagerSolo.ChangeColor(obj, Color.blue);
-                if (scenario == 1) SendingMessages.Show("Parfois, les sédiments s'accumulent au fond des noues, la bouchant. Veux-tu essayer de curer ?");
+                if (scenario == 1)
+                {
+                    SendingMessages.Show("Parfois, les sédiments s'accumulent au fond des noues, la bouchant. Veux-tu essayer de curer ?", priorite: -1);
+                    int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                    GameObject sediment_acc = GameObject.Find("SedimentAcc" + idx);
+                    if (sediment_acc != null)
+                    {
+                        SimulationManagerSolo.ChangeColor(sediment_acc, Color.blue);
+                    }
+                }
                 if (scenario == 2) SendingMessages.Show("Sans eau et avec le piétinement, ces plantes n’ont aucune chance.");
             }
             if (obj.tag.Equals("nbss_area"))
             {
                 SimulationManagerSolo.ChangeColor(obj, Color.blue);
-                if (scenario == 2) SendingMessages.Show("Le sol est si sec qu’il ne peut plus retenir l’eau. Sans pluie, la noue va disparaître.");
+                if (scenario == 2) SendingMessages.Show("Le sol est si sec qu’il ne peut plus retenir l’eau. Sans pluie, la noue va disparaître.", priorite: -1);
             }
         }
     }
@@ -105,10 +117,24 @@ public class SimulationManagerInteraction : SimulationManager
     protected override void HoverExitInteraction(HoverExitEventArgs ev)
     {
         GameObject obj = ev.interactableObject.transform.gameObject;
-        if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("nbss_area") || obj.tag.Equals("filter_media"))
+        if (scenario == 1 || scenario == 2)
         {
-            SimulationManagerSolo.ChangeColor(obj, Color.white);
-            SendingMessages.Show("");
+            if (obj.tag.Equals("trash") || obj.tag.Equals("weeds") || obj.tag.Equals("nbss_area") || obj.tag.Equals("filter_media"))
+            {
+                SimulationManagerSolo.ChangeColor(obj, Color.white);
+                SendingMessages.Show("", priorite: -1);
+            }
+            if (obj.tag.Equals("filter_media") && scenario == 1)
+            {
+                SimulationManagerSolo.ChangeColor(obj, Color.white);
+                int idx = int.Parse(obj.name.Replace("filter_media", ""));
+                GameObject sediment_acc = GameObject.Find("SedimentAcc" + idx);
+                if (sediment_acc != null)
+                {
+                    SimulationManagerSolo.ChangeColor(sediment_acc, Color.white);
+                }
+                SendingMessages.Show("", priorite: -1);
+            }
         }
     }
 
@@ -117,7 +143,7 @@ public class SimulationManagerInteraction : SimulationManager
     {
         if (!interactionsAutorisees) return;
 
-        if (remainingTime <= 0.0)
+        else if (remainingTime <= 0.0)
         {
             GameObject grabbedObject = ev.interactableObject.transform.gameObject;
             Debug.Log("grabbed: " + grabbedObject.name + " tag: " + grabbedObject.tag);
@@ -184,7 +210,7 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (grabbedObject.tag.Equals("nbss_area")) {
                 MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "NBSS_area");
-                SendingMessages.Show("Moins de déchets = moins de pollution pour l’eau et le sol.");
+                //SendingMessages.Show("Moins de déchets = moins de pollution pour l’eau et le sol.");
             }
         }
 
@@ -466,7 +492,7 @@ public class SimulationManagerInteraction : SimulationManager
         {
             if (!string.IsNullOrWhiteSpace(message.init_))
             {
-                //Debug.Log(message.init_);
+                Debug.Log(message.init_);
                 GameObject pipes = GameObject.Find("PipeSystem");
                 foreach (Transform obj in pipes.transform)
                 {
@@ -536,6 +562,7 @@ public class SimulationManagerInteraction : SimulationManager
 
                 interactionsAutorisees = false;
                 MenuRadialManager.Instance.FermerMenu();
+                Debug.Log(interactionsAutorisees);
             }
             GameObject[] nbssAreaObjs = GameObject.FindGameObjectsWithTag("nbss_area");
             GameObject[] fmObjs = GameObject.FindGameObjectsWithTag("filter_media");
@@ -778,16 +805,38 @@ public class SimulationManagerInteraction : SimulationManager
                 Scenario2.SetActive(false);
                 DisplayCanvas.SetActive(false);
                 menuPanel.SetActive(true);
+
+                // Pour téléporter le joueur à la position initiale à chaque changement de scénario
+                CharacterController cc = xrOrigin.GetComponent<CharacterController>();
+
+                if (cc != null)
+                {
+                    cc.enabled = false;
+                }
+
+                // 1. On applique la nouvelle position
+                xrOrigin.MoveCameraToWorldLocation(initPosition);
+
+                // On réactive le CharacterController si besoin
+                if (cc != null)
+                {
+                    cc.enabled = true;
+                    Debug.Log("Teleport");
+                }
             }
 
             if (message.phase == "active")
             {
                 interactionsAutorisees = true;
+
+                progressBar.gameObject.SetActive(true);
             }
             if (message.phase == "passive")
             {
                 interactionsAutorisees = false;
                 MenuRadialManager.Instance.FermerMenu();
+
+                progressBar.gameObject.SetActive(false);
             }
             message = null;
         }

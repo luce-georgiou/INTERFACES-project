@@ -7,6 +7,8 @@ public class SendingMessages : MonoBehaviour
     public static SendingMessages Instance;
     public TextMeshProUGUI text;
 
+    private int prioriteActuelle = -1;
+
     void Awake()
     {
         // Sécurité standard d'un Singleton
@@ -28,16 +30,21 @@ public class SendingMessages : MonoBehaviour
 
     // La fonction statique que tu peux appeler de n'importe où !
     // J'ai ajouté un paramètre optionnel "duree" (par défaut 5 secondes)
-    public static void Show(string msg, float duree = 7f, Color? couleur = null)
+    public static void Show(string msg, float duree = 7f, Color? couleur = null, int priorite = 0)
     {
         if (Instance != null && Instance.text != null)
         {
+
+            if (Instance.text.gameObject.activeInHierarchy && priorite < Instance.prioriteActuelle)
+            {
+                return;
+            }
+            Instance.prioriteActuelle = priorite;
             // On arrête une éventuelle ancienne coroutine si un nouveau message arrive avant la fin de l'autre
             Instance.StopAllCoroutines();
 
             // On lance la coroutine SUR LE MANAGER (donc elle ne sera jamais détruite)
             Instance.StartCoroutine(Instance.ShowForDuration(msg, duree, couleur ?? Color.black));
-            Debug.Log(msg);
         }
     }
 
@@ -54,5 +61,7 @@ public class SendingMessages : MonoBehaviour
 
         // 3. On cache le texte à la fin
         text.gameObject.SetActive(false);
+
+        prioriteActuelle = -1;
     }
 }

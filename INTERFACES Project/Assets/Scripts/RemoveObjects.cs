@@ -68,7 +68,7 @@ public class RemoveObjects : MonoBehaviour
 
     private void DesactiverObjet(SelectEnterEventArgs args)
     {
-        if (!SimulationManagerInteraction.interactionsAutorisees) return;
+        if (!SimulationManagerInteraction.interactionsAutorisees && SimulationManagerInteraction.scenario != 0) return;
         GetComponent<Renderer>().enabled = false;
         GetComponent<Collider>().enabled = false;
         StartCoroutine(SequenceMessageEtDesactivation());
@@ -82,7 +82,11 @@ public class RemoveObjects : MonoBehaviour
         //Renderer rend = GetComponent<Renderer>();
         //if (rend != null) rend.enabled = false;
 
-        if (SimulationManagerInteraction.scenario == 0) progressBarObj.BarValue = 100f;
+        if (SimulationManagerInteraction.scenario == 0)
+        { 
+            progressBarObj.BarValue = 100f;
+            SimulationManager.Instance.SendMessageToGama("nbss_area0" + ":" + "20");
+        }
         if (SimulationManagerInteraction.scenario == 2) progressBarObj.BarValue = progressBarObj.BarValue + 10f / count;
 
         Dictionary<string, string> args = new Dictionary<string, string> {

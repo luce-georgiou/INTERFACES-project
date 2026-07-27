@@ -456,6 +456,9 @@ global control: fsm {
     	enter {
     		scenario <- "menu";
     		write scenario;
+    		ask nbss_area {
+				health <- 100.0;
+			}
     	}
     	transition to: situation0 when: launch_sc0;
     	transition to: situation1_passive when: launch_sc1;
@@ -473,21 +476,37 @@ global control: fsm {
 	    	scenario <- "0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "0"];
-	    	messages <- messages + ["phase":: "active"];
+	    	//messages <- messages + ["phase":: "active"];
 	    	messages <- messages + ["timer_start":: "600"];
 	    	messages <- messages + ["message_"::"Bienvenue ! L'entretien régulier est crucial pour le bon fonctionnement des noues. Dirige-toi à droite et regarde au fond de la noue."];
 	    	send_message <- true;
 			score <- 0.0;
+			ask nbss_area where (each.name = "nbss_area0") {
+				health <- 80.0;
+			}
+			float health_nbss0 <- 80.0;
     	}
-    	if (cycle mod 300 = 0) {
+    	ask nbss_area where (each.my_name = "nbss_area0") {
+    		health_nbss0 <- health;
+    	}
+    	if (cycle mod 300 = 0 and health_nbss0 != 100.0) {
     		messages <- messages + ["message_"::"Dirige-toi à droite et regarde au fond de la noue."];
+    		send_message <- true;
+    	}
+    	if (cycle mod 300 = 0 and health_nbss0 = 100.0) {
+    		messages <- messages + ["message_"::"Bravo! Tu as réussi le tutoriel, tu peux passer au scénario suivant."];
     		send_message <- true;
     	}
     	transition to: menu when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
     	exit {
+    		ask nbss_area {
+				health <- 100.0;
+			}
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
+    		messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
+    		active_start_time <- 0.0;
     	}
     	
     }
@@ -504,7 +523,7 @@ global control: fsm {
     	//minimum_cycle_duration <- 0.2;
     	//minimum_cycle_duration <- 2.0;
     	enter {
-	    	write "entering situation1_init";
+	    	write "entering situation1";
 	    	scenario <- "1_0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "1"];
@@ -553,7 +572,8 @@ global control: fsm {
 				partpoll_acc <- 2.0;
 			}
 			ask ponding_area where (each.my_name = "ponding_area2" or each.my_name = "ponding_area3") {
-			    is_obstructed <- true;
+			    //is_obstructed <- true;
+			    water_level <- 0.5;
 			}
 			ask nbss_area where (each.my_name = "nbss_area0") {
 				health <- 10.0;
@@ -716,7 +736,7 @@ global control: fsm {
     		messages <- messages + ["timer_start":: "0"];
     		send_message <- true;
     		active_start_time <- 0.0;
-    		do_skip <- false;
+    		//do_skip <- false;
     		write "exiting sc2_passive";
     	}
     }

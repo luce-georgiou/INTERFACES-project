@@ -31,10 +31,14 @@ public class VRHoverObjetSimple : MonoBehaviour
     {
         if (TooltipManager.Instance != null)
         {
-            // C'EST ICI QU'ON MET LA LIGNE !
-            // On envoie le message configuré dans l'inspecteur, 0f pour la vie, 
-            // et FALSE pour dire au manager : "Ne montre pas la barre de santé !"
-            TooltipManager.Instance.AfficherTooltip(messageAAfficher, 0f, false, transform, new Vector3(0, 0.5f, 0), 3f);
+            //Vector3 offsetHaut = new Vector3(0, -0.1f, 0);
+            //Vector3 directionJoueur = Vector3.zero;
+            //directionJoueur = (Camera.main.transform.position - transform.position).normalized;
+            //directionJoueur.y = 0;
+            //Vector3 offsetVersJoueur = directionJoueur * 0.5f;
+            //Vector3 offsetFinal = offsetHaut + offsetVersJoueur;
+
+            TooltipManager.Instance.AfficherTooltip(messageAAfficher, 0f, false, transform, new Vector3(0, -0.1f, 0), 3f);
         }
     }
 

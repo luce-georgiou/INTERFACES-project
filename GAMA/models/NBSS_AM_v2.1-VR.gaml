@@ -342,6 +342,7 @@ species unity_linker parent: abstract_unity_linker {
 	
 	
 	// Sim functions
+	
 	reflex send_message when: send_message {
 		//write "Send message: ";
 		//do send_message players: unity_player as list mes: ["message_init"::"Mmmh certaines noues semblent ne pas fonctionner correctement..."];
@@ -401,6 +402,10 @@ species unity_linker parent: abstract_unity_linker {
 	        ask nbss_area where (each.my_name = "nbss_area0") {
 				health <- health + 45.0;
 			}
+			ask ponding_area where (each.my_name = "ponding_area0" or each.my_name = "ponding_area2" or each.my_name = "ponding_area3") {
+				water_level <- water_level - 0.25;
+			}
+			messages <- messages + ["init_":: "regular_state"];
 			messages <- messages + ["message_":: "Moins de déchets = moins de pollution pour l’eau et le sol."];
 			send_message <- true;
 //			ask ag {
@@ -417,9 +422,9 @@ species unity_linker parent: abstract_unity_linker {
 				if (function_attributes["my_fqt"] <= 1) {
 					function_attributes["my_fqt"] <- 2;
 					partpoll_acc <- 0.0;
-					ask ponding_area where (each.is_obstructed) { // condition à modif selon si transit ou non, et chemin de l'eau
+					ask ponding_area where (each.is_obstructed or each.my_name = "ponding_area2" or each.my_name = "ponding_area3") { // condition à modif selon si transit ou non, et chemin de l'eau
 						is_obstructed <- false;
-						water_level <- 0.0;
+						water_level <- water_level - 0.25;
 					}
 					ask nbss_area where (each.my_name = "nbss_area0") {
 						health <- health + 45.0;
@@ -429,7 +434,7 @@ species unity_linker parent: abstract_unity_linker {
 					}
 					//score <- score + 30.0;
 					//weight_score <- 30;
-					messages <- messages + ["init_":: "regular_state"];
+					//messages <- messages + ["init_":: "regular_state"];
 					messages <- messages + ["add_to_score":: "45.0"];
 					messages <- messages + ["message_":: "Parfait ! On a enlevé l'accumulation de sédiments, l'eau peut de nouveau s'infilter dans les sols."];
 					send_message <- true;	
