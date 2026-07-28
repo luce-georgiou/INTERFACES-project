@@ -28,12 +28,16 @@ public class SimulationManagerInteraction : SimulationManager
     public GameObject Scenario0;
     public GameObject Scenario1;
     public GameObject Scenario2;
+    public GameObject scenario2Fail;
+    public static int actionCount = 0;
+    public static int actionLimit;
     public Material defaultSky;
     public Material summerSky;
     public GameObject DisplayCanvas;
     public GameObject menuPanel;
     public TMP_Text timerText;
     public TMP_Text dateTimeText;
+    public TMP_Text actionCountText;
     private Coroutine timerCoroutine;
     public ProgressBar progressBar;
     GAMAMessage2 message = null;
@@ -141,6 +145,8 @@ public class SimulationManagerInteraction : SimulationManager
     //Defines what happens when a object is selected
     protected override void SelectInteraction(SelectEnterEventArgs ev)
     {
+        if (actionCount >= actionLimit) interactionsAutorisees = false;
+        
         if (!interactionsAutorisees) return;
 
         else if (remainingTime <= 0.0)
@@ -162,7 +168,9 @@ public class SimulationManagerInteraction : SimulationManager
                 progressBar.BarValue = progressBar.BarValue + weight;
                 SendMessageToGama(progressBar.BarValue.ToString());
                 unblocked = true;
-                
+                actionCount += 1;
+                actionCountText.text = "Actions restantes : " + actionCount + " / " + actionLimit;
+
                 //count = GameObject.FindGameObjectsWithTag("weeds").Length + GameObject.FindGameObjectsWithTag("trash").Length;
                 //if (count > 0)
                 //{
@@ -188,6 +196,8 @@ public class SimulationManagerInteraction : SimulationManager
                     Dictionary<string, string> args = new Dictionary<string, string>
                     {{"id", grabbedObject.name } };
                     ConnectionManager.Instance.SendExecutableAsk("curage", args);
+                    actionCount += 1;
+                    actionCountText.text = "Actions restantes : " + actionCount + " / " + actionLimit;
 
                     //// On désactive les indications de défaillance liées aux sédiments
                     //if (score_curage > 0) 
@@ -212,6 +222,7 @@ public class SimulationManagerInteraction : SimulationManager
                 MenuRadialManager.Instance.OuvrirMenu(grabbedObject.transform, grabbedObject.name, "NBSS_area");
                 //SendingMessages.Show("Moins de déchets = moins de pollution pour l’eau et le sol.");
             }
+            //actionCountText.text = "Actions restantes : " + actionCount + " / " + actionLimit;
         }
 
     }
@@ -306,35 +317,56 @@ public class SimulationManagerInteraction : SimulationManager
                 //{
                 //    Debug.LogWarning($"Aucun composant XRBaseInteractable trouvé sur l'objet GAMA : {obj.name}");
                 //}
-
-                obj.transform.position = new Vector3(obj.transform.position.x, -3f, obj.transform.position.z);
-                Material sourceMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
-                
-                Material mat = new Material(sourceMat);
-                Color c = mat.GetColor("_BaseColor");
-
-                if (name == "filter_media5")
+                char index = name[name.Length - 1];
+                if (index == '2' || index == '3')
                 {
-
-                    mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
-                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                    mat.SetFloat("_Surface", 1f);
-                    
-                    mat.SetFloat("_Blend", 0f); // Alpha blend mode
-                    mat.SetOverrideTag("RenderType", "Transparent");
-                    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    mat.SetInt("_ZWrite", 0);
-                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-                    mat.renderQueue = 3000;
-                    //mat.SetFloat("_Alpha", 0.5f);
-
-                    c.a = 0.6f;
-
-                    //Debug.Log(c.a);
-                    mat.SetColor("_BaseColor", c);
-                    obj.GetComponent<Renderer>().material = mat;
+                    obj.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
                 }
+                switch (index)
+                {
+                    
+                    case '0':
+                        obj.transform.localScale = new Vector3(2f, 1f, 0.97f);
+                        break;
+                    case '1':
+                        obj.transform.localScale = new Vector3(2f, 1f, 1f);
+                        break;
+                    case '2':
+                        obj.transform.localScale = new Vector3(1.8f, 1f, 0.387f);
+                        break;
+                    case '3':
+                        obj.transform.localScale = new Vector3(1.8f, 1f, 0.265f);
+                        break;
+                }
+
+                obj.transform.position = new Vector3(obj.transform.position.x, -2.35f, obj.transform.position.z);
+                //Material sourceMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Ground02");
+                
+                //Material mat = new Material(sourceMat);
+                //Color c = mat.GetColor("_BaseColor");
+
+                //if (name == "filter_media5")
+                //{
+
+                //    mat.DisableKeyword("_SURFACE_TYPE_OPAQUE");
+                //    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                //    mat.SetFloat("_Surface", 1f);
+                    
+                //    mat.SetFloat("_Blend", 0f); // Alpha blend mode
+                //    mat.SetOverrideTag("RenderType", "Transparent");
+                //    mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                //    mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                //    mat.SetInt("_ZWrite", 0);
+                //    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                //    mat.renderQueue = 3000;
+                //    //mat.SetFloat("_Alpha", 0.5f);
+
+                //    c.a = 0.6f;
+
+                //    //Debug.Log(c.a);
+                //    mat.SetColor("_BaseColor", c);
+                //    obj.GetComponent<Renderer>().material = mat;
+                //}
                 
 
                 //creating sediment accumulation
@@ -413,7 +445,16 @@ public class SimulationManagerInteraction : SimulationManager
                 else
                 {
                     healthDic.Add(obj.name, health);
-                    Debug.Log(obj.name + " with : " + health);
+                }
+                if (healthDic["nbss_area0"] > 90f)
+                {
+                    GameObject[] empties = FindObjectsOfType<GameObject>()
+                                .Where(go => go.name.StartsWith("EmptyPond"))
+                                .ToArray();
+                    foreach (GameObject pond in empties)
+                    {
+                        pond.SetActive(false);
+                    }
                 }
             }
             else if (name.StartsWith("ponding_area"))
@@ -558,11 +599,13 @@ public class SimulationManagerInteraction : SimulationManager
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(false);
 
+                progressBar.gameObject.SetActive(true);
+                actionCountText.gameObject.SetActive(true);
+
                 dateTimeText.text = "5 mai\n16:08";
 
                 interactionsAutorisees = false;
                 MenuRadialManager.Instance.FermerMenu();
-                Debug.Log(interactionsAutorisees);
             }
             GameObject[] nbssAreaObjs = GameObject.FindGameObjectsWithTag("nbss_area");
             GameObject[] fmObjs = GameObject.FindGameObjectsWithTag("filter_media");
@@ -587,6 +630,8 @@ public class SimulationManagerInteraction : SimulationManager
                     obj.GetComponent<Renderer>().sharedMaterial = matNBSS;
                 }
                 lawnObj.GetComponent<Renderer>().sharedMaterial = matLawn;
+                GameObject patchLawn = GameObject.Find("GapFiller");
+                patchLawn.GetComponent<Renderer>().sharedMaterial = matLawn;
                 foreach (GameObject obj in parkObjs)
                 {
                     obj.GetComponent<Renderer>().sharedMaterial = matPark;
@@ -604,8 +649,11 @@ public class SimulationManagerInteraction : SimulationManager
                 // changer matériau fm en sol sec
                 // mettre soleil aveuglant + poussière
                 // enable gameobject scenario 2
+                Scenario0.SetActive(false);
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(true);
+                //GameObject endingFail = GameObject.Find("ending_fail"); 
+                //endingFail.SetActive(false);
 
                 dateTimeText.text = "3 août\n13:04";
 
@@ -629,6 +677,8 @@ public class SimulationManagerInteraction : SimulationManager
                     obj.GetComponent<Renderer>().sharedMaterial = matDrySoil;
                 }
                 lawnObj.GetComponent<Renderer>().sharedMaterial = matSummerGrass0;
+                GameObject patchLawn = GameObject.Find("GapFiller");
+                patchLawn.GetComponent<Renderer>().sharedMaterial = matSummerGrass0;
                 foreach (GameObject obj in parkObjs)
                 {
                     obj.GetComponent<Renderer>().sharedMaterial = matSummerGrass1;
@@ -713,6 +763,8 @@ public class SimulationManagerInteraction : SimulationManager
                 // fail
                 // terre, toute la veg morte, arbres sans feuillage
                 // changer la date
+                scenario2Fail.SetActive(true);
+                
                 GameObject treeNoLeaf = Resources.Load<GameObject>("Prefabs/Pine Forest Pack/Prefabs/PineNoLeaf");
                 GameObject[] trees = GameObject.FindGameObjectsWithTag("tree");
                 foreach (GameObject tree in trees)
@@ -792,19 +844,23 @@ public class SimulationManagerInteraction : SimulationManager
             }
             if (message.scenario == "menu") {
                 Debug.Log("Afficher menu");
-                if (ResetScenarioObjects.Instance != null)
-                {
-                    Debug.Log("Instance trouvée, lancement du reset...");
-                    ResetScenarioObjects.Instance.ResetToDefaultState();
-                }
-                else
-                {
-                    Debug.LogError("ERREUR : ResetScenarioObjects.Instance est NULL ! Le script n'est pas dans la scène ou n'a pas pu s'initialiser dans Awake.");
-                }
+                //if (ResetScenarioObjects.Instance != null)
+                //{
+                //    Debug.Log("Instance trouvée, lancement du reset...");
+                //    ResetScenarioObjects.Instance.ResetToDefaultState();
+                //}
+                //else
+                //{
+                //    Debug.LogError("ERREUR : ResetScenarioObjects.Instance est NULL ! Le script n'est pas dans la scène ou n'a pas pu s'initialiser dans Awake.");
+                //}
+                Scenario0.SetActive(false);
                 Scenario1.SetActive(false);
                 Scenario2.SetActive(false);
                 DisplayCanvas.SetActive(false);
                 menuPanel.SetActive(true);
+
+                actionCount = 0;
+                actionLimit = 0;
 
                 // Pour téléporter le joueur à la position initiale à chaque changement de scénario
                 CharacterController cc = xrOrigin.GetComponent<CharacterController>();
@@ -821,7 +877,6 @@ public class SimulationManagerInteraction : SimulationManager
                 if (cc != null)
                 {
                     cc.enabled = true;
-                    Debug.Log("Teleport");
                 }
             }
 
@@ -830,6 +885,7 @@ public class SimulationManagerInteraction : SimulationManager
                 interactionsAutorisees = true;
 
                 progressBar.gameObject.SetActive(true);
+                actionCountText.gameObject.SetActive(true);
             }
             if (message.phase == "passive")
             {
@@ -837,6 +893,12 @@ public class SimulationManagerInteraction : SimulationManager
                 MenuRadialManager.Instance.FermerMenu();
 
                 progressBar.gameObject.SetActive(false);
+                actionCountText.gameObject.SetActive(false);
+            }
+            if (!string.IsNullOrWhiteSpace(message.action_limit))
+            {
+                actionLimit = int.Parse(message.action_limit);
+                actionCountText.text = "Actions restantes : " + actionCount + " / " + actionLimit;
             }
             message = null;
         }
@@ -854,6 +916,7 @@ public class GAMAMessage2
     public string score;
     public string add_to_score;
     public string phase;
+    public string action_limit;
 
     public static GAMAMessage2 CreateFromJSON(string jsonString)
     {

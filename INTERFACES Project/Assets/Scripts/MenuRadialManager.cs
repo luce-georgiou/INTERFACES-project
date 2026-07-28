@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Globalization;
+using TMPro;
 
 public class MenuRadialManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class MenuRadialManager : MonoBehaviour
     [Header("Scenarios")]
     public Transform Scenario1;
     public Transform Scenario2;
+    public TMP_Text actionCountText;
 
     [Header("Visuel du Menu")]
     public GameObject conteneurFilterMedia;
@@ -116,7 +118,7 @@ public class MenuRadialManager : MonoBehaviour
         {
             //transform.position = positionCible.position; //+ new Vector3(0, 3f, 0);
             conteneurFilterMedia.SetActive(true);
-            PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, -0.3f, 0));
+            PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, 0f, 0));
             if (SimulationManagerInteraction.scenario == 1)
             {
                 SC1_Buttons.SetActive(true);
@@ -138,6 +140,8 @@ public class MenuRadialManager : MonoBehaviour
         SC1_Buttons.SetActive(false);
         SC2_Buttons.SetActive(false);
         idObjetActuel = ""; // On nettoie l'ID par sécurité
+
+        
     }
 
     // créer barrière végétale
@@ -303,6 +307,8 @@ public class MenuRadialManager : MonoBehaviour
             }
         }
         ObjectSpawner(obj, loc, prefabSign);
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue + 5f;
         SendingMessages.Show("La sensibilisation est la première ligne de défense de la noue.", 7f, Color.green);
@@ -330,6 +336,8 @@ public class MenuRadialManager : MonoBehaviour
             }
         }
         ObjectSpawner(obj, loc, prefabTree);
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue + 15f;
         SendingMessages.Show("Planter des arbres permet de diversifier les strates de cet espace, et apporter un peu d'ombre et de fraîcheur à la noue.", 7f, Color.green);
@@ -367,6 +375,8 @@ public class MenuRadialManager : MonoBehaviour
         GameObject swale = GameObject.Find(idObjetActuel);
         MowGrass(swale);
 
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 15f;
         SendingMessages.Show("Tondre à ras détruit l'ombre naturelle du sol ! L'humidité s'évapore et la biodiversité fuit.", 7f, Color.red);
@@ -384,6 +394,8 @@ public class MenuRadialManager : MonoBehaviour
         {
             Debug.LogError("impossible de poser paillage");
         }
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         //EnvoyerCommandeGama("point_gain");
         progressBarObj.BarValue = progressBarObj.BarValue + 15f;
@@ -406,6 +418,8 @@ public class MenuRadialManager : MonoBehaviour
         }
 
         // 3. On ferme le menu
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue + 20f;
         SendingMessages.Show("Les plantes locales protègent la noue du piétinement naturellement, et ralentissent le tassement de la terre.", 7f, new Color(119f / 255f, 178f / 255f, 107f / 255f));
@@ -427,6 +441,8 @@ public class MenuRadialManager : MonoBehaviour
         }
 
         // 3. On ferme le menu
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 5f;
         SendingMessages.Show("Le grillage bloque les piétons, mais aussi la faune locale ! Privilégiez une barrière végétale (haie).", 7f, Color.yellow);
@@ -458,6 +474,8 @@ public class MenuRadialManager : MonoBehaviour
                 }
             }
         }
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
         progressBarObj.BarValue = progressBarObj.BarValue - 20f;
         SendingMessages.Show("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 7f, Color.red);
@@ -482,7 +500,8 @@ public class MenuRadialManager : MonoBehaviour
                 rend.material.color = Color.black;
             }
         }
-
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         conteneurArrosage.SetActive(false);
         progressBarObj.BarValue = progressBarObj.BarValue - 5f;
         SendingMessages.Show("Arroser en pleine canicule est un gaspillage : 60% de l'eau s'évapore avant de toucher les racines !", 7f, Color.red);
@@ -533,6 +552,8 @@ public class MenuRadialManager : MonoBehaviour
         }
 
         // On referme le menu après avoir cliqué
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
     }
 
@@ -556,11 +577,11 @@ public class MenuRadialManager : MonoBehaviour
             Vector3 pointLocal = objetCible.InverseTransformPoint(pointPlusProche);
 
             // On force la largeur à être au centre (0)
-            if (objetCible.name == "filter_media0" || objetCible.name == "filter_media1" || objetCible.name == "filter_media2" || objetCible.name == "filter_media3")
-            {
-                pointLocal.z = 0;
-            }
-            else pointLocal.x = 0;
+            //if (objetCible.name == "filter_media0" || objetCible.name == "filter_media1")// || objetCible.name == "filter_media2" || objetCible.name == "filter_media3")
+            //{
+            //    pointLocal.z = 0;
+            //}
+            pointLocal.x = 0;
 
             // On re-transforme ce point modifié en coordonnées mondiales
             pointPlusProche = objetCible.TransformPoint(pointLocal);

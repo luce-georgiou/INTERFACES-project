@@ -66,7 +66,7 @@ species unity_linker parent: abstract_unity_linker {
 		up_nbss_area <- geometry_properties("nbss_area","nbss_area",nbss_area_aspect,#ray_interactable,false);
 		unity_properties << up_nbss_area;
 		
-		unity_aspect filter_media_aspect <- geometry_aspect(1.5,#saddlebrown,precision);
+		unity_aspect filter_media_aspect <- prefab_aspect("Prefabs/FilterMediaPrefab",1.0,0.0,1.0,90.0,precision); //geometry_aspect(1.5,#saddlebrown,precision);
 		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
 		unity_properties << up_filter_media;
 		
@@ -100,7 +100,7 @@ species unity_linker parent: abstract_unity_linker {
 		up_flower <- geometry_properties("flower","flower",flower_aspect,#no_interaction,false);
 		unity_properties << up_flower;
 		
-		unity_aspect local_flora_aspect <- prefab_aspect("Cartoon_Farm_Crops/Prefabs/Standard/Eggplant_Plant",1.0,0.0,1.0,0.0,precision);
+		unity_aspect local_flora_aspect <- prefab_aspect("Cartoon_Farm_Crops/Prefabs/Standard/Eggplant_Plant",1.0,-2.0,1.0,0.0,precision);
 		up_local_flora <- geometry_properties("local_flora","local_flora",local_flora_aspect,#no_interaction,false);
 		unity_properties << up_local_flora;
 		
@@ -370,7 +370,6 @@ species unity_linker parent: abstract_unity_linker {
             ask nbs {
             	health <- health + float(name_health at 1);
             }
-            write name_health;
 		}
 		else { //On traite le score en fin de phase
 			score <- float(mes);
@@ -504,17 +503,24 @@ species unity_linker parent: abstract_unity_linker {
 	    	geometry geom <- target_nbss.shape;
 	    	create flower number: 10 {
 		    	shape <- triangle(0.6);
-		    	location <- {loc.x - geom.width/2 + (index mod 5) * geom.width/4,
-								loc.y + (index < 5 ? 2.5 : -2.5)
-				};
-			}
+		    	if (geom.width > geom.height) {
+		    		location <- {loc.x - geom.width/2 + (index mod 5) * geom.width/4,
+						loc.y + (index < 5 ? 2.5 : -2.5)
+					};
+		    	}
+		    	else {
+		    		location <- {loc.x + ((index mod 5) < 5 ? 2.5 : -2.5),
+						loc.y - geom.height/2 + (index mod 5) * geom.height/4
+					};
+		    	}
 			ask nbss_area where (each.my_NBSS = target_nbss) {
 	        	health <- health - 3.0;
 	        }
 			messages <- messages + ["add_to_score":: string(-5)];
 			messages <- messages + ["message_":: "Jolies ! Mais... Est-ce vraiment utile ?"];
 			send_message <- true;
-	    }
+	    	}
+		}
 	}
 //	action planter_barriere_veg(string id) {
 //		nbss_area ag <- nbss_area first_with (each.name = id);

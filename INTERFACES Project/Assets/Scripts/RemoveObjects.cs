@@ -3,6 +3,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using TMPro;
 
 [RequireComponent(typeof(UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable))]
 public class RemoveObjects : MonoBehaviour
@@ -10,6 +11,7 @@ public class RemoveObjects : MonoBehaviour
     private UnityEngine.XR.Interaction.Toolkit.Interactables.XRSimpleInteractable interactable;
 
     [SerializeField] private ProgressBar progressBarObj;
+    public TMP_Text actionCountText;
 
     public string messageAfterSelect = "Les cendres acidifient le sol et tuent les micro-organismes.";
     public string messageHover = "";
@@ -68,6 +70,8 @@ public class RemoveObjects : MonoBehaviour
 
     private void DesactiverObjet(SelectEnterEventArgs args)
     {
+        if (SimulationManagerInteraction.actionCount >= SimulationManagerInteraction.actionLimit) SimulationManagerInteraction.interactionsAutorisees = false;
+
         if (!SimulationManagerInteraction.interactionsAutorisees && SimulationManagerInteraction.scenario != 0) return;
         GetComponent<Renderer>().enabled = false;
         GetComponent<Collider>().enabled = false;
@@ -93,6 +97,9 @@ public class RemoveObjects : MonoBehaviour
                  {"id",ConnectionManager.Instance.GetConnectionId() },
                  {"mes",  progressBarObj.BarValue.ToString() }};
         ConnectionManager.Instance.SendExecutableAsk("receive_message", args);
+
+        SimulationManagerInteraction.actionCount += 1;
+        actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
 
         if (!string.IsNullOrEmpty(messageAfterSelect))
         {

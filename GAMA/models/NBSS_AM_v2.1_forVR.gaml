@@ -456,6 +456,8 @@ global control: fsm {
     	enter {
     		scenario <- "menu";
     		write scenario;
+    		messages <- messages + ["scenario":: "menu"];
+    		send_message <- true;
     		ask nbss_area {
 				health <- 100.0;
 			}
@@ -476,6 +478,7 @@ global control: fsm {
 	    	scenario <- "0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "0"];
+	    	messages <- messages + ["action_limit"::"1"];
 	    	//messages <- messages + ["phase":: "active"];
 	    	messages <- messages + ["timer_start":: "600"];
 	    	messages <- messages + ["message_"::"Bienvenue ! L'entretien régulier est crucial pour le bon fonctionnement des noues. Dirige-toi à droite et regarde au fond de la noue."];
@@ -583,10 +586,10 @@ global control: fsm {
 			}
 			//set date to rainy day
 			//starting_date <- date(string(int(20070429)));
-			write starting_date;
-			ask rain {
-				write runoff.my_flow; 
-			}
+			//write starting_date;
+//			ask rain {
+//				write runoff.my_flow; 
+//			}
 		}
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
@@ -617,6 +620,7 @@ global control: fsm {
     		write "active phase for player";
     		scenario <- "1_1";
     		messages <- messages + ["phase":: "active"];
+    		messages <- messages + ["action_limit"::"5"];
     		active_start_time <- gama.machine_time;
     		
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
@@ -759,12 +763,13 @@ global control: fsm {
     	enter {
     		scenario <- "2_1";
     		messages <- messages + ["phase":: "active"];
+    		messages <- messages + ["action_limit"::"10"];
     		active_start_time <- gama.machine_time;
     		messages <- messages + ["timer_start":: "600"];
     		messages <- messages + ["message_":: "A toi de jouer ! Essaie de rétablir la bonne santé de cet espace en cette chaleur brûlante..."];
     		send_message <- true;
     	}
-    	write score;
+    	//write score;
     	write (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
     	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
     		or (do_skip and scenario = "2_1" and score < 50.0); //180000; // 3min en ms

@@ -104,12 +104,8 @@ public class SimulationManager : MonoBehaviour
 
     bool hasSimulator ;
 
-    //public IEnumerator ShowForDuration(string msg, float duration)
-    //{
-    //    SendingMessages.Show(msg);
-    //    yield return new WaitForSeconds(duration);
-    //    SendingMessages.Show("");
-    //}
+    //public int actionCount = 0;
+    //public int actionLimit;
 
     public Dictionary<string, float> healthDic = new Dictionary<string, float>();
     public float GetHealth(string idObjet)
