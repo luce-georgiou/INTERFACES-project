@@ -27,5 +27,5 @@ This repository contains both GAMA modeling components and Unity VR implementati
 1. Open the **INTERFACES Project** folder in Unity
 2. Ensure you have the appropriate VR hardware connected via USB-C
 3. Ensure both the PC and headset are connected to the same Wifi network
-4. Open `/Assets/Scripts/Gama Provider/WebSocketConnector.cs` and change `localhost` to the iP address of that network : `    protected string DefaultIP = "localhost";`
+4. Open `/Assets/Scripts/Gama Provider/WebSocketConnector.cs` and change `localhost` to the iP address of that network : `protected string DefaultIP = "localhost";`
 5. Build and Run the project according to [this tutorial to launch simulation](https://doc.project-simple.eu/unity/how-to/Running-a-model-game)
