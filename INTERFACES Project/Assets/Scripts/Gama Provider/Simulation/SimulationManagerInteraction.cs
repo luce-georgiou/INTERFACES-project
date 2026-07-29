@@ -20,6 +20,7 @@ public class SimulationManagerInteraction : SimulationManager
     public GameObject Scenario1;
     public GameObject Scenario2;
     public GameObject scenario2Fail;
+    public GameObject createdObjs;
     public static int actionCount = 0;
     public static int actionLimit;
     public Material defaultSky;
@@ -260,7 +261,11 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("local_flora"))
             {
-                obj.transform.SetParent(Scenario2.transform, true);
+                obj.transform.SetParent(createdObjs.transform, true);
+            }
+            else if (name.StartsWith("flower"))
+            {
+                obj.transform.SetParent(createdObjs.transform, true);
             }
             else if (name.StartsWith("nbss_area"))
             {
@@ -651,6 +656,9 @@ public class SimulationManagerInteraction : SimulationManager
                     obj.GetComponent<Renderer>().sharedMaterial = matNBSS;
                 }
                 lawnObj.GetComponent<Renderer>().sharedMaterial = matLawn;
+                GameObject patchLawn = GameObject.Find("GapFiller");
+                patchLawn.GetComponent<Renderer>().sharedMaterial = matLawn;
+
                 foreach (GameObject obj in parkObjs)
                 {
                     obj.GetComponent<Renderer>().sharedMaterial = matPark;

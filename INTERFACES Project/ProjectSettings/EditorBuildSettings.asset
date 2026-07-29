@@ -59,9 +59,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/NBSS_for_headset_v1.unity
     guid: 4169d4d72c556524780e9ad8ffd36709
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/NBSS_for_headset_v2.unity
     guid: 073d1479e0d459d409c74804d185d4f8
+  - enabled: 1
+    path: Assets/Scenes/NBSS_headset_v3.unity
+    guid: 104a1907f0c31d447828968381b0673e
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
     Unity.XR.WindowsMR.Settings: {fileID: 11400000, guid: dc5a169419fa04987b057f65238cf3ba, type: 2}
