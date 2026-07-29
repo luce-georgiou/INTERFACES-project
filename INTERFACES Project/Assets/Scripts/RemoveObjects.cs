@@ -26,7 +26,6 @@ public class RemoveObjects : MonoBehaviour
         count = Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None)
                     .Count(go => go.name.StartsWith("Cylinder"));
 
-        //Debug.Log("Nombre de cylindres trouvés : " + count);
         objectRenderer = GetComponent<Renderer>();
     }
 
@@ -34,7 +33,7 @@ public class RemoveObjects : MonoBehaviour
     {
         interactable.selectEntered.AddListener(DesactiverObjet);
 
-        // On écoute le survol (Hover)
+        // On écoute au Hover
         interactable.hoverEntered.AddListener(OnHoverEnter);
         interactable.hoverExited.AddListener(OnHoverExit);
     }
@@ -80,11 +79,6 @@ public class RemoveObjects : MonoBehaviour
 
     private IEnumerator SequenceMessageEtDesactivation()
     {
-        //Collider col = GetComponent<Collider>();
-        //if (col != null) col.enabled = false;
-
-        //Renderer rend = GetComponent<Renderer>();
-        //if (rend != null) rend.enabled = false;
 
         if (SimulationManagerInteraction.scenario == 0)
         { 
@@ -107,12 +101,7 @@ public class RemoveObjects : MonoBehaviour
         }
         yield return null;
 
-        //SendingMessages.Show("Les cendres acidifient le sol et tuent les micro-organismes.\n+10");
-        //yield return new WaitForSeconds(3f);
-        //SendingMessages.Show("");
-
         Destroy(gameObject);
-        //gameObject.SetActive(false);
     }
 
 }

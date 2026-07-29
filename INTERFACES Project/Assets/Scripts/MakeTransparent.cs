@@ -25,12 +25,12 @@ public class MakeTransparent : MonoBehaviour
 
     void Awake()
     {
-        transparentMat = Resources.Load<Material>("Materials/Lawn_Transparent");
+        transparentMat = Resources.Load<Material>("Materials/Lawn_Transparent"); //Transparent mat
         Color tempColor = transparentMat.color;
         tempColor.a = selectedAlpha;
         transparentMat.color = tempColor;
-        opaqueMat = Resources.Load<Material>("Materials/Lawn_Opaque");
-        summerGrassMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass02");
+        opaqueMat = Resources.Load<Material>("Materials/Lawn_Opaque"); //Opaque mat for spring
+        summerGrassMat = Resources.Load<Material>("YughuesFreeGroundMaterials/Materials/M_YFGM_Grass02"); //Opaque mat for summer
 
         originalColor = new Color(0f, 58f / 255f, 0f, 1f);
         rend = GetComponent<Renderer>();
@@ -40,7 +40,6 @@ public class MakeTransparent : MonoBehaviour
         col = GetComponent<Collider>();
         simpleInteractable = GetComponent<XRSimpleInteractable>();
 
-        // On cherche le script de Tint
         xrTintScript = GetComponent("XRTintInteractableVisual") as MonoBehaviour;
 
         simpleInteractable.selectEntered.AddListener(OnSelect);
@@ -54,25 +53,18 @@ public class MakeTransparent : MonoBehaviour
 
     IEnumerator HandleTransparencyRoutine()
     {
-        Debug.Log("1. Début de la séquence");
         isTransparent = true;
         yield return null;
 
         if (xrTintScript != null) xrTintScript.enabled = false;
-        //SetAlpha(0.7f);
-        //originalColor.a = selectedAlpha;
-        //rend.material.color = originalColor;
         rend.material = transparentMat;
 
-        Debug.Log("2. Alpha appliqué. Le collider va être désactivé.");
+        //Disable collider
         col.enabled = false;
 
-        Debug.Log("3. Collider désactivé ! Début du chrono de " + disableDuration + " secondes...");
+        //Disable during 30s
         yield return new WaitForSeconds(disableDuration);
 
-        Debug.Log("4. Les 30 secondes sont écoulées ! Réactivation du collider...");
-        //originalColor.a = 1f;
-        //rend.material.color = originalColor;
         if (SimulationManagerInteraction.scenario == 1)
         {
             rend.material = opaqueMat;
@@ -82,14 +74,10 @@ public class MakeTransparent : MonoBehaviour
             rend.material = summerGrassMat;
         }
         
-        //SetAlpha(1f);
-        //Debug.Log("back to og color");
         col.enabled = true;
 
         if (xrTintScript != null) xrTintScript.enabled = true;
         isTransparent = false;
-
-        Debug.Log("5. Tout est restauré avec succès.");
     }
 
     void OnDestroy()

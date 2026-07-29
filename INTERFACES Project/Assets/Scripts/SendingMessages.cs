@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using System.Collections; // Obligatoire pour utiliser les Coroutines (IEnumerator)
+using System.Collections;
 
 public class SendingMessages : MonoBehaviour
 {
@@ -11,7 +11,6 @@ public class SendingMessages : MonoBehaviour
 
     void Awake()
     {
-        // Sécurité standard d'un Singleton
         if (Instance == null)
         {
             Instance = this;
@@ -21,15 +20,13 @@ public class SendingMessages : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // On cache le texte au démarrage du jeu par défaut
+        //Hiding text at the beginning of the game
         if (text != null)
         {
             text.gameObject.SetActive(false);
         }
     }
 
-    // La fonction statique que tu peux appeler de n'importe où !
-    // J'ai ajouté un paramètre optionnel "duree" (par défaut 5 secondes)
     public static void Show(string msg, float duree = 7f, Color? couleur = null, int priorite = 0)
     {
         if (Instance != null && Instance.text != null)
@@ -40,26 +37,23 @@ public class SendingMessages : MonoBehaviour
                 return;
             }
             Instance.prioriteActuelle = priorite;
-            // On arrête une éventuelle ancienne coroutine si un nouveau message arrive avant la fin de l'autre
             Instance.StopAllCoroutines();
-
-            // On lance la coroutine SUR LE MANAGER (donc elle ne sera jamais détruite)
             Instance.StartCoroutine(Instance.ShowForDuration(msg, duree, couleur ?? Color.black));
         }
     }
 
-    // La coroutine secrète qui gère l'apparition/disparition
+    //Coroutine handling showing/disappearing of message
     private IEnumerator ShowForDuration(string msg, float duree, Color couleur)
     {
-        // 1. On modifie le texte et on l'affiche
+        //Modify and display text
         text.text = msg;
         text.color = couleur;
         text.gameObject.SetActive(true);
 
-        // 2. On attend le temps défini
+        //Waiting for display time
         yield return new WaitForSeconds(duree);
 
-        // 3. On cache le texte à la fin
+        //Hide text
         text.gameObject.SetActive(false);
 
         prioriteActuelle = -1;

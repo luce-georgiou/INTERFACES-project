@@ -1,9 +1,9 @@
-using System.Collections.Generic; // Indispensable pour utiliser les Listes
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FlowArrowMulti : MonoBehaviour
 {
-    // Cette petite structure permet de grouper un point de départ et de fin
+    //Point de départ et de fin
     [System.Serializable]
     public struct ArrowData
     {
@@ -33,7 +33,7 @@ public class FlowArrowMulti : MonoBehaviour
         // On boucle sur chaque flèche que vous avez configurée dans l'inspecteur
         for (int i = 0; i < arrowsData.Count; i++)
         {
-            // 1. Création du Corps (Cylinder)
+            //Création du Corps (Cylinder)
             GameObject newShaft = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             newShaft.transform.SetParent(transform);
             newShaft.GetComponent<Renderer>().material.color = arrowColor;
@@ -43,7 +43,7 @@ public class FlowArrowMulti : MonoBehaviour
 
             shafts.Add(newShaft); // On le sauvegarde dans notre liste
 
-            // 2. Création de la Tête
+            // Création de la Tête
             GameObject newHead = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             newHead.transform.SetParent(transform);
             newHead.GetComponent<Renderer>().material.color = arrowColor;
@@ -99,25 +99,6 @@ public class FlowArrowMulti : MonoBehaviour
             heads[i].transform.position = end + (directionNorm * impulsionLongueur * 0.5f);
             heads[i].transform.up = directionNorm;
             heads[i].transform.localScale = new Vector3(pulsationTete, headHeight, pulsationTete);
-
-            /* pour ondulations verticales */
-
-            //Vector3 animStart = arrowsData[i].startPoint + Vector3.up * wave;
-            //Vector3 animEnd = arrowsData[i].endPoint + Vector3.up * wave;
-
-            //Vector3 dir = animEnd - animStart;
-            //float length = dir.magnitude;
-            //Vector3 center = (animStart + animEnd) / 2f;
-
-            //// Mise à jour du Corps
-            //shafts[i].transform.position = center;
-            //shafts[i].transform.up = dir.normalized;
-            //shafts[i].transform.localScale = new Vector3(shaftRadius, length / 2f, shaftRadius);
-
-            //// Mise à jour de la Tête
-            //heads[i].transform.position = animEnd;
-            //heads[i].transform.up = dir.normalized;
-            //heads[i].transform.localScale = new Vector3(headRadius, headHeight, headRadius);
         }
     }
 }

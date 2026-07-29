@@ -8,7 +8,7 @@ public class VRHoverObjet : MonoBehaviour
     public string messageAAfficher;
 
     [Header("Swale Health")]
-    public float health = 0.5f; // à config avec attribut santé envoyé par gama pour chaque noue (dans intercation)
+    public float health = 0.5f;
 
     [Header("Identifiant unique")]
     public int idGama;
@@ -34,20 +34,15 @@ public class VRHoverObjet : MonoBehaviour
 
     private void OnHoverEnter(HoverEnterEventArgs args)
     {
-        //string nameObject = gameObject.name;
-        //Debug.Log(gameObject.name);
         int idx = int.Parse(gameObject.name.Replace("Empty", ""));
         string nameObject = "nbss_area" + idx;
-        //Debug.Log(nameObject);
-        // recup idx avec parse puis créer nouveau string avec "nbss_area" + idx
         if (SimulationManager.Instance == null)
         {
-            Debug.LogError("ERREUR : SimulationManagerInteraction.Instance est NULL ! Vérifie qu'il est bien dans la scène.");
             return;
         }
         float health = SimulationManager.Instance.GetHealth(nameObject);
 
-        // On appelle le Manager unique pour lui dire quoi afficher et où
+        //Calling upon Tooltip manager to display message and health bar
         if (TooltipManager.Instance != null)
         {
             TooltipManager.Instance.AfficherTooltip(messageAAfficher, health, true, transform);
@@ -56,7 +51,7 @@ public class VRHoverObjet : MonoBehaviour
 
     private void OnHoverExit(HoverExitEventArgs args)
     {
-        // On dit au Manager de se cacher
+        // Disable display
         if (TooltipManager.Instance != null)
         {
             TooltipManager.Instance.MasquerTooltip();

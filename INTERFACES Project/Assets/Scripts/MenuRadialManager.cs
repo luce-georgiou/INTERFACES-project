@@ -5,7 +5,6 @@ using TMPro;
 
 public class MenuRadialManager : MonoBehaviour
 {
-    // Singleton pour pouvoir y accéder facilement depuis ton script d'interaction
     public static MenuRadialManager Instance;
 
     [Header("Scenarios")]
@@ -28,8 +27,8 @@ public class MenuRadialManager : MonoBehaviour
     public GameObject prefabSprout;
     public GameObject prefabMetalFence;
     public float decalageVersRoute = 2.5f;
-    public float espacementEntreShrubs = 1.0f; // Distance (en mètres) entre chaque buisson
-    public float spaceBetweenFences = 3.0f;
+    public float espacementEntreShrubs = 1.0f; //Distance between shrubs
+    public float spaceBetweenFences = 3.0f; //Distance between metal fences
 
     [Header("Object spawner")]
     public GameObject prefabSign;
@@ -45,7 +44,6 @@ public class MenuRadialManager : MonoBehaviour
 
     private void Awake()
     {
-        // Configuration du Singleton
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
@@ -57,7 +55,6 @@ public class MenuRadialManager : MonoBehaviour
 
     private void OnEnable()
     {
-        //SimulationManagerInteraction.OnGAMAMessageReceived -= TreatMessage;
         SimulationManagerInteraction.OnGAMAMessageReceived += TreatMessage;
     }
     private void OnDisable()
@@ -66,7 +63,6 @@ public class MenuRadialManager : MonoBehaviour
     }
     private void TreatMessage(GAMAMessage2 mes)
     {
-        //Debug.Log(mes);
         if (!string.IsNullOrWhiteSpace(mes.add_to_score))
         {
             if (Time.time - tempsDernierScore < 0.01f)
@@ -88,7 +84,7 @@ public class MenuRadialManager : MonoBehaviour
         }
     }
 
-    // On a ajouté le paramètre "objectId"
+    //Open radial menu
     public void OuvrirMenu(Transform positionCible, string objectId, string typeObjet)
     {
         if (!SimulationManagerInteraction.interactionsAutorisees) return;
@@ -99,21 +95,20 @@ public class MenuRadialManager : MonoBehaviour
         idObjetActuel = objectId; // On sauvegarde l'ID pour l'utiliser plus tard
 
         // On place le menu un peu au-dessus de l'objet
-        // Change le 0.5f (50 centimètres) par une valeur plus grande, comme 2.0f (2 mètres) ou même 3.0f.
-        //transform.position = positionCible.position + new Vector3(0, 3f, 0);
         conteneurFilterMedia.SetActive(false);
         conteneurNBSSArea.SetActive(false);
 
+        //Open menu when selecting nbss_area gameobject
         if (typeObjet == "NBSS_area")
         {
-            //transform.position = positionCible.position; //+ new Vector3(0, 1f, 0);
             if (SimulationManagerInteraction.scenario == 1) conteneurNBSSArea.SetActive(false);
             else 
             {
                 conteneurNBSSArea.SetActive(true);
-                PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, 0.2f, 0));
+                PlacerMenuProcheDuJoueur(this.gameObject, positionCible, new Vector3(0, 0.2f, 0)); 
             }
         }
+        //Open menu when selecting filter_media gameobject
         else if (typeObjet == "filter_media")
         {
             //transform.position = positionCible.position; //+ new Vector3(0, 3f, 0);
@@ -144,12 +139,10 @@ public class MenuRadialManager : MonoBehaviour
         
     }
 
-    // créer barrière végétale
-
-
+    //Create vegetal or metal fence between the swale and the road
     public void CreerBarriere(GameObject noueCliquee, GameObject fenceType)
     {
-        // --- 1. TROUVER LA ROUTE LA PLUS PROCHE ---
+        //Find nearest road
         GameObject[] toutesLesRoutes = GameObject.FindGameObjectsWithTag("road");
         if (toutesLesRoutes.Length == 0)
         {
@@ -170,7 +163,7 @@ public class MenuRadialManager : MonoBehaviour
             }
         }
 
-        // --- 2. CALCULER LA LONGUEUR ET L'ORIENTATION DE LA NOUE (CORRIGÉ) ---
+        //Calculate length and orientation of swale
         Collider col = noueCliquee.GetComponentInChildren<Collider>();
         float longueurNoue = 10f;
 
@@ -205,10 +198,10 @@ public class MenuRadialManager : MonoBehaviour
             }
         }
 
-        // Le point central de la barrière, décalé parfaitement vers la route
+        // Le point central de la barrière
         Vector3 centreBarriere = noueCliquee.transform.position + (directionDecalage * decalageVersRoute);
 
-        // --- 3. SPAWN PARALLÈLE ---
+        //Spawning the fence
         float moitie = (longueurNoue - 9f) / 2f;
         int compteur = 0;
         Debug.LogWarning(fenceType.name);
@@ -238,10 +231,9 @@ public class MenuRadialManager : MonoBehaviour
             newFence.tag = "shrubs_plants";
             compteur++;
         }
-
-        Debug.Log($"SUCCÈS : {compteur} buissons plantés parallèlement à {noueCliquee.name}");
     }
 
+    //Place covers on swale and surrounding area to provide shade
     public void PoserPaillage(GameObject noueCliquee)
     {
         Material mat = Resources.Load<Material>("Stylize Wood Texture/Materials/Stylize Wood ");
@@ -260,6 +252,7 @@ public class MenuRadialManager : MonoBehaviour
         paillageObj.transform.position = noueCliquee.transform.position + new Vector3(0, -2.3f, 0);
     }
 
+    //Remove vegetation from swale
     public void MowGrass(GameObject swale)
     {
         int idx = int.Parse(swale.name.Replace("nbss_area", ""));
@@ -268,6 +261,7 @@ public class MenuRadialManager : MonoBehaviour
         
     }
 
+    //Make objects appear if the user chooses to plant/put up a sign
     public void ObjectSpawner(GameObject obj, Vector3 location, GameObject prefab)
     {
         Vector3 spawnLoc = obj.transform.position + location;
@@ -283,9 +277,9 @@ public class MenuRadialManager : MonoBehaviour
 
     }
 
-    // --- LES BOUTONS DE TON MENU RADIAL ---
-    // Associe ces fonctions à l'événement "On Click" des boutons de ton Canvas
+    //Buttons -> to select, use inside button of controller
 
+    //Button to put up signs for sensibilization
     public void BoutonActionSensibilisation()
     {
         GameObject obj = GameObject.Find(idObjetActuel);
@@ -310,9 +304,9 @@ public class MenuRadialManager : MonoBehaviour
         SimulationManagerInteraction.actionCount += 1;
         actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
-        progressBarObj.BarValue = progressBarObj.BarValue + 5f;
+        progressBarObj.BarValue = progressBarObj.BarValue + 5f; //Updating progress bar
         SendingMessages.Show("La sensibilisation est la première ligne de défense de la noue.", 7f, Color.green);
-        SimulationManager.Instance.SendMessageToGama(obj.name + ":" + "0");
+        SimulationManager.Instance.SendMessageToGama(obj.name + ":" + "0"); //Updating swale health
     }
 
     public void BoutonActionPlanterArbre()
@@ -347,7 +341,6 @@ public class MenuRadialManager : MonoBehaviour
     public void BoutonActionCurage()
     {
         EnvoyerCommandeGama("curage");
-        //SimulationManagerInteraction.unclogged = true; //à modif car valable partout là ou enlever
     }
 
     public void BoutonActionFlowers()
@@ -355,14 +348,12 @@ public class MenuRadialManager : MonoBehaviour
         EnvoyerCommandeGama("plant_flowers");
     }
 
+    //Open submenu to choose at which time to water the plants
     public void BoutonActionArroser()
     {
-        // Remplace "amenager_noue" par le nom exact de l'action dans GAMA
-        //EnvoyerCommandeGama("arroser");
         conteneurArrosage.SetActive(true);
         SC1_Buttons.SetActive(false);
         SC2_Buttons.SetActive(false);
-        
     }
 
     public void BoutonActionReplanter()
@@ -397,7 +388,6 @@ public class MenuRadialManager : MonoBehaviour
         SimulationManagerInteraction.actionCount += 1;
         actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
-        //EnvoyerCommandeGama("point_gain");
         progressBarObj.BarValue = progressBarObj.BarValue + 15f;
         SendingMessages.Show("Le paillage protège le sol de la chaleur et garde l’humidité.", 7f, new Color(119f / 255f, 178f / 255f, 107f / 255f));
         SimulationManager.Instance.SendMessageToGama(zoneAPailler.name + ":" + "5");
@@ -416,8 +406,6 @@ public class MenuRadialManager : MonoBehaviour
         {
             Debug.LogWarning("Impossible de retrouver la zone : " + idObjetActuel);
         }
-
-        // 3. On ferme le menu
         SimulationManagerInteraction.actionCount += 1;
         actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
@@ -439,8 +427,6 @@ public class MenuRadialManager : MonoBehaviour
         {
             Debug.LogWarning("Impossible de retrouver la zone : " + idObjetActuel);
         }
-
-        // 3. On ferme le menu
         SimulationManagerInteraction.actionCount += 1;
         actionCountText.text = "Actions restantes : " + SimulationManagerInteraction.actionCount + " / " + SimulationManagerInteraction.actionLimit;
         FermerMenu();
@@ -454,12 +440,10 @@ public class MenuRadialManager : MonoBehaviour
         GameObject noue = GameObject.Find(idObjetActuel);
         int idx = int.Parse(noue.name.Replace("filter_media", ""));
         GameObject grass = GameObject.Find("Grass_NBSS" + idx);
-        //Material burntGrassMat = Resources.Load<Material>("Prefabs/Mess Maker Free/Sample Scene Assets/Material/Grass");
         Material yellowGrassMat = Resources.Load<Material>("Prefabs/FreeVegetation-LowPolyNature/FreeVegetation/Materials/Grass_1");
         foreach (Transform enfant in grass.transform)
         {
-            // Random.Range(0f, 100f) génère un nombre aléatoire entre 0 et 100
-            // Si ce nombre est inférieur à ton pourcentage, on éteint l'objet
+            // Si ce nombre est inférieur à 50%, on éteint l'objet
             if (Random.Range(0f, 100f) < 50f)
             {
                 enfant.gameObject.SetActive(false);
@@ -469,7 +453,6 @@ public class MenuRadialManager : MonoBehaviour
                 Renderer rend = enfant.GetComponent<Renderer>();
                 if (rend != null)
                 {
-                    //rend.material.color = new Color(166f / 255f, 153f / 255f, 34f / 255f);
                     rend.sharedMaterial = yellowGrassMat;
                 }
             }
@@ -480,7 +463,6 @@ public class MenuRadialManager : MonoBehaviour
         progressBarObj.BarValue = progressBarObj.BarValue - 20f;
         SendingMessages.Show("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 7f, Color.red);
         SimulationManager.Instance.SendMessageToGama("nbss_area" + idx + ":" + "-10");
-        //SimulationManager.Instance.StartCoroutine(SimulationManager.Instance.ShowForDuration("Une pelouse classique demande trop d'eau. Il faut privilégier des plantes locales adaptées à la sécheresse !", 5f));
     }
 
     public void BoutonActionArroserMaintenant()
@@ -528,13 +510,11 @@ public class MenuRadialManager : MonoBehaviour
         }
 
         EnvoyerCommandeGama("water_late_early");
-        //conteneurArrosage.SetActive(false);
     }
 
 
 
-    // --- FONCTION UTILITAIRE CENTRALE ---
-    // Évite de répéter le code de connexion pour chaque bouton
+    //Notify Gama to execute task
     private void EnvoyerCommandeGama(string nomActionGama)
     {
         if (!string.IsNullOrEmpty(idObjetActuel))
@@ -545,9 +525,6 @@ public class MenuRadialManager : MonoBehaviour
 
             // On envoie l'action à GAMA
             ConnectionManager.Instance.SendExecutableAsk(nomActionGama, args);
-            //Debug.Log(weight_score);
-            //progressBarObj.BarValue = progressBarObj.BarValue + weight_score;
-            //Debug.Log("score curage ajouté : " + progressBarObj.BarValue);
             Debug.Log($"Action '{nomActionGama}' envoyée pour l'objet : {idObjetActuel}");
         }
 
@@ -557,8 +534,7 @@ public class MenuRadialManager : MonoBehaviour
         FermerMenu();
     }
 
-
-    // J'ai retiré le paramètre "recul" de la fonction, on n'en a plus besoin !
+    //Places the menu at the center of the swale, at a point closest to player
     private void PlacerMenuProcheDuJoueur(GameObject menu, Transform objetCible, Vector3 offset)
     {
         // On récupère la position du joueur pour savoir d'où il regarde
@@ -572,35 +548,24 @@ public class MenuRadialManager : MonoBehaviour
             // 1. Calcul du point du collider le plus proche du joueur sur la longueur
             Vector3 pointPlusProche = colObjet.ClosestPoint(positionJoueur);
 
-            // --- CENTRER DANS LA LARGEUR ---
-            // On traduit ce point par rapport au centre de l'objet visé
             Vector3 pointLocal = objetCible.InverseTransformPoint(pointPlusProche);
 
-            // On force la largeur à être au centre (0)
-            //if (objetCible.name == "filter_media0" || objetCible.name == "filter_media1")// || objetCible.name == "filter_media2" || objetCible.name == "filter_media3")
-            //{
-            //    pointLocal.z = 0;
-            //}
             pointLocal.x = 0;
 
             // On re-transforme ce point modifié en coordonnées mondiales
             pointPlusProche = objetCible.TransformPoint(pointLocal);
-            // -----------------------------------------
 
-            // 2. Position finale : on ajoute simplement l'offset (la hauteur)
+            // Position finale : on ajoute simplement l'offset (la hauteur)
             positionFinale = pointPlusProche + offset;
         }
         else
         {
-            // Sécurité si pas de collider
             positionFinale = objetCible.position + offset;
         }
 
-        // 3. Appliquer la position
+        // Appliquer la position
         Debug.Log(positionFinale);
         Debug.Log(menu.transform.position);
         menu.transform.position = positionFinale;
-
-        // La rotation est maintenant entièrement gérée par ton script Billboard !
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 public class VRHoverObjetSimple : MonoBehaviour
 {
     [Header("Configuration du texte")]
-    public string messageAAfficher; // Exemple dans Unity : "Bâtiment Principal" ou "Mairie"
+    public string messageAAfficher;
 
     private XRSimpleInteractable interactable;
 
@@ -31,13 +31,7 @@ public class VRHoverObjetSimple : MonoBehaviour
     {
         if (TooltipManager.Instance != null)
         {
-            //Vector3 offsetHaut = new Vector3(0, -0.1f, 0);
-            //Vector3 directionJoueur = Vector3.zero;
-            //directionJoueur = (Camera.main.transform.position - transform.position).normalized;
-            //directionJoueur.y = 0;
-            //Vector3 offsetVersJoueur = directionJoueur * 0.5f;
-            //Vector3 offsetFinal = offsetHaut + offsetVersJoueur;
-
+            //Display text when controller is hovering over objects (no health bar)
             TooltipManager.Instance.AfficherTooltip(messageAAfficher, 0f, false, transform, new Vector3(0, -0.1f, 0), 3f);
         }
     }

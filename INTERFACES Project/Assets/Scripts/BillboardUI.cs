@@ -6,7 +6,6 @@ public class BillboardUI : MonoBehaviour
 
     void Start()
     {
-        // On récupère automatiquement la caméra principale (le casque VR du joueur)
         if (Camera.main != null)
         {
             cameraTransform = Camera.main.transform;
@@ -17,7 +16,6 @@ public class BillboardUI : MonoBehaviour
         }
     }
 
-    // LateUpdate est appelé juste après Update, idéal pour suivre une caméra
     void LateUpdate()
     {
         if (cameraTransform == null) return;
