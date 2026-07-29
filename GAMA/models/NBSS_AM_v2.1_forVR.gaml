@@ -612,7 +612,6 @@ global control: fsm {
     		messages <- messages + ["message_":: "A toi de jouer ! Essaie de rétablir la bonne santé de cet espace en cette chaleur brûlante..."];
     		send_message <- true;
     	}
-    	write (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
     	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
     		or (do_skip and scenario = "2_1" and score < 50.0);
 		transition to: situation2_partial_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 50.0 and score < 75.0)

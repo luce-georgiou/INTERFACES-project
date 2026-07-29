@@ -104,16 +104,19 @@ public class SimulationManager : MonoBehaviour
 
     bool hasSimulator ;
 
+    //Dictionary that associates a health value to a swale name
     public Dictionary<string, float> healthDic = new Dictionary<string, float>();
+    //Returns health for a given swale
     public float GetHealth(string idObjet)
     {
         if (healthDic.TryGetValue(idObjet, out float sante))
         {
             return sante;
         }
-        return 0f; // Retourne 0 si aucune santé n'est enregistrée pour cet ID
+        return 0f; //0 if no health is given for a name
     }
 
+    //Linker to Gama to send a message from Unity
     public void SendMessageToGama(string mes)
     {
         Dictionary<string, string> args = new Dictionary<string, string> {

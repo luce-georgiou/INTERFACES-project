@@ -45,11 +45,11 @@ species unity_linker parent: abstract_unity_linker {
 		
 		
 		/* NBSS components */
-		unity_aspect nbss_area_aspect <- prefab_aspect("Prefabs/NBSSAreaPrefab",1.0,0.0,1.0,0.0,precision);
+		unity_aspect nbss_area_aspect <- prefab_aspect("Prefabs/NBSSAreaPrefab",1.0,0.8,1.0,0.0,precision);
 		up_nbss_area <- geometry_properties("nbss_area","nbss_area",nbss_area_aspect,#ray_interactable,false);
 		unity_properties << up_nbss_area;
 		
-		unity_aspect filter_media_aspect <- prefab_aspect("Prefabs/FilterMediaPrefab",1.0,0.0,1.0,90.0,precision); //geometry_aspect(1.5,#saddlebrown,precision);
+		unity_aspect filter_media_aspect <- prefab_aspect("Prefabs/FilterMediaPrefab",1.0,-2.35,1.0,90.0,precision); //geometry_aspect(1.5,#saddlebrown,precision);
 		up_filter_media <- geometry_properties("filter_media","filter_media",filter_media_aspect,#ray_interactable,false);
 		unity_properties << up_filter_media;
 		
