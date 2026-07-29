@@ -104,9 +104,6 @@ public class SimulationManager : MonoBehaviour
 
     bool hasSimulator ;
 
-    //public int actionCount = 0;
-    //public int actionLimit;
-
     public Dictionary<string, float> healthDic = new Dictionary<string, float>();
     public float GetHealth(string idObjet)
     {

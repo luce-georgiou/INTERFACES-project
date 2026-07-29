@@ -35,8 +35,7 @@ model NBSSAM
 
 //******************** GLOBAL *****************************************
 global control: fsm {
-	
-	/* Modifs par rapport modèle Emma */
+
 	bool send_message <- false;
 	map messages <- [];
 	bool do_skip <- false;
@@ -45,56 +44,32 @@ global control: fsm {
 	bool launch_sc2 <- false;
 	int init_wait <- 0;
 	float score <- 0.0;
-	float weight_score <- 0.0;
+	//float weight_score <- 0.0;
 	string scenario <- "";
 	int index_meteo <- 0;
 	
-	geometry free_space; //<- init_free_space;
+	geometry free_space;
 	geometry init_free_space <- rectangle(260, 150) at_location({115, -65});
 	
+	//Unused
 	list<string> list_failures_for_VR <- [];
 	bool failure_happening_bool <- false;
 	
-	// Geoms des 8 NBS
+	//Geometry of the 4 swales
 	list<geometry> list_of_geoms <- [
 			rectangle(61.5, 5.86), //0
 			rectangle(63.2, 5.96), //1
 			rectangle(5.3, 24.5), //2
 			rectangle(5.3, 16.7) //3
-			
-//			rectangle(24.5, 4.8),  //5
-//			rectangle(26.1, 4.8), //6
-//			//rectangle(61.5, 5.86), //7
-//			//rectangle(63.2, 5.96), //8
-//			rectangle(5.3, 24.5), //4
-//			rectangle(5.3, 16.7) //3
-//			//rectangle(5.3, 14.7),  //2
-//			//rectangle(5.3, 25.1) //1	
 	];
 	
-	// Loc des 8 NBS
+	//Position of the 4 swales
 	list<point> list_of_locs <- [
-		//{17.25, -7.0}, //0 
-		//{69.55, -7.0}, //1
-		{140, -7.0}, //2
-		{207, -7.0}, //3
-		{91.5, -45.65}, //4
-		{91.5, -73.25} //5
-		//{91.5, -95.95}, //6
-		//{91.5, -122.85} //7
+		{140, -7.0}, //0
+		{207, -7.0}, //1
+		{91.5, -45.65}, //2
+		{91.5, -73.25} //3
 	];
-    
-//    reflex update_timer when: active_start_time > 0 {
-//	    float elapsed <- (gama.machine_time - active_start_time) / 1000.0;
-//	    float remaining <- 180.0 - elapsed;
-//	    int minutes <- int(remaining / 60);
-//	    int seconds <- int(remaining mod 60);
-//	    messages_time <- ["timer_":: string(minutes) + ":" + (seconds < 10 ? "0" : "") + string(seconds)];
-//	    //send_message_time <- true;
-//	}
-    
-
-    /* Fin modifs */
 	
 	
 	float step <-1 #day;
@@ -141,19 +116,6 @@ global control: fsm {
 			season_end <-date(string(y) + "-11-30");
 		}
 	}
-	//TODO: slow simulation -> alternating between maintenance phases (slow) and sped up to see results on nature (zoom out ?)
-//	reflex play_phase when: (current_date < starting_date + 1) { // chaque mois ? ralentir sur 1 journée
-//		if (current_date.day = 1 and (current_date.month mod 3 = 0)) {
-//			step <- 100.0;
-//			ask simulation {
-//				do pause;
-//				// lancer chrono (2min?) 
-//				// relancer simu
-//			}
-//		}
-//		step <- 1.0;
-//	}
-	
 
 	// Loading csv files that has the logic table which calculates the output flow depending on input and condition values
 	file output_flow_LT_file <- csv_file( "../includes/output_flow_LT.csv",';',int);
@@ -181,7 +143,6 @@ global control: fsm {
 		}
 		
 		/* Creating the urban/vegetal environment */
-
 		create lawn {
 			geometry lawn_geom <- rectangle(260, 150) at_location({115, -65});
 		    init_free_space <- lawn_geom;
@@ -192,14 +153,6 @@ global control: fsm {
 		    shape <- lawn_geom;
 		    free_space <- lawn_geom;
 		}
-		create lawn_mower {
-			//geometry rect <- rectangle(85, 85);
-			//location <- any_location_in(rect - free_space);
-			location <- any_location_in(free_space);
-		}
-//		create weeds number: rnd(0,10) {
-//			location <- any_location_in(free_space);
-//		}	
 		
 		// Initialization of NBSS and all its components :
 		create NBSS number: 4 {
@@ -207,22 +160,7 @@ global control: fsm {
 			location <- list_of_locs[index];
 			my_name <- "swale" + index;
 			
-//			NBSS parent_nbss <- self;
-//			
-//			int i <- index;
-//			
-//			create flower number: 10 {
-//				shape <- triangle(0.1);
-//				if (i < 4) { //NBSS horizontale
-//					location <- {list_of_locs[i].x - list_of_geoms[i].width/2 + (index mod 5) * list_of_geoms[i].width/4,
-//						list_of_locs[i].y + ((index mod 10) < 5 ? 2.5 : -2.5)
-//					};
-//				} else { //NBSS verticale
-//					location <- {list_of_locs[i].x + ((index mod 10) < 5 ? 2.5 : -2.5),
-//						list_of_locs[i].y - list_of_geoms[i].height/2 + (index mod 5) * list_of_geoms[i].height/4
-//					};
-//				}
-//			}
+			//Create surrounding area for NBS
 			create nbss_area {
 				shape <- list_of_geoms[index] + 3.0;
 				location <- list_of_locs[index];
@@ -256,7 +194,7 @@ global control: fsm {
 			}
 			create ponding_area  {
 				shape <- list_of_geoms[index];
-				location <- list_of_locs[index]; // en dessous du sol, mais z corrigé sur Unity
+				location <- list_of_locs[index];
 				my_name<-"ponding_area" + index;
 				my_NBSS<- myself;
 				my_color <- #antiquewhite;
@@ -276,14 +214,8 @@ global control: fsm {
 			create vegetation_cover {
 				my_name<-"vegetation_cover";
 				my_NBSS<- myself;
-//				create grass number: rnd(0, 30) {
-//						shape <- circle(0.5);
-//						location <- any_location_in(one_of(NBSS));
-//				}
 			}
 			create filter_media {
-//				shape <- rectangle(30,20);
-//				location <- {myself.location.x, myself.location.y, myself.location.z-1.0};
 				shape <- list_of_geoms[index];
 				location <- list_of_locs[index];
 				my_name<-"filter_media" + index;
@@ -342,23 +274,8 @@ global control: fsm {
 			create building number: 4 {
 				shape <- [rectangle(11, 19), rectangle(18, 12), rectangle(28, 11),
 					rectangle(28, 11)][index];
-				
-//				 //[rectangle(11, 25), //1
-//					//rectangle(11, 35), //2
-//					//rectangle(18, 12), //3
-//					//rectangle(20, 22), //4
-//					//rectangle(28, 11), //5
-//					rectangle(28, 11), //6
-//					rectangle(28, 11) //7
-//				][index];
 				location <- [{last(road).location.x - 21, ({91.5, -95.95}.y + list_of_locs[3].y)/2 + 12}, {last(road).location.x - 24, list_of_locs[2].y}, 
 					{last(road).location.x + 20, list_of_locs[3].y}, {last(road).location.x + 20, list_of_locs[2].y}][index];
-					
-//					{last(road).location.x - 20, list_of_locs[7].y}, {last(road).location.x - 20, (list_of_locs[6].y + list_of_locs[5].y)/2}, 
-//					{last(road).location.x - 22, list_of_locs[4].y},
-//					{last(road).location.x + 16, list_of_locs[7].y}, {last(road).location.x + 20, list_of_locs[6].y}, 
-//					{last(road).location.x + 20, list_of_locs[5].y}, {last(road).location.x + 20, list_of_locs[4].y}
-//				][index];
 			}
 			create park number: 2 {
 				shape <- [rectangle(45, 23), // Pole petite enfance
@@ -446,11 +363,9 @@ global control: fsm {
 		do pause;
 	}
 	
-	/* gestion des états/phases de jeu */
-	float slow_duration <- 3 #minute;
-    float slow_start;
-    int last_slow_month <- -1;
+	/* Game state/phase management */
     
+    //Menu
     state menu initial: true {
     	//minimum_cycle_duration <- 10.0;
     	enter {
@@ -472,15 +387,15 @@ global control: fsm {
     	}
     }
     
+    //Situation 0 - tutorial
     state situation0 {
     	enter {
     		write "entering situation0";
 	    	scenario <- "0";
 	    	active_start_time <- gama.machine_time;
 	    	messages <- messages + ["scenario":: "0"];
-	    	messages <- messages + ["action_limit"::"1"];
-	    	//messages <- messages + ["phase":: "active"];
-	    	messages <- messages + ["timer_start":: "600"];
+	    	messages <- messages + ["action_limit"::"1"]; // Action limit
+	    	messages <- messages + ["timer_start":: "600"]; // Timer = 10min
 	    	messages <- messages + ["message_"::"Bienvenue ! L'entretien régulier est crucial pour le bon fonctionnement des noues. Dirige-toi à droite et regarde au fond de la noue."];
 	    	send_message <- true;
 			score <- 0.0;
@@ -500,7 +415,7 @@ global control: fsm {
     		messages <- messages + ["message_"::"Bravo! Tu as réussi le tutoriel, tu peux passer au scénario suivant."];
     		send_message <- true;
     	}
-    	transition to: menu when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	transition to: menu when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "0"); // 600000 ms = 10min
     	exit {
     		ask nbss_area {
 				health <- 100.0;
@@ -514,17 +429,11 @@ global control: fsm {
     	
     }
     
+    //Situation 1 - hydraulic problem   
+    
+    //Passive phase - only observation, no interactions are possible 
     state situation1_passive {
-	//contexte : la pluie était très forte la nuit dernière (vue qui tourne sur la scène sous forte pluie)
-	// situation : eau ne s'écoule pas dans certaines noues (2 à 4)
-	//pb = acc trash dans swale 6 ou 7 <- liée à végétation en mauvaise santé, vue comme déchetterie <- mauvais entretien (qu'est-ce qui cause végétation invasive ? tout a brûlé pcq pas arrosage suffisamment fréquent)
-	// mauvaise végétation dans quasi toute (sauf une disons, où on dit qu'elle a des fleurs dc les gens en prennent soin)
-	// pb avec la récupération des EP via les canalisations des immeubles (deux bouchées donc tout va dans la même (genre la 4) qui est surchargée
-	//swale 1 à 4 remplies
-	//solution : nettoyer déchets, enlever sédiments (curage), enlever mauvaises herbes et revégétaliser, nettoyer gouttières
-	
     	//minimum_cycle_duration <- 0.2;
-    	//minimum_cycle_duration <- 2.0;
     	enter {
 	    	write "entering situation1";
 	    	scenario <- "1_0";
@@ -535,24 +444,6 @@ global control: fsm {
 	    	messages <- messages + ["timer_start":: "600"];
 	    	send_message <- true;
 			score <- 0.0;
-//			loop s over: NBSS where (each.my_name = "swale1") {
-//	    		create trash number: 10 {
-//			        shape <- circle(0.1);
-//			        location <- any_location_in(s);
-//			    }
-//	    	}
-//	    	create flower number: 10 {
-//		    	//int i <- 0;
-//		    	shape <- triangle(0.6);
-//		    	location <- {list_of_locs[0].x - list_of_geoms[0].width/2 + (index mod 5) * list_of_geoms[0].width/4,
-//								list_of_locs[0].y + (index < 5 ? 2.5 : -2.5)
-//				};
-//			}
-//			loop s over: NBSS where (each.my_name != "swale0") {
-//			    create weeds number: 25 {
-//			        location <- any_location_in(s);
-//			    }
-//			}
 			point blocked_inlet <- {list_of_locs[0].x + list_of_geoms[0].width/2, list_of_locs[0].y};
 			geometry perimeter <- circle(1.0) at_location blocked_inlet;
 			create weeds number: 8 {
@@ -562,14 +453,6 @@ global control: fsm {
 				shape <- circle(0.1);
 				location <- any_location_in(perimeter);
 			}
-//			ask component where (each.my_NBSS.my_name = "swale4" or each.my_NBSS.my_name = "swale5") {
-//			    ask filter_media {
-//			        function_attributes["my_fqt"] <- 0.0;
-//			    }
-//			    ask ponding_area {
-//			        is_obstructed <- true;
-//			    }
-//			}
 			ask filter_media where (each.my_name = "filter_media0") {
 				function_attributes["my_fqt"] <- 0.0;
 				partpoll_acc <- 2.0;
@@ -584,28 +467,18 @@ global control: fsm {
 			ask nbss_area where (each.my_name = "nbss_area2" or each.my_name = "nbss_area3") {
 				health <- 50.0;
 			}
-			//set date to rainy day
-			//starting_date <- date(string(int(20070429)));
-			//write starting_date;
-//			ask rain {
-//				write runoff.my_flow; 
-//			}
 		}
 		init_wait <- init_wait + 1;
 		if (init_wait = 2) { 
 			messages <- messages + ["message_"::"Depuis les deux derniers jours, il pleut une pluie torrentielle..."];
-			//write messages;
 			send_message <- true;
-			
-			
 		}
 		if (init_wait = 50) { 
 			messages <- messages + ["message_"::"Vous incarnez un gestionnaire chargé de l'entretien de cet espace. C'est à vous d'inspecter les noues et de vous assurer de leur bon fonctionnement."];
-			//write messages;
 			send_message <- true;
 			
 		}
-    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "1_0"); //cycle >= 5 ; //mettre timer qui inclut les deux premières phases pour déclencher phase active
+    	transition to: situation1_active when: ((gama.machine_time - active_start_time) >= 600000) or (do_skip and scenario = "1_0");
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
@@ -614,6 +487,7 @@ global control: fsm {
     }
     
     float active_start_time <- 0.0;
+    //Active phase - Interactions are possible but limited
     state situation1_active {
     	//minimum_cycle_duration <- 1.0; //9.0
     	enter {
@@ -622,23 +496,18 @@ global control: fsm {
     		messages <- messages + ["phase":: "active"];
     		messages <- messages + ["action_limit"::"5"];
     		active_start_time <- gama.machine_time;
-    		
     		messages <- messages + ["message_":: "A toi de jouer! Inspecte les noues défaillantes et essaie de régler les problèmes..."];
     		messages <- messages + ["timer_start":: "600"];
     		send_message <- true;
-    		//set day to day after rainday (no rain)
     	}
-    	//write "elapsed: " + (gama.machine_time - active_start_time);
     	transition to: situation1_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
-    		or (do_skip and scenario = "1_1" and score < 50.0); //180000; // 3min en ms
+    		or (do_skip and scenario = "1_1" and score < 50.0); //180000 -> 3min in ms
 		transition to: situation1_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 50.0)
     		or (do_skip and scenario = "1_1" and score >= 50.0);
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
     		messages <- messages + ["init_":: "regular_state"];
-//    		messages <- messages + ["message_":: "Bien joué, les noues s'écoulent de nouveau. 
-//			Maintenant, pourquoi cela s'est-il passé et que faire pour que cela ne se reproduise pas ?"]; //mauvaise fin ? Actions supplémentaires eg planter fleurs, tondre etc ?
 			write "transition to " + scenario;
 			send_message <- true;
 			active_start_time <- 0.0;
@@ -646,6 +515,7 @@ global control: fsm {
     	}
     }
     
+    // Bad ending if score < 50%
     state situation1_fail {
     	enter {
     		write "fail ending for scenario 1";
@@ -668,6 +538,7 @@ global control: fsm {
     	}
     }
     
+    // Good ending if score >= 50%
     state situation1_success {
     	enter {
     		write "success ending for scenario 1";
@@ -677,10 +548,6 @@ global control: fsm {
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Bien joué, l'écoulement est rétabli ! Comment éviter cette situation à l'avenir ?"];
     		send_message <- true;
-//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
-//			    is_obstructed <- false;
-//			    water_level <- 0.0;
-//			}
     	}
     	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "1_2b");
     	exit {
@@ -691,12 +558,7 @@ global control: fsm {
     	}
     }
     
-//    state situation1_end {
-//    	minimum_cycle_duration <- 1.0;
-//    	enter {
-//    		// analyse du jeu
-//    	}
-//    }
+    // Situation 2 - heatwave
     
     state situation2_passive {
     	//minimum_cycle_duration <- 2.0;
@@ -708,7 +570,6 @@ global control: fsm {
     		messages <- messages + ["phase":: "passive"];
     		messages <- messages + ["message_":: "C'est la canicule, et les plus à plaindre sont les plantes!"];
     		messages <- messages + ["timer_start":: "300"];
-    		//write messages;
     		send_message <- true;
     		score <- 0.0;
     		ask trash {
@@ -729,10 +590,6 @@ global control: fsm {
 			ask nbss_area {
 				health <- health_init[index];
 			}
-			
-			//starting_date <- date(string(int(20070429))); //mettre en été
-//			
-//			send_message <- true;
     	}
     	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000 or (do_skip and scenario = "2_0");
     	exit {
@@ -740,23 +597,9 @@ global control: fsm {
     		messages <- messages + ["timer_start":: "0"];
     		send_message <- true;
     		active_start_time <- 0.0;
-    		//do_skip <- false;
     		write "exiting sc2_passive";
     	}
     }
-    
-//    state situation2_transition {
-//    	minimum_cycle_duration <- 20.0;
-//    	enter {
-//    		
-//    		active_start_time <- gama.machine_time;
-//    	}
-//    	transition to: situation2_active when: (gama.machine_time - active_start_time) >= 300000;
-//    	exit {
-//    		active_start_time <- 0.0;
-//    		
-//    	}
-//    }
     
     state situation2_active {
     	//minimum_cycle_duration <- 1.0;
@@ -769,10 +612,9 @@ global control: fsm {
     		messages <- messages + ["message_":: "A toi de jouer ! Essaie de rétablir la bonne santé de cet espace en cette chaleur brûlante..."];
     		send_message <- true;
     	}
-    	//write score;
     	write (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
     	transition to: situation2_fail when: (((gama.machine_time - active_start_time) >= 600000) and score < 50.0)
-    		or (do_skip and scenario = "2_1" and score < 50.0); //180000; // 3min en ms
+    		or (do_skip and scenario = "2_1" and score < 50.0);
 		transition to: situation2_partial_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 50.0 and score < 75.0)
     		or (do_skip and scenario = "2_1" and score >= 50.0 and score < 75.0);
 		transition to: situation2_success when: (((gama.machine_time - active_start_time) >= 600000) and score >= 75.0)
@@ -780,12 +622,12 @@ global control: fsm {
     	exit {
     		do_skip <- false;
     		messages <- messages + ["timer_start":: "0"];
-    		//messages <- messages + ["scenario":: "menu"];
     		send_message <- true;
     		active_start_time <- 0.0;
     	}
     }
     
+    // Bad ending if score < 50% -> the plants that were planted will not grow, and the swales will no longer function (soil too dry)
     state situation2_fail {
     	enter {
     		write "failure ending for scenario 2";
@@ -796,10 +638,9 @@ global control: fsm {
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Trop tard… La noue est devenue un désert urbain. Recommencez en agissant plus vite et mieux !"];
     		send_message <- true;
-//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
-//			    is_obstructed <- false;
-//			    water_level <- 0.0;
-//			}
+    		ask nbss_area { // flood the nbss as well ?
+    			health <- 10.0;
+    		}
     	}
     	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2a");
     	exit {
@@ -809,6 +650,8 @@ global control: fsm {
     		active_start_time <- 0.0;
     	}
     }
+    
+    // Partially good ending if 50% <= score < 75% -> plants will grow but vegetation will not thrive or resist another heatwave
     state situation2_partial_success {
     	enter {
     		write "partial success ending for scenario 2";
@@ -819,10 +662,6 @@ global control: fsm {
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Bravo ! La noue est sauvée… pour l’instant. Mais sans pluie, elle reste fragile. Continuez à la protéger !"];
     		send_message <- true;
-//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
-//			    is_obstructed <- false;
-//			    water_level <- 0.0;
-//			}
     	}
     	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2b");
     	exit {
@@ -832,6 +671,8 @@ global control: fsm {
     		active_start_time <- 0.0;
     	}
     }
+    
+    // Good ending if score >= 75% -> plants will grow and vegetation is healthy and apt to resist another heatwave
     state situation2_success {
     	enter {
     		write "success ending for scenario 2";
@@ -842,10 +683,6 @@ global control: fsm {
     		messages <- messages + ["message_":: "Temps écoulé !"];
     		messages <- messages + ["message_":: "Incroyable ! Grâce à vous, ce réseau de noues est paré contre la chaleur. Partagez ces gestes avec votre entourage !"];
     		send_message <- true;
-//    		ask ponding_area where (each.my_name = "ponding_area4" or each.my_name = "ponding_area5" or each.my_name = "ponding_area6") {
-//			    is_obstructed <- false;
-//			    water_level <- 0.0;
-//			}
     	}
     	transition to: menu when: ((gama.machine_time - active_start_time) >= 60000) or (do_skip and scenario = "2_2c");
     	exit {
@@ -854,44 +691,6 @@ global control: fsm {
     		do_skip <- false;
     		active_start_time <- 0.0;
     	}
-    }
-    
-    
-    
-    //state2 fail -> en dessous progress bar 50% premier état, implémenter progress bar dans gama et envoyer le score en message
-    //state ok -> 50-80%
-    //state top -> >80%
-    
-
-    
-    state fast_phase { //initial: true {
-        //write "fast_phase";
-        //step <- fast_step;
-        minimum_cycle_duration <- 0.2;
-//        enter {
-//        	fast_start <- gama.machine_time;
-//        } 
-        transition to: slow_phase when: current_date.day = 1 // 1st day every 2 months = slow day
-        	and current_date.month mod 2 = 0
-        	and current_date.month != last_slow_month;
-    }
-    
-    state slow_phase {
-        //write "slow_phase";
-        //step <- slow_step;
-        minimum_cycle_duration <- 3.0;
-        enter {
-            //send_init_message <- false;
-            last_slow_month <- current_date.month;
-            slow_start <- gama.machine_time;
-            
-            
-        }
-        transition to: fast_phase 
-            when: (gama.machine_time - slow_start) >= slow_duration;
-        exit {
-        	send_message <- false;
-        }
     }
 }
 
@@ -916,11 +715,9 @@ species gravel parent: NBSS {
 	}
 }
 
-species lawn parent: vegetal_component { //grille en été ou quand pas arrosé, qd santé dégradée, ajouter float pour humidité ? et changer vitesse selon saison
+species lawn parent: vegetal_component {
 	float height <- 0.1;
 }
-
-species lawn_mower {}
 
 species road parent: urban_environment {
 	aspect default {
@@ -951,13 +748,6 @@ species nbss_area parent: NBSS {
 species local_flora {}
 
 //species microorganisms parent: filter_media {} //also bees, pollen, different kinds of plants
-
-species vegetal_waste {
-	
-	aspect default {
-		draw square(3) border:#black color:#red;
-	}
-}
 
 /* Declaration of the rain species */
 species rain {
@@ -1188,7 +978,7 @@ species filter_media parent: engineered_component {
 		}
 		ask filter_media where (each.function_attributes["my_fqt"] <= 1) {
 			ask ponding_area where (each.my_NBSS = self.my_NBSS) {
-				is_obstructed <- true; //à tester -> toutes les pond sont flooded 
+				is_obstructed <- true; //Swale is considered clogged if fqt goes below 2
 			}
 		}
 		
@@ -1313,17 +1103,13 @@ species vegetal_component parent: component {
 
 /***************************************************** GRASS *******************************************/
 
-species grass parent: vegetal_component {
-	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
-	aspect default {
-		draw square(1) border: #black color: #lightgreen;
-		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -5, 1} anchor: #top_center;
-	}
-}
-
-//species grass_1 parent: grass {}
-//species grass_2 parent: grass {}
-//species grass_3 parent: grass {}
+//species grass parent: vegetal_component {
+//	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
+//	aspect default {
+//		draw square(1) border: #black color: #lightgreen;
+//		draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -5, 1} anchor: #top_center;
+//	}
+//}
 
 species flower parent: vegetal_component {
 	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
@@ -1332,20 +1118,13 @@ species flower parent: vegetal_component {
 	}
 }
 
-//species flower_1 parent: flower {}
-//species flower_2 parent: flower {}
-
 /***************************************************** SHRUBS and PLANTS *******************************************/
 
 species shrubs_plants parent: vegetal_component {
 	map <string,int> function_attributes <- ["my_health"::3,"my_diversity"::3];
 	aspect default {
 		draw shape color: #grey;
-		//draw rectangle(10,10) at: my_surface.location + {0,-5,1};
-		//draw shrubs_plants_image size: {20.0, 12.0, 0.0} at: my_surface.location + {8, -8, 1};
-		//draw my_name color:#black font:font("Helvetica", 12, #bold) at: location + {0, -8, 1} anchor: #top_center;
 	}
-	
 }
 
 /***************************************************** TREES *******************************************/
