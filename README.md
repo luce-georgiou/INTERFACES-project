@@ -11,7 +11,7 @@ This repository contains both GAMA modeling components and Unity VR implementati
     * `NBSS_AM_v2.1_forVR.gaml`: Base simulation model based on this work `https://github.com/EmmaGirot/NBSS_ABM/tree/master#`
     * `NBSS_AM_v2.1-VR.gaml`: VR file that works with the Unity project
 * **INTERFACES Projet:** Unity project for VR visualization:
-  * `/Assets/Scenes/NBSS_VR_v`: Unity scene for PC testing and simulation (without headset)
+  * `/Assets/Scenes/NBSS_VR_v1`: Unity scene for PC testing and simulation (without headset)
   * `/Assets/Scenes/NBSS_VR_headset_v3`: Unity scene for VR simulation (with headset)
 
 ## Setup and Usage
