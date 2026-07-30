@@ -20,7 +20,6 @@ public class SimulationManagerInteraction : SimulationManager
     public GameObject Scenario1;
     public GameObject Scenario2;
     public GameObject scenario2Fail;
-    public GameObject createdObjs;
     public static int actionCount = 0;
     public static int actionLimit;
     public Material defaultSky;
@@ -261,11 +260,11 @@ public class SimulationManagerInteraction : SimulationManager
             }
             else if (name.StartsWith("local_flora"))
             {
-                obj.transform.SetParent(createdObjs.transform, true);
+                obj.transform.SetParent(Scenario2.transform, true);
             }
             else if (name.StartsWith("flower"))
             {
-                obj.transform.SetParent(createdObjs.transform, true);
+                obj.transform.SetParent(Scenario2.transform, true);
             }
             else if (name.StartsWith("nbss_area"))
             {

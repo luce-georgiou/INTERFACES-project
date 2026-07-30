@@ -10,7 +10,6 @@ public class MenuRadialManager : MonoBehaviour
     [Header("Scenarios")]
     public Transform Scenario1;
     public Transform Scenario2;
-    public Transform createdObjs;
     public TMP_Text actionCountText;
 
     [Header("Visuel du Menu")]
@@ -228,7 +227,7 @@ public class MenuRadialManager : MonoBehaviour
                 fenceType.transform.localScale = new Vector3(fenceType.transform.localScale.x, 0.3f, fenceType.transform.localScale.z);
             }
 
-            GameObject newFence = Instantiate(fenceType, positionFinale, rotationAlignee, createdObjs.transform);
+            GameObject newFence = Instantiate(fenceType, positionFinale, rotationAlignee, Scenario2.transform);
             newFence.tag = "shrubs_plants";
             compteur++;
         }
@@ -245,7 +244,7 @@ public class MenuRadialManager : MonoBehaviour
 
         Vector3 tailleFM = fmObj.GetComponent<Renderer>().bounds.size;
         GameObject paillageObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        paillageObj.transform.SetParent(createdObjs, true);
+        paillageObj.transform.SetParent(Scenario2, true);
         paillageObj.name = "paillage" + idx;
         paillageObj.tag = "paillage";
         paillageObj.transform.localScale = new Vector3(tailleFM.x, 0.2f, tailleFM.z);
@@ -268,12 +267,12 @@ public class MenuRadialManager : MonoBehaviour
         Vector3 spawnLoc = obj.transform.position + location;
         if (prefab.name.Contains("Plant"))
         {
-            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 180f, 0f), createdObjs);
+            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 180f, 0f), Scenario2);
             newObject.tag = "sprout";
         }
         else
         {
-            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 90f, 0f), createdObjs);
+            GameObject newObject = Instantiate(prefab, spawnLoc, obj.transform.rotation * Quaternion.Euler(0f, 90f, 0f), Scenario2);
         }
 
     }
